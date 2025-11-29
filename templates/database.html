@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Management - RadioChWeb</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/">RadioChWeb</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="/proposal">Propose Stream</a>
+                    <a class="nav-link" href="/radio_source">Manage Sources</a>
+                    <a class="nav-link" href="/database">Database</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-4">
+        <h1>Database Management</h1>
+        <ul class="nav nav-tabs" id="dbTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="stream-types-tab" data-bs-toggle="tab" data-bs-target="#stream-types" type="button" role="tab">Stream Types</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="proposals-tab" data-bs-toggle="tab" data-bs-target="#proposals" type="button" role="tab">Proposals</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="radio-sources-tab" data-bs-toggle="tab" data-bs-target="#radio-sources" type="button" role="tab">Radio Sources</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="dbTabsContent">
+            <div class="tab-pane fade show active" id="stream-types" role="tabpanel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Display Name</th>
+                            <th>Protocol</th>
+                            <th>Format</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for st in stream_types %}
+                        <tr>
+                            <td>{{ st.id }}</td>
+                            <td>{{ st.display_name }}</td>
+                            <td>{{ st.protocol }}</td>
+                            <td>{{ st.format }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="proposals" role="tabpanel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in proposals %}
+                        <tr>
+                            <td>{{ p.id }}</td>
+                            <td>{{ p.url }}</td>
+                            <td>{{ p.status }}</td>
+                            <td>
+                                <a href="/database_proposal_delete/{{ p.id }}" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="radio-sources" role="tabpanel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>URL</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rs in radio_sources %}
+                        <tr>
+                            <td>{{ rs.id }}</td>
+                            <td>{{ rs.name }}</td>
+                            <td>{{ rs.stream_url }}</td>
+                            <td>
+                                <a href="/database_radio_source_delete/{{ rs.id }}" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>&copy; 2025 RadioChWeb</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit {{ source.name }} - RadioChWeb</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('database.index') }}">RadioChWeb</a>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
+                    <a class="nav-link" href="{{ url_for('proposal.propose') }}">Propose Stream</a>
+                    <a class="nav-link" href="{{ url_for('database.list_proposals') }}">View Proposals</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1>Edit Radio Source</h1>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ source.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ source.name }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="url" class="form-label">Stream URL *</label>
+                                <input type="url" class="form-control" id="url" name="url" value="{{ source.url }}" required>
+                                <div class="form-text">Must be a valid HTTP/HTTPS URL</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3">{{ source.description or '' }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="stream_type_id" class="form-label">Stream Type *</label>
+                                <select class="form-select" id="stream_type_id" name="stream_type_id" required>
+                                    {% for st in stream_types %}
+                                        <option value="{{ st.id }}" {% if source.stream_type_id == st.id %}selected{% endif %}>{{ st.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>&copy; 2025 RadioChWeb</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
