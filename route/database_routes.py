@@ -66,6 +66,23 @@ def list_proposals():
     return render_template('proposals.html', proposals=proposals)
 
 
+@database_bp.route('/database')
+def database_management():
+    """Database management page with overview of all entities."""
+    radio_source_repo = get_radio_source_repo()
+    stream_type_repo = get_stream_type_repo()
+    proposal_repo = get_proposal_repo()
+    
+    stream_types = stream_type_repo.find_all()
+    proposals = proposal_repo.find_all()
+    radio_sources = radio_source_repo.find_all()
+    
+    return render_template('database.html',
+                         stream_types=stream_types,
+                         proposals=proposals,
+                         radio_sources=radio_sources)
+
+
 @database_bp.route('/api/stats')
 def get_stats():
     """API endpoint to get database statistics."""

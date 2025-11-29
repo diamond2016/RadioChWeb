@@ -4,8 +4,8 @@ Implements spec 002: validate-and-add-radio-source.
 """
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
-from service.proposal_validation_service import ProposalValidationService
-from service.radio_source_service import RadioSourceService
+from service.stream_analysis_service import StreamAnalysisService
+from service.stream_type_service import StreamTypeService
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
@@ -35,6 +35,15 @@ def get_radio_source_service():
     validation_service = get_validation_service()
     from service.radio_source_service import RadioSourceService
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
+
+def get_stream_analysis_service():
+    stream_type_service = get_stream_type_service()
+    from service.stream_analysis_service import StreamAnalysisService
+    return StreamAnalysisService(stream_type_service)
+
+def get_stream_type_service():
+    from service.stream_type_service import StreamTypeService
+    return StreamTypeService()
 
 
 @proposal_bp.route('/propose', methods=['GET', 'POST'])
@@ -71,7 +80,32 @@ def propose():
         except Exception as e:
             flash(f'Error submitting proposal: {str(e)}', 'error')
 
-    return render_template('proposal.html')
+    # Get all proposals for display
+    proposals = proposal_repo.find_all()
+    return render_template('proposal.html', proposals=proposals)
+
+
+@proposal_bp.route('/proposal_analyze', methods=['POST'])
+def analyze_url():
+    """Analyze a stream URL and show results."""
+    url = request.form.get('url')
+    
+    if not url:
+        flash('URL is required', 'error')
+        return redirect(url_for('proposal.propose'))
+    
+    try:
+        analysis_service = get_stream_analysis_service()
+        result = analysis_service.analyze_stream(url)
+        
+        # For now, just show the result in a simple format
+        # In the future, this could be enhanced to show detailed analysis
+        flash(f'Analysis result: {result.stream_type.display_name if result.stream_type else "Unknown"} - {result.confidence:.2f} confidence', 'info')
+        
+    except Exception as e:
+        flash(f'Analysis failed: {str(e)}', 'error')
+    
+    return redirect(url_for('proposal.propose'))
 
 
 @proposal_bp.route('/proposal/<int:proposal_id>')
