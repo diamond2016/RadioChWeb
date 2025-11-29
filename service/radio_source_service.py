@@ -36,7 +36,7 @@ class RadioSourceService:
         self.radio_source_repo = radio_source_repo
         self.validation_service = validation_service
     
-    def save_from_proposal(self, proposal_id: int) -> RadioSourceNode:
+    def save_from_proposal(self, proposal_id: int) -> RadioSource:
         """
         Save a proposal as a RadioSourceNode in the database.
         
@@ -63,12 +63,12 @@ class RadioSourceService:
             raise ValueError(f"Proposal validation failed: {error_msg}")
         
         # Get proposal
-        proposal = self.proposal_repo.get_by_id(proposal_id)
+        proposal = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             raise ValueError(f"Proposal with ID {proposal_id} not found")
         
         # Create RadioSourceNode from proposal
-        radio_source = RadioSourceNode(
+        radio_source = RadioSource(
             stream_url=proposal.stream_url,
             name=proposal.name,
             website_url=proposal.website_url,
@@ -76,12 +76,12 @@ class RadioSourceService:
             is_secure=proposal.is_secure,
             country=proposal.country,
             description=proposal.description,
-            image=proposal.image
+            image_url=proposal.image_url
         )
         
         try:
             # Save RadioSourceNode (this will commit the transaction)
-            saved_source = self.radio_source_repo.create(radio_source)
+            saved_source = self.radio_source_repo.save(radio_source)
             
             # Delete proposal after successful save
             self.proposal_repo.delete(proposal_id)
@@ -121,7 +121,7 @@ class RadioSourceService:
             ValueError: If proposal not found or no updates provided
         """
         # Get proposal
-        proposal = self.proposal_repo.get_by_id(proposal_id)
+        proposal = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             raise ValueError(f"Proposal with ID {proposal_id} not found")
         
@@ -146,7 +146,7 @@ class RadioSourceService:
             proposal.image = updates.image
         
         # Save and return updated proposal
-        return self.proposal_repo.update(proposal)
+        return self.proposal_repo.save(proposal)
     
     def get_proposal(self, proposal_id: int) -> Optional[Proposal]:
         """
@@ -158,7 +158,7 @@ class RadioSourceService:
         Returns:
             Proposal if found, None otherwise
         """
-        return self.proposal_repo.get_by_id(proposal_id)
+        return self.proposal_repo.find_by_id(proposal_id)
     
     def get_all_proposals(self) -> list[Proposal]:
         """
@@ -169,7 +169,7 @@ class RadioSourceService:
         """
         return self.proposal_repo.get_all()
     
-    def get_all_radio_sources(self) -> list[RadioSourceNode]:
+    def get_all_radio_sources(self) -> list[RadioSource]:
         """
         Get all radio sources.
         

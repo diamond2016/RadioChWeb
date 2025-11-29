@@ -37,13 +37,13 @@ RadioChWeb/
     │   └── 📁 css/                     # Static assets (planned)
     │   └── 📁 js/                     # Static assets (planned)
     ├── 📁 tests/                          # Test suite
-│   ├── 📄 conftest.py                 # Test configuration
-│   ├── 📁 integration/                # Integration tests
-│   │   └── 📄 test_validate_and_add_workflow.py
-│   └── 📁 unit/                       # Unit tests
-│       ├── 📄 test_proposal_validation_service.py
-│       ├── 📄 test_radio_source_service.py
-│       └── 📄 test_stream_analysis_service.py
+  │   ├── 📄 conftest.py                 # Test configuration
+  │   ├── 📁 integration/                # Integration tests
+  │   │   └── 📄 test_validate_and_add_workflow.py
+  │   └── 📁 unit/                       # Unit tests
+  │       ├── 📄 test_proposal_validation_service.py
+  │       ├── 📄 test_radio_source_service.py
+  │       └── 📄 test_stream_analysis_service.py
 ├── 📁 migration/                     # Database migrations (PyWay)
 │   ├── 📄 V1_0__initial_schema.sql
 │   └── 📄 V2_0__initialize_stream_types.sql

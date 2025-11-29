@@ -50,7 +50,7 @@ class ProposalValidationService:
         result = ValidationResult(is_valid=True)
         
         # Check proposal exists
-        proposal = self.proposal_repo.get_by_id(proposal_id)
+        proposal = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             result.add_error(f"Proposal with ID {proposal_id} not found")
             return result
@@ -100,7 +100,7 @@ class ProposalValidationService:
         Returns:
             True if duplicate found, False otherwise
         """
-        return self.radio_source_repo.exists_by_stream_url(stream_url)
+        return self.radio_source_repo.find_by_url(stream_url) is not None
     
     def get_security_status(self, proposal_id: int) -> Optional[SecurityStatus]:
         """
@@ -113,7 +113,7 @@ class ProposalValidationService:
             SecurityStatus object with is_secure flag and warning message,
             or None if proposal not found
         """
-        proposal = self.proposal_repo.get_by_id(proposal_id)
+        proposal = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             return None
         
@@ -131,7 +131,7 @@ class ProposalValidationService:
         """
         try:
             parsed = urlparse(url)
-            # Must have scheme (http/https) and netloc (domain)
-            return bool(parsed.scheme and parsed.netloc)
+            # Must have scheme (http/https only) and netloc (domain)
+            return bool(parsed.scheme in ['http', 'https'] and parsed.netloc)
         except Exception:
             return False

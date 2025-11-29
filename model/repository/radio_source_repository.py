@@ -19,7 +19,7 @@ class RadioSourceRepository:
     
     def find_by_url(self, url: str) -> Optional[RadioSource]:
         """Get RadioSource by URL (for duplicate checking)."""
-        return self.db.query(RadioSource).filter(RadioSource.url == url).first()
+        return self.db.query(RadioSource).filter(RadioSource.stream_url == url).first()
     
     def find_all(self) -> List[RadioSource]:
         """Get all RadioSources."""
