@@ -1,0 +1,107 @@
+# ===================================================================
+# Python Byte-compiled / Optimized / DLL files
+# ===================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ===================================================================
+# Python Virtual Environments
+# ===================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak
+venv.bak
+
+# ===================================================================
+# Distribution / Packaging
+# ===================================================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ===================================================================
+# Test & Coverage Artifacts
+# ===================================================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ===================================================================
+# Local Database Files
+# ===================================================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===================================================================
+# IDE / Editor specific files
+# ===================================================================
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Cursor
+.cursor/
+
+# JetBrains (PyCharm, etc.)
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===================================================================
+# OS-specific files
+# ===================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===================================================================
+# Other
+# ===================================================================
+# Flask instance folder
+instance/
+
+# Ruff cache
+.ruff_cache/
+
+# Mypy cache
+.mypy_cache/
+
+# Temporary files from scripts
+/tmp/
+*.bak
+*.swp
+
+# Docs not to be committed
+RadioCh/
+docs/_build/
+work-in-progress.md
