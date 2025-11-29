@@ -86,6 +86,7 @@ def propose():
         except Exception as e:
             flash(f'Error submitting proposal: {str(e)}', 'error')
 
+
     # Get all proposals for display
     proposals = proposal_repo.find_all()
     return render_template('proposal.html', proposals=proposals)
@@ -103,7 +104,8 @@ def analyze_url():
     try:
         analysis_service = get_stream_analysis_service()
         result = analysis_service.analyze_stream(url)
-        
+        # to add proposal.url	proposal.status proposal.analysis_result
+
         # For now, just show the result in a simple format
         # In the future, this could be enhanced to show detailed analysis
         flash(f'Analysis result: {result.stream_type_display_name if result.stream_type_display_name else "Unknown"}', 'info')

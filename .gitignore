@@ -50,6 +50,7 @@ coverage.xml
 *.db
 *.sqlite
 *.sqlite3
+instance/
 
 # ===================================================================
 # IDE / Editor specific files
