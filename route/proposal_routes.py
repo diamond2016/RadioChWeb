@@ -41,9 +41,15 @@ def get_stream_analysis_service():
     from service.stream_analysis_service import StreamAnalysisService
     return StreamAnalysisService(stream_type_service)
 
+def get_stream_type_repo():
+    from database import db
+    from model.repository.stream_type_repository import StreamTypeRepository
+    return StreamTypeRepository(db.session)
+
 def get_stream_type_service():
+    stream_type_repo = get_stream_type_repo()
     from service.stream_type_service import StreamTypeService
-    return StreamTypeService()
+    return StreamTypeService(stream_type_repo)
 
 
 @proposal_bp.route('/propose', methods=['GET', 'POST'])
