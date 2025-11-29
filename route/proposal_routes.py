@@ -106,7 +106,7 @@ def analyze_url():
         
         # For now, just show the result in a simple format
         # In the future, this could be enhanced to show detailed analysis
-        flash(f'Analysis result: {result.stream_type.display_name if result.stream_type else "Unknown"} - {result.confidence:.2f} confidence', 'info')
+        flash(f'Analysis result: {result.stream_type_display_name if result.stream_type_display_name else "Unknown"}', 'info')
         
     except Exception as e:
         flash(f'Analysis failed: {str(e)}', 'error')

@@ -84,3 +84,10 @@ class StreamTypeService:
         
         for protocol, format_type, metadata, display_name in predefined_types:
             self.repository.create_if_not_exists(protocol, format_type, metadata, display_name)
+
+    def get_display_name(self, stream_type_id: int) -> Optional[str]:
+        """Get the display name of a StreamType by its ID."""
+        stream_type = self.repository.find_by_id(stream_type_id)
+        if stream_type:
+            return stream_type.display_name
+        return None

@@ -42,6 +42,7 @@ class StreamAnalysisResult(BaseModel):
     is_valid: bool
     stream_url: Optional[str] = None  # if loaded is the url of proposal stream
     stream_type_id: Optional[int] = None  # Foreign key to StreamType, null if invalid
+    stream_type_display_name: Optional[str] = None  # Human-readable name of the stream type
     is_secure: bool  # False for HTTP, true for HTTPS
     error_code: Optional[ErrorCode] = None  # Null if valid
     detection_method: Optional[DetectionMethod] = None  # How the stream was detected

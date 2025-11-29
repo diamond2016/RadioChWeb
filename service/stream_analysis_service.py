@@ -249,6 +249,8 @@ class StreamAnalysisService:
         return StreamAnalysisResult(
             is_valid=stream_type_id is not None,
             stream_type_id=stream_type_id,
+            stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
+            stream_url=ffmpeg_result.get("stream_url", None),
             is_secure=is_secure,
             error_code=None,
             detection_method=detection_method,
@@ -283,6 +285,8 @@ class StreamAnalysisService:
             return StreamAnalysisResult(
                 is_valid=stream_type_id is not None,
                 stream_type_id=stream_type_id,
+                stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
+                stream_url=curl_result.get("stream_url", None),
                 is_secure=is_secure,
                 detection_method=DetectionMethod.HEADER,
                 raw_content_type=curl_result.get("raw_output")
@@ -303,6 +307,8 @@ class StreamAnalysisService:
         return StreamAnalysisResult(
             is_valid=stream_type_id is not None,
             stream_type_id=stream_type_id,
+            stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
+            stream_url=curl_result.get("stream_url", None),
             is_secure=is_secure,
             detection_method=DetectionMethod.HEADER,
             raw_content_type=curl_result.get("raw_output")

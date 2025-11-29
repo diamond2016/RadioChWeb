@@ -33,6 +33,13 @@ app.register_blueprint(radio_source_bp, url_prefix='/source')
 # Create database tables
 with app.app_context():
     db.create_all()
+    
+    # Initialize predefined stream types
+    from service.stream_type_service import StreamTypeService
+    from model.repository.stream_type_repository import StreamTypeRepository
+    stream_type_repo = StreamTypeRepository(db.session)
+    stream_type_service = StreamTypeService(stream_type_repo)
+    stream_type_service.initialize_predefined_types()
 
 if __name__ == '__main__':
     app.run(debug=True)
