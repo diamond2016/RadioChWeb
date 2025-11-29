@@ -22,7 +22,7 @@
 
     <main class="container mt-4">
         <h1>Propose a New Radio Stream</h1>
-        <form method="post" action="/proposal_analyze">
+        <form method="post" action="{{ url_for('proposal.analyze_url') }}">
             <div class="mb-3">
                 <label for="url" class="form-label">Stream URL</label>
                 <input type="url" class="form-control" id="url" name="url" required>
