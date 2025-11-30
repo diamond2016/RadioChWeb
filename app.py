@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
@@ -16,11 +15,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 from database import db
 db.init_app(app)
 
-# Import models after db is created
-from model.entity.stream_type import StreamType
-from model.entity.proposal import Proposal
-from model.entity.radio_source import RadioSource
-
 # Import and register blueprints
 from route.database_routes import database_bp
 from route.proposal_routes import proposal_bp
@@ -30,16 +24,7 @@ app.register_blueprint(database_bp)
 app.register_blueprint(proposal_bp, url_prefix='/proposal')
 app.register_blueprint(radio_source_bp, url_prefix='/source')
 
-# Create database tables
-with app.app_context():
-    db.create_all()
-    
-    # Initialize predefined stream types
-    from service.stream_type_service import StreamTypeService
-    from model.repository.stream_type_repository import StreamTypeRepository
-    stream_type_repo = StreamTypeRepository(db.session)
-    stream_type_service = StreamTypeService(stream_type_repo)
-    stream_type_service.initialize_predefined_types()
+# Db is created only by pyway migrations
 
 if __name__ == '__main__':
     app.run(debug=True)
