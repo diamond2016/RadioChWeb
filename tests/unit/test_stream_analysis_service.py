@@ -23,6 +23,8 @@ def mock_stream_type_service() -> StreamTypeService:
     # annotate the variable as a generic Mock for better completions/typing in editors
     mock_service: Mock[StreamTypeService] = Mock(spec=StreamTypeService)
     mock_service.find_stream_type_id.return_value = 1
+    # Provide a sensible display name to avoid Pydantic validation errors
+    mock_service.get_display_name.return_value = "Test Stream"
     # cast to the interface/class so the fixture's return type is StreamTypeService (Pylance-friendly)
     return cast(StreamTypeService, mock_service)
 
