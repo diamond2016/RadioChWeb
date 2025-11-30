@@ -48,7 +48,7 @@
                     <th>URL</th>
                     <th>Analysis</th>
                     <th>Data</th>
-                    <th>Actions</th>
+                    <th colspan="2">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,6 +59,9 @@
                     <td>{{ proposal.analysis_result }}</td>
                     <td>
                         <a href="/proposal_delete/{{ proposal.id }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                                        <td>
+                        <a href="/proposal_propose/{{ proposal.id }}" class="btn btn-danger btn-sm">Propose</a>
                     </td>
                 </tr>
                 {% endfor %}
