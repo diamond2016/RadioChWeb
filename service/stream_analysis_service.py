@@ -80,7 +80,7 @@ class StreamAnalysisService:
                 is_secure=is_secure,
                 error_code=ErrorCode.TIMEOUT
             )
-        except Exception as e:
+        except Exception:
             return StreamAnalysisResult(
 
                 is_valid=False,
@@ -202,7 +202,7 @@ class StreamAnalysisService:
             "codec": codec
         }
     
-    def _resolve_analysis_results(self, curl_result: Dict, ffmpeg_result: Dict, is_secure: bool) -> StreamAnalysisResult:
+    def _resolve_analysis_results(self, curl_result: dict, ffmpeg_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """
         Resolve analysis results from curl and ffmpeg.
         FR-003: FFmpeg is authoritative when results differ.
@@ -213,7 +213,7 @@ class StreamAnalysisService:
                 return self._classify_from_curl(curl_result, is_secure)
             else:
                 return StreamAnalysisResult(
-                    stream_url=curl_result.get("stream_url", None),
+                    stream_url=curl_result["stream_url"] if "stream_url" in curl_result else None,
                     is_valid=False,
                     is_secure=is_secure,
                     error_code=ErrorCode.UNREACHABLE,
@@ -226,7 +226,7 @@ class StreamAnalysisService:
         if not format_name:
             return StreamAnalysisResult(
                 is_valid=False,
-                stream_url=ffmpeg_result.get("stream_url", None),   
+                stream_url=ffmpeg_result["stream_url"] if "stream_url" in ffmpeg_result else None,   
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
                 raw_content_type=curl_result.get("raw_output"),
@@ -250,7 +250,7 @@ class StreamAnalysisService:
             is_valid=stream_type_id is not None,
             stream_type_id=stream_type_id,
             stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
-            stream_url=ffmpeg_result.get("stream_url", None),
+            stream_url=ffmpeg_result["stream_url"] if "stream_url" in ffmpeg_result else None,
             is_secure=is_secure,
             error_code=None,
             detection_method=detection_method,
@@ -258,7 +258,7 @@ class StreamAnalysisService:
             raw_ffmpeg_output=ffmpeg_result.get("raw_output")
         )
     
-    def _classify_from_curl(self, curl_result: Dict, is_secure: bool) -> StreamAnalysisResult:
+    def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """Classify stream based only on curl content-type headers."""
         content_type = curl_result["content_type"]
         if not content_type:

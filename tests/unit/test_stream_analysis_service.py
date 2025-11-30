@@ -116,15 +116,15 @@ class TestStreamAnalysisService:
         headers = "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg\\nServer: Icecast\\n"
 
         content_type = analysis_service._extract_content_type(headers)
-
+        print("Extracted Content-Type:", content_type)
         assert content_type == "audio/mpeg"
 
     def test_ffmpeg_output_parsing(self, analysis_service: StreamAnalysisService) -> None:
         """Test _parse_ffmpeg_output method."""
         ffmpeg_output = "Input #0, mp3, from 'stream':\\nStream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono, fltp, 24 kb/s"
 
-        result = analysis_service._parse_ffmpeg_output(ffmpeg_output)
-
+        result: dict | None = analysis_service._parse_ffmpeg_output(ffmpeg_output)
+        print("Extracted Content-Type:", result)
         assert result["format"] == "MP3"
         assert result["codec"] == "mp3"
 
