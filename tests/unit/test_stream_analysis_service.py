@@ -5,6 +5,7 @@ Tests TR-001: comprehensive unit tests for service layer components.
 
 import pytest
 from unittest.mock import Mock, patch
+from typing import cast
 import sys
 from pathlib import Path
 
@@ -16,22 +17,27 @@ from service.stream_type_service import StreamTypeService
 from model.dto.stream_analysis import ErrorCode, DetectionMethod, StreamAnalysisResult
 
 
+@pytest.fixture
+def mock_stream_type_service() -> StreamTypeService:
+    """Mock StreamTypeService for testing."""
+    # annotate the variable as a generic Mock for better completions/typing in editors
+    mock_service: Mock[StreamTypeService] = Mock(spec=StreamTypeService)
+    mock_service.find_stream_type_id.return_value = 1
+    # cast to the interface/class so the fixture's return type is StreamTypeService (Pylance-friendly)
+    return cast(StreamTypeService, mock_service)
+
+
+@pytest.fixture
+def analysis_service(mock_stream_type_service: StreamTypeService) -> StreamAnalysisService:
+    """Create StreamAnalysisService with mocked dependencies."""
+    # patch shutil.which only during construction so the constructor doesn't raise
+    with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
+        service = StreamAnalysisService(mock_stream_type_service)
+        return service
+
+
 class TestStreamAnalysisService:
     """Test cases for StreamAnalysisService."""
-
-    @pytest.fixture
-    def mock_stream_type_service() -> Mock:
-        """Mock StreamTypeService for testing."""
-        mock_service = Mock(spec=StreamTypeService)
-        mock_service.find_stream_type_id.return_value = 1
-        return mock_service
-
-    @pytest.fixture
-    def analysis_service(mock_stream_type_service: Mock) -> Mock:
-        """Create StreamAnalysisService with mocked dependencies."""
-        with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
-            service = StreamAnalysisService(mock_stream_type_service)
-            return service
 
     def test_unsupported_protocol_rejection(self, analysis_service: StreamAnalysisService) -> None:
         """Test FR-004: RTMP/RTSP URLs are rejected."""
