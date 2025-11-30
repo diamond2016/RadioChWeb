@@ -36,14 +36,16 @@ class StreamAnalysisRequest(BaseModel):
 
 class StreamAnalysisResult(BaseModel):
     """
-    Temporary data structure returned by analysis process (not persisted).
+    Data structure returned by analysis process (persisted for page proposal.html).
     This is the main return type from spec 003 analyze-and-classify process.
     """
+
+    id: int
     is_valid: bool
+    is_secure: bool  # False for HTTP, true for HTTPS
     stream_url: Optional[str] = None  # if loaded is the url of proposal stream
     stream_type_id: Optional[int] = None  # Foreign key to StreamType, null if invalid
     stream_type_display_name: Optional[str] = None  # Human-readable name of the stream type
-    is_secure: bool  # False for HTTP, true for HTTPS
     error_code: Optional[ErrorCode] = None  # Null if valid
     detection_method: Optional[DetectionMethod] = None  # How the stream was detected
     raw_content_type: Optional[str] = None  # String from curl headers
@@ -54,3 +56,4 @@ class StreamAnalysisResult(BaseModel):
     def is_success(self) -> bool:
         """Returns True if analysis was successful and stream is valid."""
         return self.is_valid and self.error_code is None
+    
