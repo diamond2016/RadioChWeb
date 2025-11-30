@@ -39,8 +39,6 @@ class StreamAnalysisResult(BaseModel):
     Data structure returned by analysis process (persisted for page proposal.html).
     This is the main return type from spec 003 analyze-and-classify process.
     """
-
-    id: int
     is_valid: bool
     is_secure: bool  # False for HTTP, true for HTTPS
     stream_url: Optional[str] = None  # if loaded is the url of proposal stream

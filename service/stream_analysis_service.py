@@ -69,7 +69,7 @@ class StreamAnalysisService:
             ffmpeg_result = self._analyze_with_ffmpeg(url, timeout_seconds)
             
             # FR-003: Compare results, ffmpeg is authoritative
-            final_result = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
+            final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
             
             return final_result
             

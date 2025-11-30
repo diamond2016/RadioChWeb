@@ -3,7 +3,7 @@ Radio source routes - Flask blueprint for managing radio sources.
 Provides CRUD operations for radio sources.
 """
 
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, Response, request, jsonify, render_template, redirect, url_for, flash
 from service.radio_source_service import RadioSourceService
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
@@ -17,7 +17,7 @@ def get_radio_source_repo():
     from database import db
     return RadioSourceRepository(db.session)
 
-def get_radio_source_service():
+def get_radio_source_service() -> RadioSourceService:
     radio_source_repo = get_radio_source_repo()
     from service.radio_source_service import RadioSourceService
     return RadioSourceService(None, radio_source_repo, None)  # Validation service will be injected if needed
@@ -84,35 +84,33 @@ def delete_source(source_id):
 
 
 @radio_source_bp.route('/api/sources', methods=['GET'])
-def get_sources():
+def get_sources() -> Response:
     """API endpoint to get all radio sources."""
     radio_source_repo = get_radio_source_repo()
     sources = radio_source_repo.find_all()
     return jsonify([{
         'id': s.id,
         'name': s.name,
-        'url': s.url,
+        'url': s.stream_url,
         'description': s.description,
         'stream_type': s.stream_type.name if s.stream_type else None,
-        'created_at': s.created_at.isoformat() if s.created_at else None,
-        'updated_at': s.updated_at.isoformat() if s.updated_at else None
+        'created_at': s.created_at.isoformat() if s.created_at else None
     } for s in sources])
 
 
 @radio_source_bp.route('/api/source/<int:source_id>', methods=['GET'])
-def get_source(source_id):
+def get_source(source_id: int) -> Response:
     """API endpoint to get a specific radio source."""
     radio_source_repo = get_radio_source_repo()
-    source = radio_source_repo.find_by_id(source_id)
+    source = radio_source_repo.find_by_id(source_id)    
     if not source:
         return jsonify({'error': 'Radio source not found'}), 404
 
     return jsonify({
         'id': source.id,
         'name': source.name,
-        'url': source.url,
+        'url': source.stream_url,
         'description': source.description,
         'stream_type': source.stream_type.name if source.stream_type else None,
-        'created_at': source.created_at.isoformat() if source.created_at else None,
-        'updated_at': source.updated_at.isoformat() if source.updated_at else None
+        'created_at': source.created_at.isoformat() if source.created_at else None
     })
