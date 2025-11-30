@@ -45,5 +45,7 @@ class ProposalRepository:
     def count(self) -> int:
         """Count total Proposals."""
         return self.db.query(Proposal).count()
+    
+    def exists_by_stream_url(self, stream_url: str) -> bool:
         """Check if a Proposal with the given stream URL already exists."""
         return self.db.query(Proposal).filter(Proposal.stream_url == stream_url).first() is not None
