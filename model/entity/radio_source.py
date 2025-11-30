@@ -20,7 +20,6 @@ class RadioSource(db.Model):
     
     # Timestamps
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    modified_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     stream_type = db.relationship("StreamType", back_populates="radio_sources")

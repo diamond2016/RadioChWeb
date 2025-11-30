@@ -10,7 +10,7 @@ from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
 from model.dto.validation import ProposalUpdateRequest
-from database import db
+
 
 proposal_bp = Blueprint('proposal', __name__)
 
