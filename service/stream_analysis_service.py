@@ -82,7 +82,7 @@ class StreamAnalysisService:
             )
         except Exception:
             return StreamAnalysisResult(
-
+                stream_url=url,
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.NETWORK_ERROR

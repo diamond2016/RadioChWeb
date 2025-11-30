@@ -20,14 +20,14 @@ class TestStreamAnalysisService:
     """Test cases for StreamAnalysisService."""
 
     @pytest.fixture
-    def mock_stream_type_service(self) -> Mock:
+    def mock_stream_type_service() -> Mock:
         """Mock StreamTypeService for testing."""
         mock_service = Mock(spec=StreamTypeService)
         mock_service.find_stream_type_id.return_value = 1
         return mock_service
 
     @pytest.fixture
-    def analysis_service(self, mock_stream_type_service: Mock) -> StreamAnalysisService:
+    def analysis_service(mock_stream_type_service: Mock) -> Mock:
         """Create StreamAnalysisService with mocked dependencies."""
         with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
             service = StreamAnalysisService(mock_stream_type_service)
@@ -54,13 +54,15 @@ class TestStreamAnalysisService:
             mock_curl.return_value = {
                 "success": True,
                 "content_type": "audio/mpeg",
-                "raw_output": "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg"
+                "raw_output": "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg",
+                "security_status": "SAFE"
             }
             mock_ffmpeg.return_value = {
                 "success": True,
                 "format": "MP3",
                 "codec": "mp3",
-                "raw_output": "Stream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono, fltp, 24 kb/s"
+                "raw_output": "Stream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono, fltp, 24 kb/s",
+                "security_status": "SAFE"
             }
 
             result = analysis_service.analyze_stream(https_url)
@@ -77,13 +79,15 @@ class TestStreamAnalysisService:
             mock_curl.return_value = {
                 "success": True,
                 "content_type": "audio/mpeg",
-                "raw_output": "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg"
+                "raw_output": "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg",
+                "security_status": "UNSAFE"
             }
             mock_ffmpeg.return_value = {
                 "success": True,
                 "format": "MP3",
                 "codec": "mp3",
-                "raw_output": "Stream #0:0: Audio: mp3"
+                "raw_output": "Stream #0:0: Audio: mp3",
+                "security_status": "UNSAFE"
             }
 
             result: StreamAnalysisResult = analysis_service.analyze_stream(http_url)
