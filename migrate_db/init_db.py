@@ -4,17 +4,17 @@ Database Initialization Script
 Creates the instance directory and runs initial migrations for a fresh database.
 """
 
-import os
-import sys
 from pathlib import Path
-DBPATH = Path(__file__).parent.parent / ".instance" / "radio_sources.db"
+from migrate import run_migrations
+
+DBPATH = Path(__file__).parent.parent / "instance" / "radio_sources.db"
 
 def init_database():
     """Initialize a fresh database with all migrations."""
     print("🗄️  Initializing RadioChWeb database...")
 
     # Create instance directory if it doesn't exist
-    instance_dir = Path("./instance")
+    instance_dir = Path("../instance")
     instance_dir.mkdir(exist_ok=True)
 
     # Remove existing database if it exists (for clean init)
@@ -25,7 +25,6 @@ def init_database():
 
     print("🚀 Running database migrations...")
     # Import and run the migration script
-    from migrate import run_migrations
     run_migrations()
 
     print("✅ Database initialization completed!")

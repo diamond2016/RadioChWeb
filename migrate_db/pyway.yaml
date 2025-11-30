@@ -1,6 +1,6 @@
 database_type: sqlite
 database_host: localhost
-database_name: ./instance/radio_sources.db
+database_name: /home/riccardo/Documenti/Programming/Projects/RadioChWeb/instance/radio_sources.db
 database_username: dummy
 database_migration_dir: migrations
 database_table: pyway

@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 PYWAY_PATH = Path(__file__).parent.parent / ".venv" / "bin" / "pyway"
+
 def run_command(cmd: list) -> bool:
     """Run a command and return success status."""
     try:
@@ -24,26 +25,33 @@ def run_command(cmd: list) -> bool:
 
 
 def run_migrations():
-    """Run all pending database migrations using PyWay."""
-    print("🚀 Starting database migrations with PyWay...")
+    """Run all pending database migrations using sqlite3."""
+    print("🚀 Starting database migrations with sqlite3...")
 
     # Ensure instance directory exists
-    instance_dir = Path("./instance")
+    instance_dir = Path("../instance")
     instance_dir.mkdir(exist_ok=True)
 
-    # Run pyway migrate
-    cmd = [
-        PYWAY_PATH.as_posix(),
-        "--config", "pyway.yaml",
-        "migrate"
-    ]
+    # Run migrations
+    import sqlite3
+    db_path = Path("../instance/radio_sources.db")
+    conn = sqlite3.connect(str(db_path))
+    cursor = conn.cursor()
 
-    if run_command(cmd):
-        print("✅ All migrations completed successfully!")
-        show_migration_status()
-    else:
-        print("❌ Migration failed!")
-        sys.exit(1)
+    # Get list of migration files
+    migration_dir = Path("migrations")
+    migration_files = sorted([f for f in migration_dir.iterdir() if f.is_file() and f.name.endswith('.sql')])
+
+    for migration_file in migration_files:
+        print(f"Applying migration: {migration_file.name}")
+        with open(migration_file, 'r') as f:
+            sql = f.read()
+        cursor.executescript(sql)
+
+    conn.commit()
+    conn.close()
+
+    print("✅ All migrations completed successfully!")
 
 
 def show_migration_status():
