@@ -2,6 +2,7 @@
 -- Creates new table for stream analysis: stream_analysis
 
 -- Create stream_analysis table
+DROP TABLE IF EXISTS stream_analysis;
 CREATE TABLE stream_analysis (
     id INTEGER NOT NULL,
     stream_url VARCHAR(200) NOT NULL,

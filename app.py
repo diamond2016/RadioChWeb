@@ -16,9 +16,9 @@ from database import db
 db.init_app(app)
 
 # Import and register blueprints
-from route.database_routes import database_bp
-from route.proposal_routes import proposal_bp
-from route.radio_source_routes import radio_source_bp
+from route.database_route import database_bp
+from route.proposal_route import proposal_bp
+from route.radio_source_route import radio_source_bp
 
 app.register_blueprint(database_bp)
 app.register_blueprint(proposal_bp, url_prefix='/proposal')
