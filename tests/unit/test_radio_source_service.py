@@ -79,8 +79,7 @@ class TestRadioSourceService:
             country="Italy",
             description="Test description",
             image_url="test.jpg",
-            created_at=datetime.now(),
-            modified_at=None
+            created_at=datetime.now()
         )
 
         # Act

@@ -76,7 +76,8 @@ class RadioSourceService:
             is_secure=proposal.is_secure,
             country=proposal.country,
             description=proposal.description,
-            image_url=proposal.image_url
+            image_url=proposal.image_url,
+            created_at=datetime.now()
         )
         
         try:

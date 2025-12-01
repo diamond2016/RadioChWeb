@@ -70,7 +70,7 @@ class StreamAnalysisService:
             
             # FR-003: Compare results, ffmpeg is authoritative
             final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
-            
+            print("Analysis result for URL {}: {}".format(url, final_result))
             return final_result
             
         except subprocess.TimeoutExpired:

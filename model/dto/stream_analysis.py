@@ -55,3 +55,4 @@ class StreamAnalysisResult(BaseModel):
         """Returns True if analysis was successful and stream is valid."""
         return self.is_valid and self.error_code is None
     
+    model_config = ConfigDict(from_attributes=True)

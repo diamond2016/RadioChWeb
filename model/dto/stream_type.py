@@ -2,7 +2,6 @@
 StreamType DTO for API responses and data transfer.
 """
 
-from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 

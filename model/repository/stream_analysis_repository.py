@@ -3,8 +3,6 @@ StreamAnalysysRepository - Data access layer for StreamAnalysys entity.
 """
 
 from typing import Optional, List, Dict
-from winreg import ExpandEnvironmentStrings
-from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from model.entity.stream_analysis import StreamAnalysis
 

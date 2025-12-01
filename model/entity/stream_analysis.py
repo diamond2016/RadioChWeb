@@ -1,7 +1,7 @@
 from database import db
 
 class StreamAnalysis(db.Model):
-    __tablename__ = 'stream_types'
+    __tablename__ = 'stream_analysis'
 
     id= db.Column(db.Integer, primary_key=True, autoincrement=True)
     stream_url = db.Column(db.String(200), nullable=False)  
@@ -15,7 +15,7 @@ class StreamAnalysis(db.Model):
 
 
     # Relationship with StreamTypes
-    stream_types = db.relationship("StreamType", back_populates="stream_type")
+    stream_type = db.relationship("StreamType", back_populates="stream_analysis")
 
     def __repr__(self):
         return f"<StreamAnalysis(id={self.id}, url='{self.stream_url}', type='{self.stream_type_id}', valid={self.is_valid})>"
