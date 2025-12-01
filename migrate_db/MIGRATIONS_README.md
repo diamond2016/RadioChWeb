@@ -98,3 +98,30 @@ Repeatable: Migrations can be safely re-run
 Auditable: Migration history is maintained
 Standard: Uses industry-standard Flyway/PyWay patterns
 Future-Proof: Easy to add new migrations as the project grows
+
+## Recent project-specific migrations
+
+- `V5_0__add_extracted_metadata.sql` — Adds `extracted_metadata` (TEXT) column to `stream_analysis` to store normalized ffmpeg metadata snippets.
+- `V6_0__raw_fields_to_text.sql` — Recreates `stream_analysis` (SQLite-safe) to convert `raw_content_type` and `raw_ffmpeg_output` to `TEXT` to avoid truncation of multiline ffmpeg output.
+
+### Notes for production (MySQL)
+
+- For MySQL you can alter existing columns in-place instead of recreating the table. Example:
+
+```sql
+ALTER TABLE stream_analysis
+    MODIFY COLUMN raw_content_type TEXT NULL,
+    MODIFY COLUMN raw_ffmpeg_output TEXT NULL;
+```
+
+- Adding `extracted_metadata` is safe on both SQLite and MySQL:
+
+```sql
+ALTER TABLE stream_analysis ADD COLUMN extracted_metadata TEXT;
+```
+
+### Best practices
+
+- Backup your DB before running migrations in production.
+- Test migrations on a staging copy of the production database to measure lock/alter duration.
+- For large MySQL tables consider adding new columns during low-load windows or using online schema changes tools.

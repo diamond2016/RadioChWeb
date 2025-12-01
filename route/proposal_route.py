@@ -105,7 +105,8 @@ def propose():
             error_code=stream.error_code,            
             detection_method=stream.detection_method,
             raw_content_type=stream.raw_content_type,
-            raw_ffmpeg_output=stream.raw_ffmpeg_output
+            raw_ffmpeg_output=stream.raw_ffmpeg_output,
+            extracted_metadata=stream.extracted_metadata
         )
         streams.append(stream_validation)
     return render_template('proposal.html', streams=streams)
@@ -136,7 +137,8 @@ def analyze_url():
             stream_type_id=result.stream_type_id, 
             detection_method=result.detection_method.name if result.detection_method else None,
             raw_content_type=result.raw_content_type,
-            raw_ffmpeg_output=result.raw_ffmpeg_output
+            raw_ffmpeg_output=result.raw_ffmpeg_output,
+            extracted_metadata=result.extracted_metadata
         )
         analysis_repo.save(analysis_entity)              
    
