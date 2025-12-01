@@ -20,33 +20,33 @@ from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
 
 
+@pytest.fixture
+def mock_proposal_repo() -> ProposalRepository:
+    """Create mock ProposalRepository."""
+    return Mock(spec=ProposalRepository)
+
+@pytest.fixture
+def mock_radio_source_repo() -> RadioSourceRepository:
+    """Create mock RadioSourceRepository."""
+    return Mock(spec=RadioSourceRepository)
+
+@pytest.fixture
+def mock_validation_service() -> ProposalValidationService:
+    """Create mock ProposalValidationService."""
+    return Mock(spec=ProposalValidationService)
+
+@pytest.fixture
+def radio_source_service(mock_proposal_repo: ProposalRepository,
+                            mock_radio_source_repo: RadioSourceRepository, mock_validation_service: ProposalValidationService) -> RadioSourceService:
+    """Create RadioSourceService with mocked dependencies."""
+    return RadioSourceService(
+        mock_proposal_repo,
+        mock_radio_source_repo,
+        mock_validation_service
+
+
 class TestRadioSourceService:
     """Test suite for RadioSourceService."""
-
-    @pytest.fixture
-    def mock_proposal_repo(self) -> ProposalRepository:
-        """Create mock ProposalRepository."""
-        return Mock(spec=ProposalRepository)
-
-    @pytest.fixture
-    def mock_radio_source_repo(self) -> RadioSourceRepository:
-        """Create mock RadioSourceRepository."""
-        return Mock(spec=RadioSourceRepository)
-
-    @pytest.fixture
-    def mock_validation_service(self) -> ProposalValidationService:
-        """Create mock ProposalValidationService."""
-        return Mock(spec=ProposalValidationService)
-
-    @pytest.fixture
-    def radio_source_service(self, mock_proposal_repo: ProposalRepository,
-                             mock_radio_source_repo: RadioSourceRepository, mock_validation_service: ProposalValidationService) -> RadioSourceService:
-        """Create RadioSourceService with mocked dependencies."""
-        return RadioSourceService(
-            mock_proposal_repo,
-            mock_radio_source_repo,
-            mock_validation_service
-        )
 
     def test_save_from_proposal_success(
         self,
