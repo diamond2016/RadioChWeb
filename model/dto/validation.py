@@ -21,7 +21,7 @@ class ValidationResult(BaseModel):
     errors: List[str] = []
     warnings: List[str] = []
 
-    model_config = ConfigDict(use_enum_values=True)
+    model_config = ConfigDict(from_attributes=True)
 
     def add_error(self, error: str):
         """Add an error message."""

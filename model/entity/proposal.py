@@ -19,6 +19,6 @@ class Proposal(db.Model):
 
     # Relationship
     stream_type = db.relationship("StreamType", back_populates="proposals")
-
+    
     def __repr__(self):
         return f"<Proposal(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"
