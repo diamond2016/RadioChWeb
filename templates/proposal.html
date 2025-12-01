@@ -59,10 +59,10 @@
                     <td>{{ stream.extracted_metadata }}</td>
                         </td>
                     <td>
-                        <a href="/proposal_delete/{{ stream.id }}" class="btn btn-danger btn-sm">Delete</a>
+                        <a href="{{ url_for('analysis.delete', id=stream.id) }}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                     <td>
-                        <a href="/proposal_propose/{{ stream.id }}" class="btn btn-danger btn-sm">Propose</a>
+                        <a href="{{ url_for('analysis.propose', id=stream.id) }}" class="btn btn-danger btn-sm">Propose</a>
                     </td>
                 </tr>
                 {% endfor %}
