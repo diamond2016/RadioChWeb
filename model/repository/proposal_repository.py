@@ -49,3 +49,7 @@ class ProposalRepository:
     def exists_by_stream_url(self, stream_url: str) -> bool:
         """Check if a Proposal with the given stream URL already exists."""
         return self.db.query(Proposal).filter(Proposal.stream_url == stream_url).first() is not None
+    
+    def get_all_proposals(self) -> List[Proposal]:
+        """Retrieve all proposals from the database."""
+        return self.db.query(Proposal).all()

@@ -168,7 +168,7 @@ class RadioSourceService:
         Returns:
             List of all proposals
         """
-        return self.proposal_repo.get_all()
+        return self.proposal_repo.get_all_proposals()
     
     def get_all_radio_sources(self) -> list[RadioSource]:
         """
@@ -177,4 +177,4 @@ class RadioSourceService:
         Returns:
             List of all radio sources
         """
-        return self.radio_source_repo.get_all()
+        return self.radio_source_repo.find_all()

@@ -10,14 +10,17 @@ Tests radio source management including:
 
 import pytest
 from unittest.mock import Mock
-from datetime import datetime
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from service.radio_source_service import RadioSourceService
 from service.proposal_validation_service import ProposalValidationService
-from model.dto.validation import ValidationResult, ProposalUpdateRequest
 from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
+from model.entity.stream_analysis import StreamAnalysis
+
+from model.dto.validation import ProposalUpdateRequest
+from model.dto.validation import ValidationResult
+from datetime import datetime
 
 
 @pytest.fixture
@@ -42,7 +45,7 @@ def radio_source_service(mock_proposal_repo: ProposalRepository,
     return RadioSourceService(
         mock_proposal_repo,
         mock_radio_source_repo,
-        mock_validation_service
+        mock_validation_service)
 
 
 class TestRadioSourceService:
@@ -56,6 +59,7 @@ class TestRadioSourceService:
         mock_validation_service
     ):
         """Test successfully saving a valid proposal as RadioSource."""
+
         # Arrange
         proposal = Proposal(
             id=1,
@@ -72,6 +76,7 @@ class TestRadioSourceService:
         validation_result = ValidationResult(is_valid=True)
         mock_validation_service.validate_proposal.return_value = validation_result
         mock_proposal_repo.find_by_id.return_value = proposal
+
         mock_radio_source_repo.save.return_value = RadioSource(
             id=1,
             stream_url="https://stream.example.com/radio.mp3",
@@ -263,7 +268,7 @@ class TestRadioSourceService:
             Proposal(id=1, stream_url="url1", name="Radio 1", website_url="web1", stream_type_id=1, is_secure=True),
             Proposal(id=2, stream_url="url2", name="Radio 2", website_url="web2", stream_type_id=2, is_secure=False)
         ]
-        mock_proposal_repo.get_all.return_value = proposals
+        mock_proposal_repo.get_all_proposals.return_value = proposals
 
         # Act
         result = radio_source_service.get_all_proposals()
@@ -314,7 +319,7 @@ class TestRadioSourceService:
             RadioSource(id=1, stream_url="url1", name="Radio 1", website_url="web1", stream_type_id=1, is_secure=True, created_at=datetime.now()),
             RadioSource(id=2, stream_url="url2", name="Radio 2", website_url="web2", stream_type_id=2, is_secure=False, created_at=datetime.now())
         ]
-        mock_radio_source_repo.get_all.return_value = radio_sources
+        mock_radio_source_repo.find_all.return_value = radio_sources
 
         # Act
         result = radio_source_service.get_all_radio_sources()
