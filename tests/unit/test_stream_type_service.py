@@ -4,24 +4,25 @@ Unit tests for StreamTypeService.
 
 import pytest
 from unittest.mock import Mock
+from model.repository.stream_type_repository import StreamTypeRepository
 from service.stream_type_service import StreamTypeService
 from model.dto.stream_type import StreamTypeDTO
+
+@pytest.fixture
+def mock_repository() -> StreamTypeRepository:
+    """Mock StreamTypeRepository for testing."""
+    return Mock()
+
+@pytest.fixture
+def stream_type_service(mock_repository: StreamTypeRepository) -> StreamTypeService:
+    """Create StreamTypeService with mocked repository."""
+    return StreamTypeService(mock_repository)
 
 
 class TestStreamTypeService:
     """Test cases for StreamTypeService."""
 
-    @pytest.fixture
-    def mock_repository(self):
-        """Mock StreamTypeRepository for testing."""
-        return Mock()
-
-    @pytest.fixture
-    def stream_type_service(self, mock_repository):
-        """Create StreamTypeService with mocked repository."""
-        return StreamTypeService(mock_repository)
-
-    def test_find_stream_type_id(self, stream_type_service, mock_repository):
+    def test_find_stream_type_id(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test finding stream type ID by combination."""
         mock_repository.find_by_combination.return_value = 5
 
@@ -30,7 +31,7 @@ class TestStreamTypeService:
         assert result == 5
         mock_repository.find_by_combination.assert_called_once_with("HTTPS", "MP3", "Icecast")
 
-    def test_find_stream_type_id_not_found(self, stream_type_service, mock_repository):
+    def test_find_stream_type_id_not_found(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test finding stream type ID when not found."""
         mock_repository.find_by_combination.return_value = None
 
@@ -38,7 +39,7 @@ class TestStreamTypeService:
 
         assert result is None
 
-    def test_get_stream_type(self, stream_type_service, mock_repository):
+    def test_get_stream_type(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting stream type by ID."""
         # Mock the entity returned by repository
         mock_entity = Mock()
@@ -58,7 +59,7 @@ class TestStreamTypeService:
         assert result.metadata == "Icecast"
         assert result.display_name == "HTTPS MP3 Icecast"
 
-    def test_get_stream_type_not_found(self, stream_type_service, mock_repository):
+    def test_get_stream_type_not_found(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting stream type when not found."""
         mock_repository.get_by_id.return_value = None
 
@@ -66,7 +67,7 @@ class TestStreamTypeService:
 
         assert result is None
 
-    def test_get_all_stream_types(self, stream_type_service, mock_repository):
+    def test_get_all_stream_types(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting all stream types."""
         # Mock entities
         mock_entities = [
@@ -82,7 +83,7 @@ class TestStreamTypeService:
         assert result[0].protocol == "HTTP"
         assert result[1].protocol == "HTTPS"
 
-    def test_get_predefined_types_map(self, stream_type_service, mock_repository):
+    def test_get_predefined_types_map(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting predefined types map."""
         mock_repository.get_type_key_to_id_map.return_value = {
             "HTTP-MP3-Icecast": 1,
@@ -94,7 +95,7 @@ class TestStreamTypeService:
         assert result == {"HTTP-MP3-Icecast": 1, "HTTPS-AAC-Shoutcast": 2}
         mock_repository.get_type_key_to_id_map.assert_called_once()
 
-    def test_initialize_predefined_types(self, stream_type_service, mock_repository):
+    def test_initialize_predefined_types(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test initializing predefined types."""
         stream_type_service.initialize_predefined_types()
 

@@ -21,7 +21,7 @@ from model.dto.stream_analysis import ErrorCode, DetectionMethod, StreamAnalysis
 def mock_stream_type_service() -> StreamTypeService:
     """Mock StreamTypeService for testing."""
     # annotate the variable as a generic Mock for better completions/typing in editors
-    mock_service: Mock[StreamTypeService] = Mock(spec=StreamTypeService)
+    mock_service: Mock = Mock(spec=StreamTypeService)
     mock_service.find_stream_type_id.return_value = 1
     # Provide a sensible display name to avoid Pydantic validation errors
     mock_service.get_display_name.return_value = "Test Stream"

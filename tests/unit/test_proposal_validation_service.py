@@ -10,48 +10,57 @@ Tests validation logic for proposals including:
 
 import pytest
 from unittest.mock import Mock
+from model.dto.stream_analysis import StreamAnalysisResult
 from model.dto.validation import ValidationResult
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
-from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.proposal_validation_service import ProposalValidationService
 from model.entity.proposal import Proposal
-from model.entity.stream_analysis import StreamAnalysis
 from model.entity.radio_source import RadioSource
+from service.stream_analysis_service import StreamAnalysisService
+
+@pytest.fixture
+def mock_proposal_repo() -> ProposalRepository:
+    """Create mock ProposalRepository."""
+    return Mock(spec=ProposalRepository)
+
+@pytest.fixture
+def mock_radio_source_repo() -> RadioSourceRepository:
+    """Create mock RadioSourceRepository."""
+    return Mock(spec=RadioSourceRepository)
+
+@pytest.fixture
+def mock_stream_analysis_service() -> StreamAnalysisService:
+    """Create mock StreamAnalysisService."""
+    return Mock(spec=StreamAnalysisService)
+
+@pytest.fixture
+def validation_service(mock_proposal_repo: ProposalRepository, mock_radio_source_repo: RadioSourceRepository) -> ProposalValidationService:
+    """Create ProposalValidationService with mocked repositories."""
+    return ProposalValidationService(mock_proposal_repo, mock_radio_source_repo)
 
 
 class TestProposalValidationService:
     """Test suite for ProposalValidationService."""
 
-    @pytest.fixture
-    def mock_proposal_repo(self) -> ProposalRepository:
-        """Create mock ProposalRepository."""
-        return Mock(spec=ProposalRepository)
-
-    @pytest.fixture
-    def mock_radio_source_repo(self) -> RadioSourceRepository:
-        """Create mock RadioSourceRepository."""
-        return Mock(spec=RadioSourceRepository)
-    
-    @pytest.fixture
-    def mock_stream_analysis_repo(self) -> StreamAnalysisRepository:
-        """Create mock StreamAnalysisRepository."""
-        return Mock(spec=StreamAnalysisRepository)
-    
-    @pytest.fixture
-    def validation_service(self, mock_proposal_repo: ProposalRepository, mock_radio_source_repo: RadioSourceRepository) -> ProposalValidationService:
-        """Create ProposalValidationService with mocked repositories."""
-        return ProposalValidationService(mock_proposal_repo, mock_radio_source_repo)
-
-    def test_validate_proposal_success(self, validation_service: ProposalValidationService, mock_proposal_repo: ProposalRepository, mock_radio_source_repo: RadioSourceRepository) -> None:
+    def test_validate_proposal_success(self, validation_service: ProposalValidationService, mock_proposal_repo: ProposalRepository, 
+                                       mock_stream_analysis_service: StreamAnalysisService, mock_radio_source_repo: RadioSourceRepository) -> None:
         """Test validation succeeds for valid proposal."""
+        
+        url="https://stream.example.com/radio.mp3"
+        mock_analysis_result: StreamAnalysisResult = mock_stream_analysis_service.analyze_stream(url).return_value
+        mock_analysis_result.success = True
+        mock_analysis_result.content_type = "audio/mpeg"
+        mock_analysis_result.raw_output = "HTTP/1.1 200 OK\nContent-Type: audio/mpeg"
+        mock_analysis_result.security_status = "UNSAFE"
+
         # Arrange
         proposal = Proposal(
             id=1,
-            stream_url="https://stream.example.com/radio.mp3",
+            stream_url=mock_analysis_result.stream_url,
             name="Test Radio",
-            website_url="https://example.com",
-            stream_type_id=1,
+            website_url="http.//example.com",
+            stream_type_id=mock_analysis_result.stream_type_id,
             is_secure=True
         )
         mock_proposal_repo.find_by_id.return_value = proposal
