@@ -58,10 +58,12 @@
                     <td>{{ stream.stream_url }}</td>
                     <td>{{ stream.detection_method }}</td>
                     <td>{{ stream.raw_ffmpeg_output }}</td>
-                    <td>{{ stream.raw_curl_output }}</td>
+                    <td>{{ stream.raw_curl_output }}
+                    </td>
+                    <td>
                         <a href="/proposal_delete/{{ stream.id }}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
-                                        <td>
+                    <td>
                         <a href="/proposal_propose/{{ stream.id }}" class="btn btn-danger btn-sm">Propose</a>
                     </td>
                 </tr>
