@@ -10,6 +10,7 @@ Tests validation logic for proposals including:
 
 import pytest
 from unittest.mock import Mock
+
 from model.dto.stream_analysis import StreamAnalysisResult
 from model.dto.validation import ValidationResult
 from model.repository.proposal_repository import ProposalRepository
@@ -17,6 +18,7 @@ from model.repository.radio_source_repository import RadioSourceRepository
 from service.proposal_validation_service import ProposalValidationService
 from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
+from model.entity.stream_analysis import StreamAnalysis
 from service.stream_analysis_service import StreamAnalysisService
 
 @pytest.fixture
@@ -53,18 +55,23 @@ class TestProposalValidationService:
         mock_analysis_result.content_type = "audio/mpeg"
         mock_analysis_result.raw_output = "HTTP/1.1 200 OK\nContent-Type: audio/mpeg"
         mock_analysis_result.security_status = "UNSAFE"
+        mock_analysis_result.is_valid = True
+        mock_analysis_result.is_secure = True
+        mock_analysis_result.stream_url = url
+        mock_analysis_result.stream_type_id = 1
 
         # Arrange
         proposal = Proposal(
             id=1,
             stream_url=mock_analysis_result.stream_url,
             name="Test Radio",
-            website_url="http.//example.com",
+            website_url="http://example.com",
             stream_type_id=mock_analysis_result.stream_type_id,
-            is_secure=True
-        )
+            is_secure=True)
+        
         mock_proposal_repo.find_by_id.return_value = proposal
-        mock_radio_source_repo.find_by_url.return_value = None
+        mock_radio_source_repo.find_by_url.return_value = None  # No duplicate
+        mock_stream_analysis_service.analyze_stream.return_value = mock_analysis_result
 
         # Act
         result: ValidationResult = validation_service.validate_proposal(1)
