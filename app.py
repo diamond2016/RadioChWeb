@@ -17,10 +17,12 @@ db.init_app(app)
 
 # Import and register blueprints
 from route.database_route import database_bp
+from route.analysis_route import analysis_bp
 from route.proposal_route import proposal_bp
 from route.radio_source_route import radio_source_bp
 
 app.register_blueprint(database_bp)
+app.register_blueprint(analysis_bp, url_prefix='/analysis')
 app.register_blueprint(proposal_bp, url_prefix='/proposal')
 app.register_blueprint(radio_source_bp, url_prefix='/source')
 

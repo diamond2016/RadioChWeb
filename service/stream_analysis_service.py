@@ -11,8 +11,11 @@ import shutil
 from urllib.parse import urlparse
 from typing import Optional, Dict, Any
 from model.dto.stream_analysis import StreamAnalysisResult, DetectionMethod, ErrorCode
+from model.entity.proposal import Proposal
+from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.stream_type_service import StreamTypeService
-
+from model.repository.proposal_repository import ProposalRepository
+from model.entity.stream_analysis import StreamAnalysis
 
 class StreamAnalysisService:
     """
@@ -24,10 +27,12 @@ class StreamAnalysisService:
     3. FFmpeg is authoritative when results differ
     """
     
-    def __init__(self, stream_type_service: StreamTypeService):
-        self.stream_type_service = stream_type_service
+    def __init__(self, stream_type_service: StreamTypeService, proposal_repository: ProposalRepository, analysis_repository: StreamAnalysisRepository):
+        self.stream_type_service: StreamTypeService = stream_type_service
+        self.proposal_repository: ProposalRepository = proposal_repository
+        self.analysis_repository: StreamAnalysisRepository = analysis_repository
         self._check_prerequisites()
-    
+
     def _check_prerequisites(self) -> None:
         """
         Check that required tools are available (NFR-001).
@@ -402,3 +407,38 @@ class StreamAnalysisService:
             return "Icecast"
         else:
             return "None"
+        
+    def save_analysis_as_proposal(self, stream: StreamAnalysisResult) -> Proposal:
+        """
+        Approve an analysis and create a proposal for radio source.
+        """
+        if not stream or not stream.is_valid:
+            raise ValueError("Cannot approve invalid or None stream analysis.")
+
+        # Implementation of proposal creation goes here 
+        proposal: Proposal = Proposal(
+            id=0,  # to be assigned by repository
+            stream_url=stream.stream_url,
+            name="",
+            website_url=None,
+            country=None,
+            description=None,
+            image_url=None,
+            stream_type_id=stream.stream_type_id,
+            is_secure=stream.is_secure
+        )
+        # Save proposal to repository (not implemented here)
+        self.proposal_repository.save(proposal)
+        print("Proposal created for stream URL: {}".format(stream.stream_url))  
+
+    def delete_analysis(self, stream: StreamAnalysisResult) -> bool:
+        """
+        Delete a proposal associated with the given stream URL.
+        
+        Returns:
+            True if deletion was successful, False otherwise.
+        """
+        existing_analysis: StreamAnalysis = self.analysis_repository.find_by_id(stream.id)
+        if existing_analysis:
+            return self.analysis_repository.delete(existing_analysis.id)
+        return False

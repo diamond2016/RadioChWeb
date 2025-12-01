@@ -52,3 +52,20 @@ class ProposalUpdateRequest(BaseModel):
             self.description is not None,
             self.image is not None
         ])
+
+
+class ProposalRequest(BaseModel):
+    """Data model for a proposal."""    
+    id: int
+    stream_url: str
+    name: str
+    website_url: Optional[str] = None
+    country: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    stream_type_id: int
+    is_secure: bool
+    
+    model_config = ConfigDict(from_attributes=True)
+    def __repr__(self):
+        return f"<Proposal(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"
