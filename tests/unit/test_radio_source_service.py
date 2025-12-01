@@ -9,8 +9,10 @@ Tests radio source management including:
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 from datetime import datetime
+from model.repository.proposal_repository import ProposalRepository
+from model.repository.radio_source_repository import RadioSourceRepository
 from service.radio_source_service import RadioSourceService
 from service.proposal_validation_service import ProposalValidationService
 from model.dto.validation import ValidationResult, ProposalUpdateRequest
@@ -22,22 +24,23 @@ class TestRadioSourceService:
     """Test suite for RadioSourceService."""
 
     @pytest.fixture
-    def mock_proposal_repo(self):
+    def mock_proposal_repo(self) -> ProposalRepository:
         """Create mock ProposalRepository."""
-        return Mock()
+        return Mock(spec=ProposalRepository)
 
     @pytest.fixture
-    def mock_radio_source_repo(self):
+    def mock_radio_source_repo(self) -> RadioSourceRepository:
         """Create mock RadioSourceRepository."""
-        return Mock()
+        return Mock(spec=RadioSourceRepository)
 
     @pytest.fixture
-    def mock_validation_service(self):
+    def mock_validation_service(self) -> ProposalValidationService:
         """Create mock ProposalValidationService."""
         return Mock(spec=ProposalValidationService)
 
     @pytest.fixture
-    def radio_source_service(self, mock_proposal_repo, mock_radio_source_repo, mock_validation_service):
+    def radio_source_service(self, mock_proposal_repo: ProposalRepository,
+                             mock_radio_source_repo: RadioSourceRepository, mock_validation_service: ProposalValidationService) -> RadioSourceService:
         """Create RadioSourceService with mocked dependencies."""
         return RadioSourceService(
             mock_proposal_repo,

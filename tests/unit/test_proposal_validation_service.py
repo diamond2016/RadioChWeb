@@ -13,6 +13,7 @@ from unittest.mock import Mock
 from model.dto.validation import ValidationResult
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
+from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.proposal_validation_service import ProposalValidationService
 from model.entity.proposal import Proposal
 from model.entity.stream_analysis import StreamAnalysis
@@ -31,7 +32,12 @@ class TestProposalValidationService:
     def mock_radio_source_repo(self) -> RadioSourceRepository:
         """Create mock RadioSourceRepository."""
         return Mock(spec=RadioSourceRepository)
-
+    
+    @pytest.fixture
+    def mock_stream_analysis_repo(self) -> StreamAnalysisRepository:
+        """Create mock StreamAnalysisRepository."""
+        return Mock(spec=StreamAnalysisRepository)
+    
     @pytest.fixture
     def validation_service(self, mock_proposal_repo: ProposalRepository, mock_radio_source_repo: RadioSourceRepository) -> ProposalValidationService:
         """Create ProposalValidationService with mocked repositories."""
