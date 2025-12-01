@@ -48,8 +48,6 @@ class StreamAnalysisResult(BaseModel):
     detection_method: Optional[DetectionMethod] = None  # How the stream was detected
     raw_content_type: Optional[str] = None  # String from curl headers
     raw_ffmpeg_output: Optional[str] = None  # String from ffmpeg detection
-    
-    model_config = ConfigDict(use_enum_values=True)
         
     def is_success(self) -> bool:
         """Returns True if analysis was successful and stream is valid."""

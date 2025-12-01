@@ -129,7 +129,7 @@ def analyze_url():
         # Save detail in repo
         analysis_repo = get_analysis_repo()
         analysis_entity = StreamAnalysis(
-            stream_url=result.url,
+            stream_url=result.stream_url,
             is_valid=result.is_valid,
             is_secure=result.is_secure,
             error_code=result.error_code.name if result.error_code else None,

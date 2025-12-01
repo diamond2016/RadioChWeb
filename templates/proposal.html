@@ -46,18 +46,19 @@
             <thead>
                 <tr>
                     <th>URL</th>
-                    <th></th>
-                    <th>Data</th>
+                    <th>Detection Method</th>
+                    <th>Raw FFmpeg Output</th>
+                    <th>Raw Curl Output</th>
                     <th colspan="2">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for stream in streams %}
                 <tr>
-                    <td>{{ stream.url }}</td>
-                    <td>{{ stream.status }}</td>
-                    <td>{{ stream.analysis_result }}</td>
-                    <td>
+                    <td>{{ stream.stream_url }}</td>
+                    <td>{{ stream.detection_method }}</td>
+                    <td>{{ stream.raw_ffmpeg_output }}</td>
+                    <td>{{ stream.raw_curl_output }}</td>
                         <a href="/proposal_delete/{{ stream.id }}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                                         <td>

@@ -15,7 +15,7 @@ class StreamAnalysis(db.Model):
 
 
     # Relationship with StreamTypes
-    stream_type = db.relationship("StreamType", back_populates="stream_analysis")
+    stream_type = db.relationship("StreamType", back_populates="analysis")
 
     def __repr__(self):
         return f"<StreamAnalysis(id={self.id}, url='{self.stream_url}', type='{self.stream_type_id}', valid={self.is_valid})>"
