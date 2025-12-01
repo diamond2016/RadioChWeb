@@ -1,7 +1,7 @@
 ## issue feature: "treat result of analyzeStream (from stream_analysis_service) before persisting in db in table stream_analysis"
 
 1. extract only the part of interest, "after Metadata";
-2, apply security before saving data for sql injection (I think no necessary it is not entered by user)
+2. apply security before saving data for sql injection (I think no necessary it is not entered by user)
 3. In proposal_route /proposal (get) showing in a proper manner for styling in order to make text aligned and readable.
 
 Example:

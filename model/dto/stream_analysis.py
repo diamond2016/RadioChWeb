@@ -5,6 +5,7 @@ StreamAnalysisResult is the main return type from the analyze-and-classify proce
 
 from typing import Optional
 from pydantic import BaseModel, HttpUrl, ConfigDict
+from pydantic import field_validator
 from enum import Enum
 
 
@@ -48,6 +49,18 @@ class StreamAnalysisResult(BaseModel):
     detection_method: Optional[DetectionMethod] = None  # How the stream was detected
     raw_content_type: Optional[str] = None  # String from curl headers
     raw_ffmpeg_output: Optional[str] = None  # String from ffmpeg detection
+    extracted_metadata: Optional[str] = None  # Normalized metadata extracted from ffmpeg stderr
+        
+    @field_validator('extracted_metadata')
+    def _clean_extracted_metadata(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        # remove control chars except newline and tab, trim, and enforce max length
+        cleaned = ''.join(ch for ch in v if (ch >= ' ' or ch in '\n\t'))
+        cleaned = cleaned.strip()
+        if len(cleaned) > 4096:
+            cleaned = cleaned[:4096]
+        return cleaned
         
     def is_success(self) -> bool:
         """Returns True if analysis was successful and stream is valid."""

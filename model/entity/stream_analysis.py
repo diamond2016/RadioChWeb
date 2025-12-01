@@ -12,6 +12,7 @@ class StreamAnalysis(db.Model):
     detection_method = db.Column(db.String(50), nullable=True)  # How the stream was detected
     raw_content_type = db.Column(db.String(100), nullable=True)  # String from curl headers
     raw_ffmpeg_output = db.Column(db.Text, nullable=True)  # String from ffmpeg detection   
+    extracted_metadata = db.Column(db.Text, nullable=True)
 
 
     # Relationship with StreamTypes

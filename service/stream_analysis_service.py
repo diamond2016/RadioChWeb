@@ -148,15 +148,19 @@ class StreamAnalysisService:
             
             # ffmpeg writes info to stderr, not stdout
             output = result.stderr
-            
+
             # Parse ffmpeg output for format and codec information
             format_info = self._parse_ffmpeg_output(output)
-            
+
+            # Extract metadata block from ffmpeg stderr (if present)
+            extracted_metadata = self._extract_metadata_from_ffmpeg_output(output)
+
             return {
                 "success": format_info is not None,
                 "format": format_info.get("format") if format_info else None,
                 "codec": format_info.get("codec") if format_info else None,
-                "raw_output": output
+                "raw_output": output,
+                "extracted_metadata": extracted_metadata
             }
             
         except subprocess.TimeoutExpired:
@@ -201,6 +205,68 @@ class StreamAnalysisService:
             "format": format_name,
             "codec": codec
         }
+
+    def _extract_metadata_from_ffmpeg_output(self, output: str) -> Optional[str]:
+        """
+        Extract the 'Metadata:' block from ffmpeg stderr output and return a
+        normalized plain-text snippet. Returns None when no metadata block found.
+
+        Strategy:
+        - Normalize newlines, find last occurrence of a line matching '^\s*Metadata:\s*$'.
+        - Capture subsequent indented lines (leading whitespace) until an empty
+          line or a non-indented section header is found.
+        - Strip control characters (keep newline and tab), normalize colon spacing,
+          trim and truncate to 4096 chars.
+        """
+        if not output or not isinstance(output, str):
+            return None
+
+        norm = output.replace('\r\n', '\n').replace('\r', '\n')
+
+        # Find all 'Metadata:' markers; choose the last one
+        meta_matches = [m.start() for m in re.finditer(r"^\s*Metadata:\s*$", norm, flags=re.MULTILINE)]
+        if not meta_matches:
+            return None
+
+        # Start scanning from the last metadata marker
+        last_pos = meta_matches[-1]
+        tail = norm[last_pos:]
+        lines = tail.split('\n')
+
+        # Skip the 'Metadata:' line itself
+        captured = []
+        for line in lines[1:]:
+            if line.strip() == "":
+                break
+            # Stop if we hit a new ffmpeg section header (Stream, Input, Output, Duration, etc.)
+            if re.match(r"^\s*(Stream|Input|Output|Duration|At least)\b", line):
+                break
+            # Consider indented lines as metadata lines
+            if re.match(r"^\s+", line):
+                # normalize: remove leading whitespace, normalize spacing around ':'
+                stripped = line.strip()
+                # replace multiple spaces around colon
+                if ':' in stripped:
+                    parts = stripped.split(':', 1)
+                    key = parts[0].strip()
+                    val = parts[1].strip()
+                    captured.append(f"{key}: {val}")
+                else:
+                    captured.append(stripped)
+            else:
+                break
+
+        if not captured:
+            return None
+
+        joined = "\n".join(captured)
+
+        # Remove control chars except newline and tab
+        cleaned = ''.join(ch for ch in joined if (ch >= ' ' or ch in '\n\t'))
+        cleaned = cleaned.strip()
+        if len(cleaned) > 4096:
+            cleaned = cleaned[:4096]
+        return cleaned
     
     def _resolve_analysis_results(self, curl_result: dict, ffmpeg_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """
@@ -218,7 +284,8 @@ class StreamAnalysisService:
                     is_secure=is_secure,
                     error_code=ErrorCode.UNREACHABLE,
                     raw_content_type=curl_result.get("raw_output"),
-                    raw_ffmpeg_output=ffmpeg_result.get("raw_output")
+                    raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
+                    extracted_metadata=ffmpeg_result.get("extracted_metadata")
                 )
         
         # FFmpeg succeeded - use it as authoritative source
@@ -230,7 +297,8 @@ class StreamAnalysisService:
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
                 raw_content_type=curl_result.get("raw_output"),
-                raw_ffmpeg_output=ffmpeg_result.get("raw_output")
+                raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
+                extracted_metadata=ffmpeg_result.get("extracted_metadata")
             )
         
         # Determine protocol (HTTP/HTTPS based on URL, or HLS if m3u8 detected)
@@ -255,7 +323,8 @@ class StreamAnalysisService:
             error_code=None,
             detection_method=detection_method,
             raw_content_type=curl_result.get("raw_output"),
-            raw_ffmpeg_output=ffmpeg_result.get("raw_output")
+            raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
+            extracted_metadata=ffmpeg_result.get("extracted_metadata")
         )
     
     def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisResult:

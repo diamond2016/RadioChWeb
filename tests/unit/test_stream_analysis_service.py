@@ -174,3 +174,50 @@ class TestStreamAnalysisService:
 
         assert not result.is_valid
         assert result.error_code == ErrorCode.TIMEOUT
+
+    def test_extract_metadata_from_ffmpeg_output_basic(self, analysis_service: StreamAnalysisService) -> None:
+        """Unit test for _extract_metadata_from_ffmpeg_output helper."""
+        ffmpeg_stderr = (
+            "Input #0, mp3, from 'stream':\n"
+            "  Metadata:\n"
+            "    title           : Test Title\n"
+            "    artist          : Example Artist\n"
+            "  Stream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono"
+        )
+
+        extracted = analysis_service._extract_metadata_from_ffmpeg_output(ffmpeg_stderr)
+        assert extracted == "title: Test Title\nartist: Example Artist"
+
+    def test_analyze_stream_populates_extracted_metadata_from_ffmpeg(self, analysis_service: StreamAnalysisService) -> None:
+        """Integration-style test: ensure analyze_stream result contains extracted_metadata."""
+        url = "https://stream.example.com/test"
+        ffmpeg_stderr = (
+            "Input #0, mp3, from 'stream':\n"
+            "  Metadata:\n"
+            "    title           : Test Title\n"
+            "    artist          : Example Artist\n"
+            "  Stream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono"
+        )
+
+        with patch.object(analysis_service, '_analyze_with_curl') as mock_curl, \
+             patch.object(analysis_service, '_analyze_with_ffmpeg') as mock_ffmpeg:
+
+            mock_curl.return_value = {
+                "success": True,
+                "content_type": "audio/mpeg",
+                "raw_output": "HTTP/1.1 200 OK\nContent-Type: audio/mpeg"
+            }
+
+            # Return ffmpeg result including extracted_metadata (what our helper would produce)
+            mock_ffmpeg.return_value = {
+                "success": True,
+                "format": "MP3",
+                "codec": "mp3",
+                "raw_output": ffmpeg_stderr,
+                "extracted_metadata": "title: Test Title\nartist: Example Artist"
+            }
+
+            result = analysis_service.analyze_stream(url)
+
+            assert result.raw_ffmpeg_output == ffmpeg_stderr
+            assert result.extracted_metadata == "title: Test Title\nartist: Example Artist"
