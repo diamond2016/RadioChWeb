@@ -13,7 +13,8 @@ CREATE TABLE stream_analysis (
     detection_method VARCHAR(200),
     raw_content_type VARCHAR(200),
     raw_ffmpeg_output VARCHAR(200),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
 );
 
 -- Create indexes

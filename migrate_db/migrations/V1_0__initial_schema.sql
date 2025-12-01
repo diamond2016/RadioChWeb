@@ -23,7 +23,8 @@ CREATE TABLE radio_sources (
     description VARCHAR(200),
     image_url VARCHAR(200),
     created_at DATETIME,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
 );
 CREATE INDEX idx_radio_sources_stream_url ON radio_sources(stream_url);
 CREATE INDEX idx_radio_sources_stream_type_id ON radio_sources(stream_type_id);

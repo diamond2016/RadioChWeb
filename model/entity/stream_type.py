@@ -13,7 +13,9 @@ class StreamType(db.Model):
     radio_sources = db.relationship("RadioSource", back_populates="stream_type")
     # Relationship with StreamAnalysis
     stream_analysis = db.relationship("StreamAnalysis", back_populates="stream_type")   
-
+    # Relationship with Proposals
+    proposals = db.relationship("Proposal", back_populates="stream_type")   
+    
     def __repr__(self):
         return f"<StreamType(id={self.id}, protocol='{self.protocol}', format='{self.format}', metadata_type='{self.metadata_type}')>"
 
