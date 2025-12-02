@@ -36,39 +36,6 @@
                         <p><strong>Submitted:</strong> {{ proposal.created_at.strftime('%Y-%m-%d %H:%M') if proposal.created_at else 'Unknown' }}</p>
 
                         <hr>
-                        <h6>Validation Status</h6>
-                        {% if validation.is_valid %}
-                            <div class="alert alert-success">
-                                <strong>✓ Valid</strong> - This proposal can be approved.
-                            </div>
-                        {% else %}
-                            <div class="alert alert-danger">
-                                <strong>✗ Invalid</strong> - {{ validation.message }}
-                            </div>
-                        {% endif %}
-
-                        {% if validation.security_status %}
-                            <p><strong>Security Status:</strong>
-                                {% if validation.security_status.name == 'SAFE' %}
-                                    <span class="badge bg-success">Safe</span>
-                                {% elif validation.security_status.name == 'WARNING' %}
-                                    <span class="badge bg-warning">Warning</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Unsafe</span>
-                                {% endif %}
-                            </p>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer">
-                        {% if validation.is_valid %}
-                            <form method="post" action="{{ url_for('proposal.approve_proposal', proposal_id=proposal.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-success">Approve & Add as Source</button>
-                            </form>
-                        {% endif %}
-                        <a href="{{ url_for('database.list_proposals') }}" class="btn btn-secondary">Back to Proposals</a>
-                    </div>
-                </div>
-            </div>
 
             <div class="col-md-4">
                 <div class="card">

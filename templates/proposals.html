@@ -39,6 +39,9 @@
                     </div>
                     <div class="card-footer">
                         <a href="{{ url_for('proposal.proposal_detail', proposal_id=proposal.id) }}" class="btn btn-primary">Review Proposal</a>
+                        <form method="post" action="{{ url_for('proposal.approve_proposal', proposal_id=proposal.id) }}" style="display:inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Approve Proposal</button>
+                        </form>
                     </div>
                 </div>
             </div>

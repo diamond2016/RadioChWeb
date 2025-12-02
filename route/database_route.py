@@ -25,13 +25,6 @@ def get_proposal_repo():
     return ProposalRepository(db.session)
 
 
-@database_bp.route('/')
-def index():
-    """Main index page - list all radio sources."""
-    radio_source_repo = get_radio_source_repo()
-    sources = radio_source_repo.find_all()
-    return render_template('index.html', sources=sources)
-
 
 @database_bp.route('/sources')
 def list_sources():

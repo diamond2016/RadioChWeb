@@ -91,26 +91,23 @@ def propose():
 
 
 
-@proposal_bp.route('/proposal/<int:proposal_id>')
+@proposal_bp.route('/proposal/<int:proposal_id>', methods=['GET', 'POST'])
 def proposal_detail(proposal_id):
+    if request.method == 'POST':
+        pass #here to be inserted edit functionality of a proposal
+
     """Display proposal details and validation status."""
     proposal_repo = get_proposal_repo()
-    validation_service = get_validation_service()
     
     proposal = proposal_repo.find_by_id(proposal_id)
     if not proposal:
         flash('Proposal not found', 'error')
-        return redirect(url_for('database.list_sources'))
+        return redirect(url_for('proposal.index'))
 
-    # Get validation result
-    validation_result = validation_service.validate_proposal(proposal)
-
-    return render_template('proposal_detail.html',
-                         proposal=proposal,
-                         validation=validation_result)
+    return render_template('proposal_detail.html',proposal=proposal)
 
 
-@proposal_bp.route('/proposal/<int:proposal_id>/approve', methods=['POST'])
+@proposal_bp.route('/proposal/approve/<int:proposal_id>', methods=['POST'])
 def approve_proposal(proposal_id):
     """Approve and convert proposal to radio source."""
     radio_source_service = get_radio_source_service()
@@ -124,4 +121,4 @@ def approve_proposal(proposal_id):
     except Exception as e:
         flash(f'Error approving proposal: {str(e)}', 'error')
 
-    return redirect(url_for('proposal.proposal_detail', proposal_id=proposal_id))
+    return redirect(url_for('main.index'))
