@@ -452,6 +452,19 @@ class StreamAnalysisService:
         try:
             self.proposal_repository.save(proposal)
             print("Proposal created for stream URL: {}".format(stream_url))
+            # After successfully creating a proposal, try to remove the originating analysis
+            try:
+                # If stream_or_id was an int, delete by that id; if it was an object, try to get its id
+                if isinstance(stream_or_id, int):
+                    self.analysis_repository.delete(stream_or_id)
+                else:
+                    stream_id = getattr(stream_entity, 'id', None)
+                    if stream_id:
+                        self.analysis_repository.delete(stream_id)
+            except Exception:
+                # Non-fatal: proposal creation succeeded, analysis deletion failed
+                pass
+
             return True
         except Exception as e:
             print(f"Failed to save proposal: {e}")

@@ -12,9 +12,9 @@
             <div class="container">
                 <a class="navbar-brand" href="/">RadioChWeb</a>
                 <div class="navbar-nav">
-                    <a class="nav-link" href="/proposal">Propose Stream</a>
-                    <a class="nav-link" href="/radio_source">Manage Sources</a>
-                    <a class="nav-link" href="/database">Database</a>
+                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
+                    <a class="nav-link" href="{{ url_for('database.list_proposals') }}">View Proposals</a>
+                    <a class="nav-link" href="{{ url_for('database.database_management') }}">Database</a>
                 </div>
             </div>
         </nav>

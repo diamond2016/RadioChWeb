@@ -35,7 +35,7 @@
                         <small class="text-muted">by {{ proposal.user_name }}</small>
                     </div>
                     <div class="card-body d-flex flex-column">
-                        <p><strong>URL:</strong> <a href="{{ proposal.url }}" target="_blank">{{ proposal.url }}</a></p>
+                        <p><strong>URL:</strong> <a href="{{ proposal.stream_url }}" target="_blank">{{ proposal.url }}</a></p>
                         <p class="card-text flex-grow-1">{{ proposal.description or 'No description provided' }}</p>
                         <p class="text-muted">
                             Submitted: {{ proposal.created_at.strftime('%Y-%m-%d %H:%M') if proposal.created_at else 'Unknown' }}

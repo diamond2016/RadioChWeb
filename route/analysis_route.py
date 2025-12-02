@@ -122,7 +122,7 @@ def approve_analysis(id: int):
     except Exception as e:
         flash(f'Error approving stream analysis: {str(e)}', 'error')
 
-    return redirect(url_for('proposal.propose'))
+    return redirect(url_for('proposal.index'))
 
 
 @analysis_bp.route('/delete/<int:id>', methods=['POST'])

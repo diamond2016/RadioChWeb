@@ -54,6 +54,10 @@ def test_approve_analysis_route_creates_proposal(test_app, test_db):
                 resp = approve_analysis(sa.id)
                 assert resp is not None
 
+    # Verify the StreamAnalysis row was removed after proposing
+    found = test_db.query(StreamAnalysis).filter(StreamAnalysis.stream_url == sa.stream_url).first()
+    assert found is None
+
     # Verify a Proposal was created for that stream_url
     proposal = test_db.query(Proposal).filter(Proposal.stream_url == sa.stream_url).first()
     assert proposal is not None
