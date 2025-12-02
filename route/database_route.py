@@ -60,7 +60,7 @@ def list_proposals():
 
 
 @database_bp.route('/database')
-def database_management():
+def index():
     """Database management page with overview of all entities."""
     radio_source_repo = get_radio_source_repo()
     stream_type_repo = get_stream_type_repo()

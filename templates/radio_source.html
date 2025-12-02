@@ -10,11 +10,11 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="/">RadioChWeb</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">RadioChWeb</a>
                 <div class="navbar-nav">
-                    <a class="nav-link" href="/proposal">Propose Stream</a>
-                    <a class="nav-link" href="/radio_source">Manage Sources</a>
-                    <a class="nav-link" href="/database">Database</a>
+                    <a class="nav-link" href="{{ url_for('proposal.propose') }}">Propose Stream</a>
+                    <a class="nav-link" href="{{ url_for('radio_source.manage') }}">Manage Sources</a>
+                    <a class="nav-link" href="{{ url_for('database.index') }}">Database</a>
                 </div>
             </div>
         </nav>
