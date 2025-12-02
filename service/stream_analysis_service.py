@@ -408,12 +408,13 @@ class StreamAnalysisService:
         else:
             return "None"
         
-    def save_analysis_as_proposal(self, stream: StreamAnalysisResult) -> Proposal:
+    def save_analysis_as_proposal(self, stream: StreamAnalysisResult) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
         """
         if not stream or not stream.is_valid:
-            raise ValueError("Cannot approve invalid or None stream analysis.")
+            print("Cannot create proposal for invalid or None stream analysis.")
+            return False
 
         # Implementation of proposal creation goes here 
         proposal: Proposal = Proposal(
@@ -427,9 +428,11 @@ class StreamAnalysisService:
             stream_type_id=stream.stream_type_id,
             is_secure=stream.is_secure
         )
-        # Save proposal to repository (not implemented here)
-        self.proposal_repository.save(proposal)
+        # Save proposal to repository
+        self.proposal_repository.save(proposal=proposal)
         print("Proposal created for stream URL: {}".format(stream.stream_url))  
+        return True
+    
 
     def delete_analysis(self, stream: StreamAnalysisResult) -> bool:
         """

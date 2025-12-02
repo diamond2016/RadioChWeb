@@ -9,6 +9,9 @@ from typing import cast
 import sys
 from pathlib import Path
 
+from model.repository.proposal_repository import ProposalRepository
+from model.repository.stream_analysis_repository import StreamAnalysisRepository
+
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -28,13 +31,27 @@ def mock_stream_type_service() -> StreamTypeService:
     # cast to the interface/class so the fixture's return type is StreamTypeService (Pylance-friendly)
     return cast(StreamTypeService, mock_service)
 
+@pytest.fixture
+def mock_stream_analysis_repo() -> StreamAnalysisRepository:
+    """Mock StreamAnalysisRepository for testing."""
+    mock_repo: Mock = Mock(spec=StreamAnalysisRepository)
+    return cast(StreamAnalysisRepository, mock_repo)
+
 
 @pytest.fixture
-def analysis_service(mock_stream_type_service: StreamTypeService) -> StreamAnalysisService:
+def mock_proposal_repo() -> ProposalRepository:
+    mock_repo: Mock = Mock(spec=ProposalRepository)
+    mock_repo.save.return_value = True
+    return cast(ProposalRepository, mock_repo)
+
+
+@pytest.fixture
+def analysis_service(mock_stream_type_service: StreamTypeService, mock_proposal_repo: ProposalRepository, mock_stream_analysis_repo: StreamAnalysisRepository) -> StreamAnalysisService:
     """Create StreamAnalysisService with mocked dependencies."""
     # patch shutil.which only during construction so the constructor doesn't raise
     with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
-        service = StreamAnalysisService(mock_stream_type_service)
+        service = StreamAnalysisService(stream_type_service=mock_stream_type_service, 
+                                        proposal_repository=mock_proposal_repo, analysis_repository=mock_stream_analysis_repo)
         return service
 
 
@@ -162,7 +179,7 @@ class TestStreamAnalysisService:
 
         with patch('service.stream_analysis_service.shutil.which', return_value=None):
             with pytest.raises(RuntimeError, match="ffmpeg is not installed"):
-                StreamAnalysisService(mock_service)
+                StreamAnalysisService(mock_service, proposal_repository=Mock(), analysis_repository=Mock())
 
     @patch('subprocess.run')
     def test_timeout_handling(self, mock_run, analysis_service: StreamAnalysisService) -> None:
@@ -221,3 +238,20 @@ class TestStreamAnalysisService:
 
             assert result.raw_ffmpeg_output == ffmpeg_stderr
             assert result.extracted_metadata == "title: Test Title\nartist: Example Artist"
+
+    def test_save_analysis_as_proposal_basic(self, analysis_service: StreamAnalysisService) -> None:
+        """Unit test promoting a analysis into a proposal."""
+        with patch.object(analysis_service, 'analyze_stream') as mock_stream_analysis:
+            mock_stream_analysis.return_value = StreamAnalysisResult(
+                stream_url="https://stream.example.com/test",
+                stream_type_display_name="Test Stream",
+                is_valid=True,
+                detection_method=DetectionMethod.BOTH,
+                stream_type_id=1,
+                is_secure=True,
+                raw_ffmpeg_output="Stream #0:0: Audio: mp3",
+                extracted_metadata="title: Test Title\nartist: Example Artist"
+            )
+  
+            result: bool = analysis_service.save_analysis_as_proposal(mock_stream_analysis.return_value)
+            assert result is True
