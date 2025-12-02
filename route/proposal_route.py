@@ -5,9 +5,7 @@ Implements spec 002: validate-and-add-radio-source.
 
 from typing import List
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
-from model.entity.stream_analysis import StreamAnalysis
-from model.dto.stream_analysis import StreamAnalysisResult
-from model.repository.stream_analysis_repository import StreamAnalysisRepository
+
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
@@ -126,37 +124,3 @@ def approve_proposal(proposal_id):
         flash(f'Error approving proposal: {str(e)}', 'error')
 
     return redirect(url_for('proposal.proposal_detail', proposal_id=proposal_id))
-
-
-@proposal_bp.route('/api/proposals', methods=['GET'])
-def get_proposals():
-    """API endpoint to get all proposals."""
-    proposal_repo = get_proposal_repo()
-    proposals = proposal_repo.find_all()
-    return jsonify([{
-        'id': p.id,
-        'name': p.name,
-        'url': p.url,
-        'description': p.description,
-        'user_name': p.user_name,
-        'created_at': p.created_at.isoformat() if p.created_at else None,
-        'status': 'pending'
-    } for p in proposals])
-
-
-@proposal_bp.route('/api/proposal/<int:proposal_id>/validate', methods=['GET'])
-def validate_proposal_api(proposal_id):
-    """API endpoint to validate a proposal."""
-    proposal_repo = get_proposal_repo()
-    validation_service = get_validation_service()
-    
-    proposal = proposal_repo.find_by_id(proposal_id)
-    if not proposal:
-        return jsonify({'error': 'Proposal not found'}), 404
-
-    result = validation_service.validate_proposal(proposal)
-    return jsonify({
-        'is_valid': result.is_valid,
-        'message': result.message,
-        'security_status': result.security_status.value if result.security_status else None
-    })
