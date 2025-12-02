@@ -21,6 +21,19 @@
     </header>
 
     <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set bs_class = 'info' %}
+                    {% if category == 'success' %}{% set bs_class = 'success' %}{% endif %}
+                    {% if category == 'error' %}{% set bs_class = 'danger' %}{% endif %}
+                    <div class="alert alert-{{ bs_class }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Pending Proposals</h1>
             <a href="{{ url_for('proposal.propose') }}" class="btn btn-primary">Submit New Proposal</a>
@@ -40,6 +53,7 @@
                     <div class="card-footer">
                         <a href="{{ url_for('proposal.proposal_detail', proposal_id=proposal.id) }}" class="btn btn-primary">Review Proposal</a>
                         <form method="post" action="{{ url_for('proposal.approve_proposal', proposal_id=proposal.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger btn-sm">Approve Proposal</button>
                         </form>
                     </div>

@@ -15,6 +15,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 from database import db
 db.init_app(app)
 
+# Enable CSRF protection for forms
+try:
+    from flask_wtf import CSRFProtect
+    csrf = CSRFProtect(app)
+except Exception:
+    # If flask-wtf is not installed in the environment, app will still run
+    pass
+
 # Import and register blueprints
 from route.main_route import main_bp
 from route.database_route import database_bp
