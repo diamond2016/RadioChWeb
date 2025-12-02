@@ -14,10 +14,9 @@ from model.entity.proposal import Proposal
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.stream_analysis_service import StreamAnalysisService
 from service.stream_type_service import StreamTypeService
-from tests.unit.test_stream_analysis_service import analysis_service
 
 
-analysys_bp = Blueprint('analysys', __name__, url_prefix='/analysis')
+analysis_bp = Blueprint('analysis', __name__)
 
 # Repository and service initialization functions
 def get_analysis_repo() -> StreamAnalysisRepository:
@@ -51,11 +50,9 @@ def get_stream_type_repo() -> StreamTypeRepository:
     return StreamTypeRepository(db.session)
 
 def get_stream_analysis_service() -> StreamAnalysisService:
-    proposal_repo = get_proposal_repo()
-    analysis_repository = get_analysis_repo()
     stream_type_service = get_stream_type_service()
     from service.stream_analysis_service import StreamAnalysisService
-    return StreamAnalysisService(stream_type_service, proposal_repo, analysis_repository))
+    return StreamAnalysisService(stream_type_service, get_proposal_repo(), get_analysis_repo())
 
 
 def get_stream_type_service():
@@ -64,38 +61,24 @@ def get_stream_type_service():
     return StreamTypeService(stream_type_repo)
 
 
-@analysys_bp.route('/', methods=['GET'])
+@analysis_bp.route('/', methods=['GET'])
 def index():
     """Display the analysis page with all stream analyses."""
     analysis_repo = get_analysis_repo()
 
-    # Get all proposals for display
+    # Get all analyses for display (pass entity objects so templates can access id)
     streams_from_db: List[StreamAnalysis] = analysis_repo.find_all()
-    streams: List[StreamAnalysisResult] = []
-    for stream in streams_from_db:
-        stream_validation = StreamAnalysisResult(
-            is_valid=stream.is_valid,
-            is_secure=stream.is_secure,
-            stream_url=stream.stream_url,
-            stream_type_id=stream.stream_type_id,
-            error_code=stream.error_code,            
-            detection_method=stream.detection_method,
-            raw_content_type=stream.raw_content_type,
-            raw_ffmpeg_output=stream.raw_ffmpeg_output,
-            extracted_metadata=stream.extracted_metadata
-        )
-        streams.append(stream_validation)
-    return render_template('analysis.html', streams=streams)
+    return render_template('analysis.html', streams=streams_from_db)
 
 
-@analysys_bp.route('/analyze', methods=['POST'])
+@analysis_bp.route('/analyze', methods=['POST'])
 def analyze_url():
     """Analyze a stream URL and show results."""
     url = request.form.get('url')
     
     if not url:
         flash('URL is required', 'error')
-        return redirect(url_for('analysys.index'))
+        return redirect(url_for('analysis.index'))
     
     try:
         analysis_service: StreamAnalysisService = get_stream_analysis_service()
@@ -122,10 +105,10 @@ def analyze_url():
     except Exception as e:
         flash(f'Analysis failed: {str(e)}', 'error')
     
-    return redirect(url_for('analysys.index'))
+    return redirect(url_for('analysis.index'))
 
 
-@analysys_bp.route('/approve/<int:id>', methods=['POST'])
+@analysis_bp.route('/approve/<int:id>', methods=['POST'])
 def approve_analysis(id: int):
     """Approve an analysis and creates a proposal."""
     
@@ -139,10 +122,10 @@ def approve_analysis(id: int):
     except Exception as e:
         flash(f'Error approving stream analysis: {str(e)}', 'error')
 
-    return redirect(url_for('proposal.index', proposal_id=id))
+    return redirect(url_for('proposal.propose'))
 
 
-@analysys_bp.route('/delete/<int:id>', methods=['POST'])
+@analysis_bp.route('/delete/<int:id>', methods=['POST'])
 def delete_analysis(id: int):
     """Delete an analysis."""
     analysis_service: StreamAnalysisService = get_stream_analysis_service()
@@ -155,4 +138,4 @@ def delete_analysis(id: int):
             flash('Failed to delete stream analysis', 'error')
     except Exception as e:
         flash(f'Error deleting stream analysis: {str(e)}', 'error')
-    return redirect(url_for('analysys.index'))
+    return redirect(url_for('analysis.index'))

@@ -408,40 +408,67 @@ class StreamAnalysisService:
         else:
             return "None"
         
-    def save_analysis_as_proposal(self, stream: StreamAnalysisResult) -> bool:
+    def save_analysis_as_proposal(self, stream_or_id) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
+
+        Accepts either a `StreamAnalysisResult`/entity-like object or an integer id.
+        Returns True on successful creation, False otherwise.
         """
-        if not stream or not stream.is_valid:
-            print("Cannot create proposal for invalid or None stream analysis.")
+        # Resolve input to an analysis entity/object
+        stream_entity = None
+        if isinstance(stream_or_id, int):
+            stream_entity = self.analysis_repository.find_by_id(stream_or_id)
+        else:
+            # Assume stream_or_id is a DTO-like object with attributes
+            stream_entity = stream_or_id
+
+        if not stream_entity:
+            print("Cannot create proposal: analysis not found or invalid input.")
             return False
 
-        # Implementation of proposal creation goes here 
-        proposal: Proposal = Proposal(
-            id=0,  # to be assigned by repository
-            stream_url=stream.stream_url,
+        # Determine required fields
+        stream_url = getattr(stream_entity, 'stream_url', None)
+        stream_type_id = getattr(stream_entity, 'stream_type_id', None)
+        is_secure = getattr(stream_entity, 'is_secure', False)
+        is_valid = getattr(stream_entity, 'is_valid', True)
+
+        if not is_valid or not stream_url or not stream_type_id:
+            print("Cannot create proposal for invalid analysis or missing data.")
+            return False
+
+        proposal = Proposal(
+            stream_url=stream_url,
             name="",
             website_url=None,
             country=None,
             description=None,
             image_url=None,
-            stream_type_id=stream.stream_type_id,
-            is_secure=stream.is_secure
+            stream_type_id=stream_type_id,
+            is_secure=is_secure
         )
-        # Save proposal to repository
-        self.proposal_repository.save(proposal=proposal)
-        print("Proposal created for stream URL: {}".format(stream.stream_url))  
-        return True
-    
 
-    def delete_analysis(self, stream: StreamAnalysisResult) -> bool:
+        # Save proposal to repository
+        try:
+            self.proposal_repository.save(proposal)
+            print("Proposal created for stream URL: {}".format(stream_url))
+            return True
+        except Exception as e:
+            print(f"Failed to save proposal: {e}")
+            return False
+
+    def delete_analysis(self, stream_or_id) -> bool:
         """
-        Delete a proposal associated with the given stream URL.
-        
-        Returns:
-            True if deletion was successful, False otherwise.
+        Delete a StreamAnalysis by id or by object.
+
+        Returns True if deletion was successful, False otherwise.
         """
-        existing_analysis: StreamAnalysis = self.analysis_repository.find_by_id(stream.id)
-        if existing_analysis:
-            return self.analysis_repository.delete(existing_analysis.id)
+        if isinstance(stream_or_id, int):
+            return self.analysis_repository.delete(stream_or_id)
+
+        # If an object provided, try to get id
+        stream_id = getattr(stream_or_id, 'id', None)
+        if stream_id:
+            return self.analysis_repository.delete(stream_id)
+
         return False

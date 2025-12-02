@@ -22,7 +22,7 @@
 
     <main class="container mt-4">
         <h1>Analyze a New Radio Stream</h1>
-        <form method="post" action="{{ url_for('analysys.analyze_url') }}">
+        <form method="post" action="{{ url_for('analysis.analyze_url') }}">
             <div class="mb-3">
                 <label for="url" class="form-label">Stream URL</label>
                 <input type="url" class="form-control" id="url" name="url" required>
@@ -56,13 +56,17 @@
                 <tr>
                     <td>{{ stream.stream_url }}</td>
                     <td>{{ stream.detection_method }}</td>
-                    <td>{{ stream.extracted_metadata }}</td>
+                    <td style="white-space: pre-wrap;">{{ stream.extracted_metadata }}</td>
                         </td>
                     <td>
-                        <a href="{{ url_for('analysis.delete', id=stream.id) }}" class="btn btn-danger btn-sm">Delete analysis</a>
+                        <form method="post" action="{{ url_for('analysis.delete_analysis', id=stream.id) }}" style="display:inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
                     </td>
                     <td>
-                        <a href="{{ url_for('analysis.propose', id=stream.id) }}" class="btn btn-danger btn-sm">Save analysis as proposal</a>
+                        <form method="post" action="{{ url_for('analysis.approve_analysis', id=stream.id) }}" style="display:inline">
+                            <button type="submit" class="btn btn-primary btn-sm">Propose</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
