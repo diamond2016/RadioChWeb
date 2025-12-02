@@ -14,7 +14,7 @@
                 <div class="navbar-nav">
                     <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
                     <a class="nav-link" href="{{ url_for('analysis.index') }}">Analyze Stream</a>
-                    <a class="nav-link" href="{{ url_for('database.list_proposals') }}">View Proposals</a>
+                    <a class="nav-link" href="{{ url_for('proposal.index') }}">View Proposals</a>
                     <a class="nav-link" href="{{ url_for('database.database_management') }}">Database</a>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                         <p class="card-text">{{ source.description or 'No description available' }}</p>
                         <p><strong>Type:</strong> {{ source.stream_type.name if source.stream_type else 'Unknown' }}</p>
                         <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-primary">View Details</a>
-                        <a href="{{ source.url }}" target="_blank" class="btn btn-secondary">Listen</a>
+                        <a href="{{ source.stream_url }}" target="_blank" class="btn btn-secondary">Listen</a>
                     </div>
                 </div>
             </div>

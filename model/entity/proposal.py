@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from database import db
 
 class Proposal(db.Model):
@@ -17,6 +18,9 @@ class Proposal(db.Model):
     description = db.Column(db.Text)
     image_url = db.Column(db.String(500))
 
+    # Timestamps
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    
     # Relationship
     stream_type = db.relationship("StreamType", back_populates="proposals")
     

@@ -5,6 +5,7 @@ This service implements the dual validation strategy (curl + ffmpeg) and
 classification logic as defined in the specification.
 """
 
+from datetime import date
 import subprocess
 import re
 import shutil
@@ -445,7 +446,8 @@ class StreamAnalysisService:
             description=None,
             image_url=None,
             stream_type_id=stream_type_id,
-            is_secure=is_secure
+            is_secure=is_secure,
+            created_at=date.today(),
         )
 
         # Save proposal to repository

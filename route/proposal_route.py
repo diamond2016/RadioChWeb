@@ -4,7 +4,7 @@ Implements spec 002: validate-and-add-radio-source.
 """
 
 from typing import List
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash
 
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
@@ -48,6 +48,7 @@ def index():
 
     # Get all proposals for display (pass entity objects so templates can access id)
     proposals_from_db: List[Proposal] = proposal_repo.find_all()
+    print(f"Loaded {len(proposals_from_db)} proposals from database for display.")
     return render_template('proposals.html', proposals=proposals_from_db)
 
 
