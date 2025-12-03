@@ -9,6 +9,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
+from model.dto.validation import ProposalUpdateRequest
 
 
 proposal_bp = Blueprint('proposal', __name__)
@@ -39,6 +40,12 @@ def get_stream_type_service():
     stream_type_repo = get_stream_type_repo()
     from service.stream_type_service import StreamTypeService
     return StreamTypeService(stream_type_repo)
+
+
+def get_proposal_service():
+    proposal_repo = get_proposal_repo()
+    from service.proposal_service import ProposalService
+    return ProposalService(proposal_repo)
 
 
 @proposal_bp.route('/', methods=['GET'])
@@ -94,7 +101,29 @@ def propose():
 @proposal_bp.route('/proposal/<int:proposal_id>', methods=['GET', 'POST'])
 def proposal_detail(proposal_id):
     if request.method == 'POST':
-        pass #here to be inserted edit functionality of a proposal
+        # Read form values and delegate update to ProposalService
+        name = request.form.get('name')
+        website_url = request.form.get('website_url')
+        country = request.form.get('country')
+        description = request.form.get('description')
+        image = request.form.get('image')
+
+        update_dto = ProposalUpdateRequest(
+            name=name,
+            website_url=website_url,
+            country=country,
+            description=description,
+            image=image
+        )
+
+        proposal_service = get_proposal_service()
+        try:
+            proposal_service.update_proposal(proposal_id, update_dto)
+            flash('Proposal updated successfully', 'success')
+        except Exception as e:
+            flash(f'Failed to update proposal: {str(e)}', 'error')
+
+        return redirect(url_for('proposal.index'))
 
     """Display proposal details and validation status."""
     proposal_repo = get_proposal_repo()

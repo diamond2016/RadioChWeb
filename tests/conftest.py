@@ -24,6 +24,10 @@ def test_app():
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Required for session/flash in tests
+    app.secret_key = 'test-secret'
+    # Disable CSRF in tests for simplicity (we assert behavior, not CSRF infra)
+    app.config['WTF_CSRF_ENABLED'] = False
 
     db.init_app(app)
 
@@ -67,6 +71,12 @@ def sample_urls():
 
 def _initialize_stream_types():
     """Initialize stream types in test database."""
+    # Ensure related entity classes are imported so SQLAlchemy can configure relationships
+    try:
+        from model.entity.stream_analysis import StreamAnalysis  # noqa: F401
+    except Exception:
+        # If stream_analysis is not present, proceed; relationships will be resolved later
+        pass
     stream_types_data = [
         {"protocol": "HTTP", "format": "MP3", "metadata_type": "Icecast", "display_name": "HTTP MP3 Icecast"},
         {"protocol": "HTTP", "format": "MP3", "metadata_type": "Shoutcast", "display_name": "HTTP MP3 Shoutcast"},
