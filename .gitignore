@@ -103,7 +103,7 @@ instance/
 *.swp
 
 # Docs not to be committed
-RadioCh/
+work/
 docs/_build/
 work-in-progress.md
 test_*.md
