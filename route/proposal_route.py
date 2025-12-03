@@ -6,6 +6,7 @@ Implements spec 002: validate-and-add-radio-source.
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
+from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
@@ -142,7 +143,7 @@ def approve_proposal(proposal_id):
     radio_source_service = get_radio_source_service()
     
     try:
-        success = radio_source_service.convert_proposal_to_source(proposal_id)
+        success: RadioSource = radio_source_service.save_from_proposal(proposal_id)
         if success:
             flash('Proposal approved and added as radio source!', 'success')
         else:
