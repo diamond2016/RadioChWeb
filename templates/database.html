@@ -12,8 +12,7 @@
             <div class="container">
                 <a class="navbar-brand" href="/">RadioChWeb</a>
                 <div class="navbar-nav">
-                    <a class="nav-link" href="{{ url_for('proposal.propose') }}">Propose Stream</a>
-                    <a class="nav-link" href="{{ url_for('database.list_proposals') }}">Manage Sources</a>
+                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Manage Sources</a>
                     <a class="nav-link" href="{{ url_for('database.index') }}">Database</a>
                 </div>
             </div>
@@ -25,9 +24,6 @@
         <ul class="nav nav-tabs" id="dbTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="stream-types-tab" data-bs-toggle="tab" data-bs-target="#stream-types" type="button" role="tab">Stream Types</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="proposals-tab" data-bs-toggle="tab" data-bs-target="#proposals" type="button" role="tab">Proposals</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="radio-sources-tab" data-bs-toggle="tab" data-bs-target="#radio-sources" type="button" role="tab">Radio Sources</button>
@@ -56,30 +52,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="tab-pane fade" id="proposals" role="tabpanel">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>URL</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in proposals %}
-                        <tr>
-                            <td>{{ p.id }}</td>
-                            <td>{{ p.url }}</td>
-                            <td>{{ p.status }}</td>
-                            <td>
-                                <a href="/database_proposal_delete/{{ p.id }}" class="btn btn-danger btn-sm">Delete</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+  
             <div class="tab-pane fade" id="radio-sources" role="tabpanel">
                 <table class="table">
                     <thead>
@@ -97,7 +70,10 @@
                             <td>{{ rs.name }}</td>
                             <td>{{ rs.stream_url }}</td>
                             <td>
-                                <a href="/database_radio_source_delete/{{ rs.id }}" class="btn btn-danger btn-sm">Delete</a>
+                                <form method="post" action="{{ url_for('radio_source.delete_source', source_id=rs.id) }}" style="display:inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

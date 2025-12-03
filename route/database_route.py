@@ -93,16 +93,3 @@ def get_stats():
         'total_stream_types': stream_type_count
     })
 
-
-@database_bp.route('/api/stream-types')
-def get_stream_types():
-    """API endpoint to get all stream types."""
-    stream_type_repo = get_stream_type_repo()
-    stream_types = stream_type_repo.find_all()
-    return jsonify([{
-        'id': st.id,
-        'name': st.display_name,
-        'protocol': st.protocol,
-        'format': st.format,
-        'metadata_type': st.metadata_type
-    } for st in stream_types])
