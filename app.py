@@ -29,12 +29,14 @@ from route.database_route import database_bp
 from route.analysis_route import analysis_bp
 from route.proposal_route import proposal_bp
 from route.radio_source_route import radio_source_bp
+from route.listen_route import listen_bp
 
 app.register_blueprint(blueprint=main_bp)
 app.register_blueprint(blueprint=database_bp)
-app.register_blueprint(blueprint=analysis_bp, url_prefix='/analysis')
-app.register_blueprint(blueprint=proposal_bp, url_prefix='/proposal')
-app.register_blueprint(blueprint=radio_source_bp, url_prefix='/source')
+app.register_blueprint(blueprint=analysis_bp)
+app.register_blueprint(blueprint=proposal_bp)
+app.register_blueprint(blueprint=radio_source_bp)
+app.register_blueprint(blueprint=listen_bp)
 
 # Db is created only by pyway migrations
 

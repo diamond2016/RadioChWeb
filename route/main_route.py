@@ -3,7 +3,7 @@ from flask import Blueprint, render_template
 
 from model.repository.radio_source_repository import RadioSourceRepository
 
-main_bp = Blueprint('main', __name__)
+main_bp = Blueprint('main', __name__, url_prefix='/')
 
 # Repository initialization functions
 def get_radio_source_repo():

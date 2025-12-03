@@ -16,7 +16,7 @@ from service.stream_analysis_service import StreamAnalysisService
 from service.stream_type_service import StreamTypeService
 
 
-analysis_bp = Blueprint('analysis', __name__)
+analysis_bp = Blueprint('analysis', __name__, url_prefix='/analysis')
 
 # Repository and service initialization functions
 def get_analysis_repo() -> StreamAnalysisRepository:

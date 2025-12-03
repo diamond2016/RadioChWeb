@@ -9,7 +9,7 @@ from model.repository.stream_type_repository import StreamTypeRepository
 from model.repository.proposal_repository import ProposalRepository
 from database import db
 
-database_bp = Blueprint('database', __name__)
+database_bp = Blueprint('database', __name__, url_prefix='/database')
 
 # Repository initialization functions
 def get_radio_source_repo():

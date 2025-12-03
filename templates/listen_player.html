@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Listen - {{ source.name or 'Radio' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; height:100vh; background:#f8f9fa; }
+    .player { max-width:720px; width:100%; padding:1.5rem; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; }
+    .stream-url { word-break:break-all; font-size:.9rem; color:#6c757d; margin-top:.5rem; }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <h5 class="mb-3">{{ source.name or 'Live Stream' }}</h5>
+
+    <!-- native audio control; browser decides codec support -->
+    <audio id="streamPlayer" controls preload="none" style="width:100%;">
+      <source src="{{ source.stream_url }}" type="audio/mpeg">
+      <!-- add additional source types if you know them -->
+      Your browser does not support the audio element.
+    </audio>
+
+    <div class="stream-url mt-3">
+      <small>Stream: <a href="{{ source.stream_url }}" target="_blank" rel="noopener noreferrer">{{ source.stream_url }}</a></small>
+    </div>
+    <div class="stream-type mt-2">
+      <small>Type: {{ source.stream_type.display_name if source.stream_type else 'Unknown' }}</small>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-sm btn-outline-secondary" onclick="window.close()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Autoplay often blocked: optional attempt (muted first if desired)
+    const audio = document.getElementById('streamPlayer');
+    // Try autoplay if you want (may be blocked by browser):
+    // audio.play().catch(()=>{/* user gesture required */});
+  </script>
+</body>
+</html>

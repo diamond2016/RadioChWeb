@@ -4,16 +4,14 @@ Provides CRUD operations for radio sources.
 """
 
 from typing import List
-from flask import Blueprint, Response, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, request,render_template, redirect, url_for, flash
 from model.entity.stream_type import StreamType
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.radio_source_service import RadioSourceService
-from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
-from model.entity.radio_source import RadioSource
 from database import db
 
-radio_source_bp = Blueprint('radio_source', __name__)
+radio_source_bp = Blueprint('radio_source', __name__, url_prefix='/source')
 
 # Repository and service initialization functions
 def get_radio_source_repo() -> RadioSourceRepository:

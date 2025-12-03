@@ -14,7 +14,7 @@ from model.dto.validation import ProposalUpdateRequest
 from service.proposal_service import ProposalService
 
 
-proposal_bp = Blueprint('proposal', __name__)
+proposal_bp = Blueprint('proposal', __name__, url_prefix='/proposal')
 
 
 def get_proposal_repo():

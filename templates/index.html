@@ -32,9 +32,12 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ source.name }}</h5>
                         <p class="card-text">{{ source.description or 'No description available' }}</p>
-                        <p><strong>Type:</strong> {{ source.stream_type.name if source.stream_type else 'Unknown' }}</p>
+                        <a href="{{ source.website_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm">{{ source.website_url }}</a>
                         <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-primary">View Details</a>
-                        <a href="{{ source.stream_url }}" target="_blank" class="btn btn-secondary">Listen</a>
+                        <!-- listen page -->
+                        <a href="{{ url_for('listen.player', source_id=source.id) }}"
+                        onclick="openStreamWindow(event, '{{ url_for('listen.player', source_id=source.id) }}', 720, 480)"
+                        class="btn btn-secondary">Listen</a>
                     </div>
                 </div>
             </div>
@@ -47,5 +50,15 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function openStreamWindow(evt, url, w = 700, h = 480) {
+        evt.preventDefault();
+        const left = Math.max(0, Math.round((screen.width - w) / 2));
+        const top = Math.max(0, Math.round((screen.height - h) / 2));
+        const features = `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+        window.open(url, 'streamPlayerWindow', features);
+        return false;
+    }
+</script>
 </body>
 </html>
