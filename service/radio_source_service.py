@@ -92,17 +92,6 @@ class RadioSourceService:
         except Exception as e:
             raise RuntimeError(f"Failed to save radio source: {str(e)}")
     
-    def reject_proposal(self, proposal_id: int) -> bool:
-        """
-        Reject and delete a proposal.
-        
-        Args:
-            proposal_id: ID of the proposal to reject
-            
-        Returns:
-            True if successfully deleted, False if proposal not found
-        """
-        return self.proposal_repo.delete(proposal_id)
     
     def update_proposal(self, proposal_id: int, updates: ProposalUpdateRequest) -> Proposal:
         """
@@ -149,6 +138,7 @@ class RadioSourceService:
         # Save and return updated proposal
         return self.proposal_repo.save(proposal)
     
+
     def get_proposal(self, proposal_id: int) -> Optional[Proposal]:
         """
         Get a proposal by ID.
@@ -161,6 +151,7 @@ class RadioSourceService:
         """
         return self.proposal_repo.find_by_id(proposal_id)
     
+
     def get_all_proposals(self) -> list[Proposal]:
         """
         Get all proposals.
@@ -170,6 +161,7 @@ class RadioSourceService:
         """
         return self.proposal_repo.get_all_proposals()
     
+
     def get_all_radio_sources(self) -> list[RadioSource]:
         """
         Get all radio sources.
@@ -178,3 +170,9 @@ class RadioSourceService:
             List of all radio sources
         """
         return self.radio_source_repo.find_all()
+
+    def delete_radio_source(self, id) -> bool:
+        """ delete a radio source"""
+        if id:
+            return self.radio_source_repo.delete(id)
+        return False

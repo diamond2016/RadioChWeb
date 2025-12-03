@@ -11,6 +11,7 @@ from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
 from model.dto.validation import ProposalUpdateRequest
+from service.proposal_service import ProposalService
 
 
 proposal_bp = Blueprint('proposal', __name__)
@@ -56,7 +57,6 @@ def index():
 
     # Get all proposals for display (pass entity objects so templates can access id)
     proposals_from_db: List[Proposal] = proposal_repo.find_all()
-    print(f"Loaded {len(proposals_from_db)} proposals from database for display.")
     return render_template('proposals.html', proposals=proposals_from_db)
 
 
@@ -95,11 +95,11 @@ def propose():
             flash(f'Error submitting proposal: {str(e)}', 'error')
 
         # After proposing or when visiting this endpoint, show the proposals listing
-        return redirect(url_for('database.list_proposals'))
+        return redirect(url_for('proposal.index'))
 
 
 
-@proposal_bp.route('/proposal/<int:proposal_id>', methods=['GET', 'POST'])
+@proposal_bp.route('/update/<int:proposal_id>', methods=['GET', 'POST'])
 def proposal_detail(proposal_id):
     if request.method == 'POST':
         # Read form values and delegate update to ProposalService
@@ -117,7 +117,7 @@ def proposal_detail(proposal_id):
             image=image
         )
 
-        proposal_service = get_proposal_service()
+        proposal_service: ProposalService = get_proposal_service()
         try:
             proposal_service.update_proposal(proposal_id, update_dto)
             flash('Proposal updated successfully', 'success')
@@ -137,7 +137,7 @@ def proposal_detail(proposal_id):
     return render_template('proposal_detail.html',proposal=proposal)
 
 
-@proposal_bp.route('/proposal/approve/<int:proposal_id>', methods=['POST'])
+@proposal_bp.route('/approve/<int:proposal_id>', methods=['POST'])
 def approve_proposal(proposal_id):
     """Approve and convert proposal to radio source."""
     radio_source_service = get_radio_source_service()
@@ -151,4 +151,4 @@ def approve_proposal(proposal_id):
     except Exception as e:
         flash(f'Error approving proposal: {str(e)}', 'error')
 
-    return redirect(url_for('main.index'))
+    return redirect(url_for('proposal.index'))

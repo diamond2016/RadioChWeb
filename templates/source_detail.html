@@ -10,11 +10,9 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{{ url_for('database.index') }}">RadioChWeb</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">RadioChWeb</a>
                 <div class="navbar-nav">
-                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
-                    <a class="nav-link" href="{{ url_for('proposal.propose') }}">Propose Stream</a>
-                    <a class="nav-link" href="{{ url_for('database.list_proposals') }}">View Proposals</a>
+                    <a class="nav-link" href="{{ url_for('proposal.index') }}">View Proposals</a>
                 </div>
             </div>
         </nav>
@@ -29,7 +27,7 @@
                     <div class="card-body">
                         <p><strong>URL:</strong> <a href="{{ source.stream_url }}" target="_blank">{{ source.stream_url }}</a></p>
                         <p><strong>Description:</strong> {{ source.description or 'No description available' }}</p>
-                        <p><strong>Type:</strong> {{ source.stream_type.name if source.stream_type else 'Unknown' }}</p>
+                        <p><strong>Type:</strong> {{ source.stream_type.display_name if source.stream_type else 'Unknown' }}</p>
                         <p><strong>Added:</strong> {{ source.created_at.strftime('%Y-%m-%d %H:%M') if source.created_at else 'Unknown' }}</p>
                         {% if source.updated_at %}
                             <p><strong>Last Updated:</strong> {{ source.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
@@ -39,30 +37,19 @@
                         <a href="{{ source.stream_url }}" target="_blank" class="btn btn-primary">Listen Now</a>
                         <a href="{{ url_for('radio_source.edit_source', source_id=source.id) }}" class="btn btn-warning">Edit</a>
                         <form method="post" action="{{ url_for('radio_source.delete_source', source_id=source.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this source?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h6>Quick Actions</h6>
-                    </div>
-                    <div class="card-body">
-                        <a href="{{ url_for('database.list_sources') }}" class="btn btn-primary w-100 mb-2">Browse All Sources</a>
-                        <a href="{{ url_for('proposal.propose') }}" class="btn btn-outline-primary w-100 mb-2">Propose New Source</a>
-                        <a href="{{ url_for('database.list_proposals') }}" class="btn btn-outline-secondary w-100">View Proposals</a>
-                    </div>
-                </div>
-
                 <div class="card mt-3">
                     <div class="card-header">
                         <h6>Stream Information</h6>
                     </div>
                     <div class="card-body">
-                        <p><strong>Stream Type:</strong> {{ source.stream_type.name if source.stream_type else 'Unknown' }}</p>
+                        <p><strong>Stream Type:</strong> {{ source.stream_type.display_name if source.stream_type else 'Unknown' }}</p>
                         <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
                     </div>
                 </div>
