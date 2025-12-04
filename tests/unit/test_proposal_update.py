@@ -23,12 +23,17 @@ def test_update_proposal_post(test_app, test_db):
         'website_url': 'https://new.example.com',
         'country': 'Italy',
         'description': 'New description',
-        'image': 'https://new.example.com/img.png'
+        'image_url': 'https://new.example.com/img.png'
     }
 
     # Register blueprint so url_for('proposal.index') resolves during the view
     from route.proposal_route import proposal_bp
-    test_app.register_blueprint(proposal_bp)
+    
+    # Register blueprint so url_for('proposal.index') resolves during the view
+    from route.proposal_route import proposal_bp
+    # register only if not present to avoid "register_blueprint after first request" errors
+    if proposal_bp.name not in test_app.blueprints:
+        test_app.register_blueprint(proposal_bp)
 
     # Call the view function within a request context
     with test_app.test_request_context(f'/proposal/{proposal.id}', method='POST', data=data):

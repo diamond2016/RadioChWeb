@@ -346,7 +346,15 @@ python migrate.py migrate
 
 ---
 
-**Last Updated**: November 25, 2025
-**Python Version**: 3.12+
-**Test Coverage**: 44 tests passing (unit + integration)
-**Status**: Active Development - Spec 002 Complete
+**Last Updated**: December 4, 2025
+**Python Version**: 3.14+
+**Test Coverage**: multiple unit & integration tests (see `tests/`) — smoke auth pages test added
+**Status**: Active Development - Auth + Migrations integrated
+
+### Recent Updates (Dec 4, 2025)
+- Added authentication layer: `User` model, `UserRepository`, `AuthService` (passlib + pbkdf2_sha256 default, bcrypt available), and `auth` blueprint with login/register/change-password/logout flows.
+- Authentication uses **email** as the canonical identity key (username field removed).
+- Templates updated: `index.html` now exposes a `{% block content %}` to allow auth and other pages to render inside the main layout; login/register templates stored under `templates/user/`.
+- Migrations: runner `migrate_db/migrate.py` now prefers the `pyway` CLI (`pyway migrate`) for applying migrations and will fall back to direct SQL application if pyway is unavailable. The project `pyway.yaml` configures the `pyway` metadata table in the SQLite DB.
+- Tests: integration smoke test `tests/integration/test_smoke_auth_pages.py` added to verify auth pages render within site layout.
+

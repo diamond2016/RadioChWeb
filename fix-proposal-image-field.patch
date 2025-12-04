@@ -1,0 +1,7 @@
+diff --git a/route/proposal_route.py b/route/proposal_route.py
+--- a/route/proposal_route.py
++++ b/route/proposal_route.py
+@@
+-        image = request.form.get('image')
++        # Accept either 'image' (form) or 'image_url' (tests/clients)
++        image = request.form.get('image') or request.form.get('image_url')

@@ -16,12 +16,30 @@
                     <a class="nav-link" href="{{ url_for('analysis.index') }}">Analyze Stream</a>
                     <a class="nav-link" href="{{ url_for('proposal.index') }}">View Proposals</a>
                     <a class="nav-link" href="{{ url_for('database.index') }}">Database</a>
+                    {% if current_user.is_authenticated %}
+                    <a class="nav-link" href="#">Signed in as {{ current_user.email }}</a>
+                    <a class="nav-link me-2" href="{{ url_for('auth.change_password') }}">Change password</a>
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                    {% else %}
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>
     </header>
 
     <main class="container mt-4">
+        {% block content %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-2">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category=='success' else 'danger' }}" role="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <h1>Welcome to RadioChWeb</h1>
         <p>Discover and enjoy radio streams.</p>
         <div class="row">
@@ -43,6 +61,7 @@
             </div>
             {% endfor %}
         </div>
+        {% endblock %}
     </main>
 
     <footer class="bg-dark text-white text-center py-3 mt-4">

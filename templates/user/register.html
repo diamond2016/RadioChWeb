@@ -1,0 +1,49 @@
+{% extends "index.html" %}
+{% block content %}
+<main class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Create account</h4>
+          <form method="post" action="{{ url_for('auth.register') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.email.label(class="form-label") }}
+              {{ form.email(class="form-control", placeholder="you@example.com") }}
+              {% if form.email.errors %}
+                <div class="text-danger small mt-1">{{ form.email.errors[0] }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.password.label(class="form-label") }}
+              {{ form.password(class="form-control", placeholder="Password") }}
+              {% if form.password.errors %}
+                <div class="text-danger small mt-1">{{ form.password.errors[0] }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.confirm.label(class="form-label") }}
+              {{ form.confirm(class="form-control", placeholder="Confirm password") }}
+              {% if form.confirm.errors %}
+                <div class="text-danger small mt-1">{{ form.confirm.errors[0] }}</div>
+              {% endif %}
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <small>Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></small>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
