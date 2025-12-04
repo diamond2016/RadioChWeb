@@ -176,3 +176,40 @@ class RadioSourceService:
         if id:
             return self.radio_source_repo.delete(id)
         return False
+    
+
+    def reject_proposal(self, proposal_id: int) -> bool:
+        """
+        Reject (delete) a proposal by id.
+
+        Returns True if deletion succeeded, False otherwise.
+        This method is defensive about repository method names to preserve backward compatibility.
+        """
+        try:
+            # preferred repo API
+            if hasattr(self.proposal_repo, "delete_by_id"):
+                return bool(self.proposal_repo.delete_by_id(proposal_id))
+
+            # alternate common name
+            if hasattr(self.proposal_repo, "delete"):
+                return bool(self.proposal_repo.delete(proposal_id))
+
+            # fallback: load entity and try repository delete_entity or session
+            finder = getattr(self.proposal_repo, "find_by_id", None)
+            if callable(finder):
+                prop: Proposal = finder(proposal_id)
+                if prop is None:
+                    return False
+                if hasattr(self.proposal_repo, "delete_entity"):
+                    return bool(self.proposal_repo.delete_entity(prop))
+                session = getattr(self.proposal_repo, "session", None)
+                if session is not None:
+                    session.delete(prop)
+                    session.commit()
+                    return True
+
+            # no supported API found
+            return False
+        except Exception:
+            return False
+
