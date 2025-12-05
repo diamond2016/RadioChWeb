@@ -18,6 +18,7 @@ from model.repository.radio_source_repository import RadioSourceRepository
 from service.proposal_validation_service import ProposalValidationService
 from service.radio_source_service import RadioSourceService
 from model.dto.validation import ProposalUpdateRequest
+from tests.conftest import login_helper, test_app, test_user
 
 
 class TestValidateAndAddWorkflow:
@@ -59,6 +60,7 @@ class TestValidateAndAddWorkflow:
             country="Italy",
             description="A test radio station",
             image_url="test.jpg",
+            proposal_user=test_user
         )
         db_session.add(proposal)
         db_session.commit()
@@ -110,6 +112,7 @@ class TestValidateAndAddWorkflow:
             website_url="https://second.com",
             stream_type_id=1,
             is_secure=True,
+            proposal_user=test_user
         )
         db_session.add(proposal2)
         db_session.commit()
@@ -132,6 +135,7 @@ class TestValidateAndAddWorkflow:
             website_url="https://reject.com",
             stream_type_id=1,
             is_secure=True,
+            proposal_user=test_user
         )
         db_session.add(proposal)
         db_session.commit()
@@ -147,19 +151,22 @@ class TestValidateAndAddWorkflow:
     def test_proposal_update_workflow(self, db_session, services):
         """Test updating proposal data."""
         _, radio_source_service = services
+        with test_app.test_client() as client:
+            login_helper(client)    
 
-        # Create a proposal
-        proposal = Proposal(
-            stream_url="https://update.example.com/stream.mp3",
-            name="Original Name",
-            website_url="https://original.com",
-            stream_type_id=1,
-            is_secure=True,
-            country="Original Country",
-            description="Original description",
-        )
-        db_session.add(proposal)
-        db_session.commit()
+            # Create a proposal
+            proposal = Proposal(
+                stream_url="https://update.example.com/stream.mp3",
+                name="Original Name",
+                website_url="https://original.com",
+                stream_type_id=1,
+                is_secure=True,
+                country="Original Country",
+                description="Original description",
+                proposal_user=client
+            )
+            db_session.add(proposal)
+            db_session.commit()
 
         # Update the proposal
         update_request = ProposalUpdateRequest(
@@ -192,6 +199,7 @@ class TestValidateAndAddWorkflow:
             website_url="https://test.com",
             stream_type_id=1,
             is_secure=True,
+            proposal_user=test_user
         )
         db_session.add(proposal)
         db_session.commit()
@@ -212,6 +220,7 @@ class TestValidateAndAddWorkflow:
             website_url="https://insecure.com",
             stream_type_id=1,
             is_secure=False,
+            proposal_user=test_user
         )
         db_session.add(proposal)
         db_session.commit()

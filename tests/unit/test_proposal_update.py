@@ -1,21 +1,26 @@
 from model.entity.proposal import Proposal
 
 
-def test_update_proposal_post(test_app, test_db):
-    # Create a proposal in the test DB
-    proposal = Proposal(
-        stream_url="https://stream.example.com/test",
-        name="Old Name",
-        website_url="https://old.example.com",
-        stream_type_id=1,
-        is_secure=False,
-        country="OldCountry",
-        description="Old description",
-        image_url="https://old.example.com/img.png",
-    )
-    test_db.add(proposal)
-    test_db.commit()
-    test_db.refresh(proposal)
+def test_update_proposal_post(test_app, test_db, login_helper):
+    
+    with test_app.test_client() as client:
+        login_helper(client)       # logs test_user into this client
+
+        # Create a proposal in the test DB
+        proposal = Proposal(
+            stream_url="https://stream.example.com/test",
+            name="Old Name",
+            website_url="https://old.example.com",
+            stream_type_id=1,
+            is_secure=False,
+            country="OldCountry",
+            description="Old description",
+            image_url="https://old.example.com/img.png",
+            proposal_user=client
+        )
+        test_db.add(proposal)
+        test_db.commit()
+        test_db.refresh(proposal)
 
     # Prepare updated data
     data = {

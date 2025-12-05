@@ -2,18 +2,20 @@
 Test configuration and fixtures for RadioChWeb tests.
 """
 
+from flask_login import login_user
 import pytest
 import sys
 from pathlib import Path
 from flask import Flask
 from unittest.mock import Mock
 
+
 # Add current directory to Python path for tests
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from database import db
 from model.entity.stream_type import StreamType
-
+from route.auth_route import login
 
 @pytest.fixture(scope="session")
 def test_app():
@@ -70,6 +72,45 @@ def sample_urls():
         "hls_playlist": "https://stream.example.com/playlist.m3u8",
     }
 
+@pytest.fixture
+def test_user(test_db):
+    """Create a test user with role 'user'."""
+    from model.entity.user import User  # Assuming User model is in model.entity.user
+    user = User(email="testuser@example.com", hash_password="hashed_password1", role="user")  # Adjust fields as per User model
+    test_db.add(user)
+    test_db.commit()
+    return user
+
+
+@pytest.fixture
+def admin_user(test_db):
+    """Create an admin user with role 'admin'."""
+    from model.entity.user import User  # Assuming User model is in model.entity.user
+    user = User(email="adminuser@example.com", hash_password="hashed_password2", role="admin")  # Adjust fields as per User model
+    test_db.add(user)
+    test_db.commit()
+    return user
+
+# role="user" login helper
+@pytest.fixture
+def login_helper(test_app, test_user):
+    """Return a helper that logs test_user into a test_client by setting session keys."""
+    def login(client):
+        # client is a Flask test_client instance
+        with client.session_transaction() as sess:
+            sess['_user_id'] = str(test_user.id)
+            sess['_fresh'] = True
+    return login
+
+# role="admin" login helper
+@pytest.fixture
+def login_admin_helper(test_app, admin_user):
+    """Return a helper that logs admin_user into a test_client by setting session keys."""
+    def login(client):
+        with client.session_transaction() as sess:
+            sess['_user_id'] = str(admin_user.id)
+            sess['_fresh'] = True
+    return login
 
 def _initialize_stream_types():
     """Initialize stream types in test database."""
