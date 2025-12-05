@@ -17,9 +17,7 @@ def register_blueprints(app):
     for bp in (main_bp, database_bp, analysis_bp, proposal_bp, radio_source_bp, listen_bp, auth_bp):
         if bp.name not in app.blueprints:
             app.register_blueprint(bp)
-    # Initialize AuthService only if a login manager isn't already present on the app
-    if not hasattr(app, 'login_manager'):
-        AuthService(app)
+
 
 def test_smoke_auth_pages_render(test_app):
     register_blueprints(test_app)

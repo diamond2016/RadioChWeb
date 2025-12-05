@@ -25,11 +25,11 @@ def run_command(cmd: list) -> bool:
 
 
 def run_migrations():
-    """Run database migrations using pyway if available, otherwise fallback to sqlite3 SQL application.
+    """
+    Run database migrations by first attempting to use the pyway CLI, and falling back to direct SQL application if pyway is unavailable or fails.
 
-    This will prefer the pyway CLI so pyway's migration tracking table (configured in `pyway.yaml`)
-    is used. If the pyway binary cannot be executed, we fall back to applying the SQL files
-    directly (the old behavior).
+    This function always tries to apply migrations using the pyway CLI (so pyway's migration tracking table, as configured in `pyway.yaml`, is used).
+    If the pyway binary cannot be executed or the migration fails, it falls back to applying the SQL files directly (the old behavior).
     """
     print("🚀 Starting database migrations (pyway preferred)...")
 

@@ -58,7 +58,11 @@ This gives session-based auth, role checks, and a migration-ready DB model with 
 ### Further Considerations
 - Password hashing options: use Argon2id via passlib[argon2] (recommended). If Argon2 not available, use passlib[bcrypt]. Use pwd_context.verify_and_update() for lazy migration. Ensure DB field length (>= 255).
 - Session management: use Flask-Login (recommended). It integrates cleanly with Flask and simplifies current_user logic. Provide an adapter so User entity implements required attributes/methods or a lightweight wrapper.
-- Security & UX: enable CSRF on all forms, rate-limit login endpoint (simple rate limiter or use Flask-Limiter later), require email confirmation and/or password reset as next steps. For proposal edit permissions: allow only the author or admin to edit. - For delete of analysis: admin-only, as in spec.
+- Security & UX: enable CSRF on all forms, rate-limit login endpoint (simple rate limiter or use Flask-Limiter later), require email confirmation and/or password reset as next steps.
+- For proposal edit permissions: allow only the author or admin to edit.
+- For delete of analysis: admin-only, as in spec.
+- For proposal edit permissions: allow only the author or admin to edit.
+- For delete of analysis: admin-only, as in spec.
 
 - Migration & rollout: add SQL migration; deploy to staging; test registration/login flows and verify that lazy rehashing updates stored hashes. Set SECRET_KEY and any passlib salts in environment.
 

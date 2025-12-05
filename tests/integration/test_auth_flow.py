@@ -16,7 +16,8 @@ def register_blueprints_and_auth(app):
     for bp in (main_bp, database_bp, analysis_bp, proposal_bp, radio_source_bp, listen_bp, auth_bp):
         if bp.name not in app.blueprints:
             app.register_blueprint(bp)
-    AuthService(app)
+    if not hasattr(app, "login_manager"):
+        AuthService(app)
 
 
 

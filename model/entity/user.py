@@ -20,11 +20,11 @@ class User(db.Model):
         return str(self.id)
 
     @property
-    def is_authenticated(self) -> Literal[True]:
+    def is_authenticated(self) -> bool:
         return True
 
     @property
-    def is_anonymous(self) -> Literal[False]:
+    def is_anonymous(self) -> bool:
         return False
 
     def __repr__(self):

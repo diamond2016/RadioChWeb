@@ -5,7 +5,7 @@ Provides an isolated service for proposal-specific operations such as
 updating user-editable fields. This keeps proposal domain logic
 separate from the RadioSource service.
 """
-from typing import Optional
+
 from model.repository.proposal_repository import ProposalRepository
 from model.dto.validation import ProposalUpdateRequest
 from model.entity.proposal import Proposal

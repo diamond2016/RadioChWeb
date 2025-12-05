@@ -37,11 +37,7 @@
             </div>
 
             <!-- removed remember checkbox; keep small change-password link (only for logged-in users) -->
-            <div class="mb-3 text-end">
-              {% if current_user.is_authenticated %}
-                <a href="{{ url_for('auth.change_password') }}" class="small">Change password</a>
-              {% endif %}
-            </div>
+
             
             <div class="d-grid">
               <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>

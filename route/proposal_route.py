@@ -108,7 +108,7 @@ def proposal_detail(proposal_id):
         country = request.form.get('country')
         description = request.form.get('description')
         # Accept either 'image' (form) or 'image_url' (tests/clients)
-        image = request.form.get('image') or request.form.get('image_url')
+        image = request.form.get('image_url') or request.form.get('image') or None  
 
         update_dto = ProposalUpdateRequest(
             name=name,

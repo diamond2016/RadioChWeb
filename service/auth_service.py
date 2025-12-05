@@ -35,7 +35,6 @@ class AuthService:
         Verify password; return (verified, new_hash_or_none)
         new_hash_or_none is non-None when the hash should be updated (lazy upgrade)
         """
-        verified: bool = pwd_context.verify(plain, hashed)
         
         new_hash: str | None = None
         try:
