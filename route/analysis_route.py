@@ -5,6 +5,7 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 
 from typing import List
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask_login import login_required
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisResult
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
@@ -71,6 +72,8 @@ def index():
     return render_template('analysis.html', streams=streams_from_db)
 
 
+# only a registered user can analyze a stream and save as proposal
+@login_required
 @analysis_bp.route('/analyze', methods=['POST'])
 def analyze_url():
     """Analyze a stream URL and show results."""
@@ -108,6 +111,7 @@ def analyze_url():
     return redirect(url_for('analysis.index'))
 
 
+@login_required
 @analysis_bp.route('/approve/<int:id>', methods=['POST'])
 def approve_analysis(id: int):
     """Approve an analysis and creates a proposal."""
@@ -125,6 +129,7 @@ def approve_analysis(id: int):
     return redirect(url_for('proposal.index'))
 
 
+@login_required
 @analysis_bp.route('/delete/<int:id>', methods=['POST'])
 def delete_analysis(id: int):
     """Delete an analysis."""

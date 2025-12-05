@@ -76,11 +76,12 @@
                             <label class="form-label"><strong>Submitted</strong></label>
                             <input class="form-control" type="text" name="created_at" value="{{ proposal.created_at.strftime('%Y-%m-%d %H:%M') if proposal.created_at else 'Unknown' }}" readonly>
                         </div>
-
+                        {% if current_user.is_authenticated %}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Update Proposal</button>
                             <a class="btn btn-outline-secondary" href="{{ url_for('proposal.index') }}">Return to Proposals</a>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
                 </form>

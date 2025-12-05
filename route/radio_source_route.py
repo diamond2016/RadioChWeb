@@ -7,6 +7,7 @@ from typing import List
 from flask import Blueprint, request,render_template, redirect, url_for, flash
 from model.entity.stream_type import StreamType
 from model.repository.stream_type_repository import StreamTypeRepository
+from service.authorization import admin_required
 from service.radio_source_service import RadioSourceService
 from model.repository.radio_source_repository import RadioSourceRepository
 from database import db
@@ -40,6 +41,8 @@ def source_detail(source_id):
     return render_template('source_detail.html', source=source)
 
 
+# only admin users can edit or delete radio sources
+@admin_required
 @radio_source_bp.route('/edit/<int:source_id>', methods=['GET', 'POST'])
 def edit_source(source_id):
     """Edit radio source."""
@@ -71,6 +74,7 @@ def edit_source(source_id):
     return render_template('edit_source.html', source=source, stream_types=stream_types)
 
 
+@admin_required
 @radio_source_bp.route('/delete/<int:source_id>', methods=['POST'])
 def delete_source(source_id):
     """Delete radio source."""

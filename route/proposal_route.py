@@ -5,6 +5,7 @@ Implements spec 002: validate-and-add-radio-source.
 
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask_login import login_required
 
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
@@ -12,6 +13,7 @@ from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
 from model.dto.validation import ProposalUpdateRequest
 from service.proposal_service import ProposalService
+from service.authorization import admin_required
 
 
 proposal_bp = Blueprint('proposal', __name__, url_prefix='/proposal')
@@ -60,6 +62,8 @@ def index():
     return render_template('proposals.html', proposals=proposals_from_db)
 
 
+# only a registered use can propose a new radio source
+@login_required
 @proposal_bp.route('/propose', methods=['GET', 'POST'])
 def propose():
     """Handle proposal submission form."""
@@ -98,7 +102,7 @@ def propose():
         return redirect(url_for('proposal.index'))
 
 
-
+@login_required
 @proposal_bp.route('/update/<int:proposal_id>', methods=['GET', 'POST'])
 def proposal_detail(proposal_id):
     if request.method == 'POST':
@@ -138,6 +142,8 @@ def proposal_detail(proposal_id):
     return render_template('proposal_detail.html',proposal=proposal)
 
 
+# only admin users can approve proposals
+@admin_required
 @proposal_bp.route('/approve/<int:proposal_id>', methods=['POST'])
 def approve_proposal(proposal_id):
     """Approve and convert proposal to radio source."""
