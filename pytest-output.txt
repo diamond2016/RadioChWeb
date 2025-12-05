@@ -1,0 +1,167 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.0, pytest-8.0.0, pluggy-1.6.0 -- /home/riccardo/Documenti/Programming/Projects/RadioChWeb/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/riccardo/Documenti/Programming/Projects/RadioChWeb
+plugins: cov-4.1.0
+collecting ... collected 53 items
+
+tests/integration/test_auth_flow.py::test_register_login_logout_flow PASSED [  1%]
+tests/integration/test_smoke_auth_pages.py::test_smoke_auth_pages_render FAILED [  3%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_complete_save_workflow PASSED [  5%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_duplicate_stream_url_prevention PASSED [  7%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_proposal_rejection_workflow PASSED [  9%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_proposal_update_workflow PASSED [ 11%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_validation_with_missing_required_fields PASSED [ 13%]
+tests/integration/test_validate_and_add_workflow.py::TestValidateAndAddWorkflow::test_insecure_stream_warning PASSED [ 15%]
+tests/unit/test_analysis_routes.py::test_delete_analysis_route_removes_row PASSED [ 16%]
+tests/unit/test_analysis_routes.py::test_approve_analysis_route_creates_proposal PASSED [ 18%]
+tests/unit/test_auth_service.py::test_hash_and_verify_roundtrip PASSED   [ 20%]
+tests/unit/test_proposal_update.py::test_update_proposal_post FAILED     [ 22%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_success PASSED [ 24%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_missing_required_fields PASSED [ 26%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_invalid_url_format PASSED [ 28%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_duplicate_stream_url PASSED [ 30%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_insecure_stream_warning PASSED [ 32%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_proposal_nonexistent_proposal PASSED [ 33%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_url_format_valid_urls PASSED [ 35%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_validate_url_format_invalid_urls PASSED [ 37%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_check_duplicate_stream_url_no_duplicate PASSED [ 39%]
+tests/unit/test_proposal_validation_service.py::TestProposalValidationService::test_check_duplicate_stream_url_duplicate_exists PASSED [ 41%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_save_from_proposal_success PASSED [ 43%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_save_from_proposal_validation_failure PASSED [ 45%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_save_from_proposal_not_found PASSED [ 47%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_reject_proposal_success PASSED [ 49%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_reject_proposal_not_found PASSED [ 50%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_update_proposal_success PASSED [ 52%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_update_proposal_not_found PASSED [ 54%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_get_proposal PASSED [ 56%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_get_all_proposals PASSED [ 58%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_reject_proposal PASSED [ 60%]
+tests/unit/test_radio_source_service.py::TestRadioSourceService::test_get_all_radio_sources PASSED [ 62%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_unsupported_protocol_rejection PASSED [ 64%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_https_security_detection PASSED [ 66%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_http_security_warning PASSED [ 67%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_ffmpeg_authoritative_over_curl PASSED [ 69%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_curl_header_extraction PASSED [ 71%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_ffmpeg_output_parsing PASSED [ 73%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_metadata_detection_icecast PASSED [ 75%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_metadata_detection_shoutcast PASSED [ 77%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_prerequisites_check_missing_ffmpeg PASSED [ 79%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_timeout_handling PASSED [ 81%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_extract_metadata_from_ffmpeg_output_basic PASSED [ 83%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_analyze_stream_populates_extracted_metadata_from_ffmpeg PASSED [ 84%]
+tests/unit/test_stream_analysis_service.py::TestStreamAnalysisService::test_save_analysis_as_proposal_basic PASSED [ 86%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_find_stream_type_id PASSED [ 88%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_find_stream_type_id_not_found PASSED [ 90%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_get_stream_type PASSED [ 92%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_get_stream_type_not_found PASSED [ 94%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_get_all_stream_types PASSED [ 96%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_get_predefined_types_map PASSED [ 98%]
+tests/unit/test_stream_type_service.py::TestStreamTypeService::test_initialize_predefined_types PASSED [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_smoke_auth_pages_render _________________________
+
+test_app = <Flask 'conftest'>
+
+    def test_smoke_auth_pages_render(test_app):
+>       register_blueprints(test_app)
+
+tests/integration/test_smoke_auth_pages.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_smoke_auth_pages.py:20: in register_blueprints
+    AuthService(app)
+service/auth_service.py:17: in __init__
+    self.init_app(app)
+service/auth_service.py:22: in init_app
+    lm.init_app(app)
+.venv/lib64/python3.14/site-packages/flask_login/login_manager.py:137: in init_app
+    app.after_request(self._update_remember_cookie)
+.venv/lib64/python3.14/site-packages/flask/sansio/scaffold.py:43: in wrapper_func
+    self._check_setup_finished(f_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Flask 'conftest'>, f_name = 'after_request'
+
+    def _check_setup_finished(self, f_name: str) -> None:
+        if self._got_first_request:
+>           raise AssertionError(
+                f"The setup method '{f_name}' can no longer be called"
+                " on the application. It has already handled its first"
+                " request, any changes will not be applied"
+                " consistently.\n"
+                "Make sure all imports, decorators, functions, etc."
+                " needed to set up the application are done before"
+                " running it."
+            )
+E           AssertionError: The setup method 'after_request' can no longer be called on the application. It has already handled its first request, any changes will not be applied consistently.
+E           Make sure all imports, decorators, functions, etc. needed to set up the application are done before running it.
+
+.venv/lib64/python3.14/site-packages/flask/sansio/app.py:417: AssertionError
+__________________________ test_update_proposal_post ___________________________
+
+test_app = <Flask 'conftest'>
+test_db = <sqlalchemy.orm.scoping.scoped_session object at 0x7f014df56120>
+
+    def test_update_proposal_post(test_app, test_db):
+        # Create a proposal in the test DB
+        proposal = Proposal(
+            stream_url='https://stream.example.com/test',
+            name='Old Name',
+            website_url='https://old.example.com',
+            stream_type_id=1,
+            is_secure=False,
+            country='OldCountry',
+            description='Old description',
+            image_url='https://old.example.com/img.png'
+        )
+        test_db.add(proposal)
+        test_db.commit()
+        test_db.refresh(proposal)
+    
+        # Prepare updated data
+        data = {
+            'name': 'New Name',
+            'website_url': 'https://new.example.com',
+            'country': 'Italy',
+            'description': 'New description',
+            'image_url': 'https://new.example.com/img.png'
+        }
+    
+        # Register blueprint so url_for('proposal.index') resolves during the view
+        from route.proposal_route import proposal_bp
+    
+        # Register blueprint so url_for('proposal.index') resolves during the view
+        from route.proposal_route import proposal_bp
+        # register only if not present to avoid "register_blueprint after first request" errors
+        if proposal_bp.name not in test_app.blueprints:
+            test_app.register_blueprint(proposal_bp)
+    
+        # Call the view function within a request context
+        with test_app.test_request_context(f'/proposal/{proposal.id}', method='POST', data=data):
+            from route.proposal_route import proposal_detail
+            resp = proposal_detail(proposal.id)
+    
+            # Expect a redirect response to proposals index
+            assert resp.status_code == 302
+    
+        # Reload from DB and assert changes
+        updated = test_db.query(Proposal).filter(Proposal.id == proposal.id).first()
+        assert updated is not None
+        assert updated.name == 'New Name'
+        assert updated.website_url == 'https://new.example.com'
+        assert updated.country == 'Italy'
+        assert updated.description == 'New description'
+>       assert updated.image_url == 'https://new.example.com/img.png'
+E       AssertionError: assert 'https://old.example.com/img.png' == 'https://new.example.com/img.png'
+E         
+E         - https://new.example.com/img.png
+E         ?         ^^^
+E         + https://old.example.com/img.png
+E         ?         ^^^
+
+tests/unit/test_proposal_update.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_smoke_auth_pages.py::test_smoke_auth_pages_render
+FAILED tests/unit/test_proposal_update.py::test_update_proposal_post - Assert...
+========================= 2 failed, 51 passed in 0.63s =========================

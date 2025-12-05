@@ -13,9 +13,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from database import db
 from model.entity.stream_type import StreamType
-from model.entity.radio_source import RadioSource
-from model.entity.proposal import Proposal
-
 
 @pytest.fixture(scope="session")
 def test_app():
@@ -35,6 +32,9 @@ def test_app():
         db.create_all()
         # Initialize stream types
         _initialize_stream_types()
+        # ensure LoginManager is configured early
+        from service.auth_service import AuthService
+        AuthService(app)
         yield app
 
 
@@ -72,11 +72,7 @@ def sample_urls():
 def _initialize_stream_types():
     """Initialize stream types in test database."""
     # Ensure related entity classes are imported so SQLAlchemy can configure relationships
-    try:
-        from model.entity.stream_analysis import StreamAnalysis  # noqa: F401
-    except Exception:
-        # If stream_analysis is not present, proceed; relationships will be resolved later
-        pass
+
     stream_types_data = [
         {"protocol": "HTTP", "format": "MP3", "metadata_type": "Icecast", "display_name": "HTTP MP3 Icecast"},
         {"protocol": "HTTP", "format": "MP3", "metadata_type": "Shoutcast", "display_name": "HTTP MP3 Shoutcast"},

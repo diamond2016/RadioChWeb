@@ -3,7 +3,7 @@ StreamTypeService - Service for managing StreamType lookup table.
 Provides methods to find and manage the predefined stream types from spec 003.
 """
 
-from typing import Optional, List
+from typing import Optional, List, Dict
 from model.repository.stream_type_repository import StreamTypeRepository
 from model.dto.stream_type import StreamTypeDTO
 

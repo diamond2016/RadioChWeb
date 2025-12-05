@@ -25,14 +25,32 @@ def run_command(cmd: list) -> bool:
 
 
 def run_migrations():
-    """Run all pending database migrations using sqlite3."""
-    print("🚀 Starting database migrations with sqlite3...")
+    """
+    Run database migrations by first attempting to use the pyway CLI, and falling back to direct SQL application if pyway is unavailable or fails.
+
+    This function always tries to apply migrations using the pyway CLI (so pyway's migration tracking table, as configured in `pyway.yaml`, is used).
+    If the pyway binary cannot be executed or the migration fails, it falls back to applying the SQL files directly (the old behavior).
+    """
+    print("🚀 Starting database migrations (pyway preferred)...")
 
     # Ensure instance directory exists
     instance_dir = Path("../instance")
     instance_dir.mkdir(exist_ok=True)
 
-    # Run migrations
+    # Try to run pyway CLI
+    # pyway CLI expects the migration command 'migrate' (not 'apply')
+    pyway_cmd = [PYWAY_PATH.as_posix(), "--config", "pyway.yaml", "migrate"]
+    try:
+        result = run_command(pyway_cmd)
+        if result:
+            print("✅ Migrations applied via pyway.")
+            return
+        else:
+            print("⚠️  pyway run failed, falling back to direct SQL application.")
+    except Exception:
+        print("⚠️  pyway CLI not available or failed to run; falling back to direct SQL application.")
+
+    # Fallback: apply SQL files directly
     import sqlite3
     db_path = Path("../instance/radio_sources.db")
     conn = sqlite3.connect(str(db_path))
@@ -51,7 +69,7 @@ def run_migrations():
     conn.commit()
     conn.close()
 
-    print("✅ All migrations completed successfully!")
+    print("✅ All migrations completed successfully (direct SQL).")
 
 
 def show_migration_status():
