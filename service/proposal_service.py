@@ -15,7 +15,9 @@ class ProposalService:
     def __init__(self, proposal_repo: ProposalRepository):
         self.proposal_repo = proposal_repo
 
-    def update_proposal(self, proposal_id: int, updates: ProposalUpdateRequest) -> Proposal:
+    def update_proposal(
+        self, proposal_id: int, updates: ProposalUpdateRequest
+    ) -> Proposal:
         """Update editable fields of a proposal and persist changes.
 
         Editable fields: name, website_url, country, description, image (mapped to image_url)

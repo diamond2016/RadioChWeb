@@ -11,29 +11,37 @@ from service.auth_service import AuthService
 
 auth_service = AuthService()
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 class RegisterForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
-    confirm = PasswordField('Confirm', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Register')
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
+    confirm = PasswordField("Confirm", validators=[DataRequired(), EqualTo("password")])
+    submit = SubmitField("Register")
+
 
 class ChangePasswordForm(FlaskForm):
-    old_password = PasswordField('Current password', validators=[DataRequired()])
-    new_password = PasswordField('New password', validators=[DataRequired(), Length(min=8)])
-    confirm = PasswordField('Confirm', validators=[DataRequired(), EqualTo('new_password')])
-    submit = SubmitField('Change Password')
+    old_password = PasswordField("Current password", validators=[DataRequired()])
+    new_password = PasswordField(
+        "New password", validators=[DataRequired(), Length(min=8)]
+    )
+    confirm = PasswordField(
+        "Confirm", validators=[DataRequired(), EqualTo("new_password")]
+    )
+    submit = SubmitField("Change Password")
+
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Login")
+
 
 user_repo = UserRepository()
 
-@auth_bp.route('/change_password', methods=['GET', 'POST'])
+
+@auth_bp.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change_password():
     form = ChangePasswordForm()
@@ -47,65 +55,71 @@ def change_password():
         else:
             verified = bool(res)
         if not verified:
-            flash('Current password incorrect', 'error')
-            return render_template('user/change_password.html', form=form), 400
+            flash("Current password incorrect", "error")
+            return render_template("user/change_password.html", form=form), 400
         auth_service.change_password(user, new)
-        flash('Password changed successfully', 'success')
-        return redirect(url_for('main.index'))
-    return render_template('user/change_password.html', form=form)
+        flash("Password changed successfully", "success")
+        return redirect(url_for("main.index"))
+    return render_template("user/change_password.html", form=form)
+
 
 user_repo = UserRepository()
 
 
-
-
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        found_user: User = auth_service.user_repo.find_by_email(form.email.data)  # adapt to your repo/service call
-    
-        if found_user and auth_service.verify_password(form.password.data, found_user.hash_password):
+        found_user: User = auth_service.user_repo.find_by_email(
+            form.email.data
+        )  # adapt to your repo/service call
+
+        if found_user and auth_service.verify_password(
+            form.password.data, found_user.hash_password
+        ):
             login_user(found_user)
-            flash('Signed in successfully', 'success')
-            next_page = request.args.get('next') or url_for('main.index')
+            flash("Signed in successfully", "success")
+            next_page = request.args.get("next") or url_for("main.index")
             return redirect(next_page)
         verified = False
         if found_user:
-            res = auth_service.verify_password(form.password.data, found_user.hash_password)
+            res = auth_service.verify_password(
+                form.password.data, found_user.hash_password
+            )
             if isinstance(res, tuple):
                 verified = bool(res[0])
             else:
                 verified = bool(res)
-        
+
         if not verified:
-            flash('Invalid email or password', 'error')
-            return render_template('user/login.html', form=form)
+            flash("Invalid email or password", "error")
+            return render_template("user/login.html", form=form)
         else:
             login_user(found_user)
-            flash('Signed in successfully', 'success')
-            next_page = request.args.get('next') or url_for('main.index')
+            flash("Signed in successfully", "success")
+            next_page = request.args.get("next") or url_for("main.index")
             return redirect(next_page)
-    
-    return render_template('user/login.html', form=form)
+
+    return render_template("user/login.html", form=form)
 
 
-@auth_bp.route('/logout')
+@auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return redirect(url_for("main.index"))
 
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
         try:
-            auth_service.register_user(email=form.email.data, password=form.password.data)
-            flash('Registration successful. Please login.', 'success')
-            return redirect(url_for('auth.login'))
+            auth_service.register_user(
+                email=form.email.data, password=form.password.data
+            )
+            flash("Registration successful. Please login.", "success")
+            return redirect(url_for("auth.login"))
         except ValueError as e:
-            flash(str(e), 'error')
-    return render_template('user/register.html', form=form)
-
+            flash(str(e), "error")
+    return render_template("user/register.html", form=form)

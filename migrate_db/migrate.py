@@ -10,10 +10,13 @@ from pathlib import Path
 
 PYWAY_PATH = Path(__file__).parent.parent / ".venv" / "bin" / "pyway"
 
+
 def run_command(cmd: list) -> bool:
     """Run a command and return success status."""
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=Path(__file__).parent
+        )
         if result.returncode != 0:
             print(f"❌ Command failed: {' '.join(cmd)}")
             print(f"Error: {result.stderr}")
@@ -48,21 +51,26 @@ def run_migrations():
         else:
             print("⚠️  pyway run failed, falling back to direct SQL application.")
     except Exception:
-        print("⚠️  pyway CLI not available or failed to run; falling back to direct SQL application.")
+        print(
+            "⚠️  pyway CLI not available or failed to run; falling back to direct SQL application."
+        )
 
     # Fallback: apply SQL files directly
     import sqlite3
+
     db_path = Path("../instance/radio_sources.db")
     conn = sqlite3.connect(str(db_path))
     cursor = conn.cursor()
 
     # Get list of migration files
     migration_dir = Path("migrations")
-    migration_files = sorted([f for f in migration_dir.iterdir() if f.is_file() and f.name.endswith('.sql')])
+    migration_files = sorted(
+        [f for f in migration_dir.iterdir() if f.is_file() and f.name.endswith(".sql")]
+    )
 
     for migration_file in migration_files:
         print(f"Applying migration: {migration_file.name}")
-        with open(migration_file, 'r') as f:
+        with open(migration_file, "r") as f:
             sql = f.read()
         cursor.executescript(sql)
 
@@ -76,11 +84,7 @@ def show_migration_status():
     """Show current migration status."""
     print("\n📊 Migration Status:")
 
-    cmd = [
-        PYWAY_PATH.as_posix(),
-        "--config", "pyway.yaml",
-        "info"
-    ]
+    cmd = [PYWAY_PATH.as_posix(), "--config", "pyway.yaml", "info"]
 
     run_command(cmd)
 
@@ -89,11 +93,7 @@ def validate_migrations():
     """Validate migration checksums."""
     print("🔍 Validating migrations...")
 
-    cmd = [
-        PYWAY_PATH.as_posix(),
-        "--config", "pyway.yaml",
-        "validate"
-    ]
+    cmd = [PYWAY_PATH.as_posix(), "--config", "pyway.yaml", "validate"]
 
     if run_command(cmd):
         print("✅ All migrations are valid!")

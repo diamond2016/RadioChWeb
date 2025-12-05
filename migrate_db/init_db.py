@@ -9,6 +9,7 @@ from migrate import run_migrations
 
 DBPATH = Path(__file__).parent.parent / "instance" / "radio_sources.db"
 
+
 def init_database():
     """Initialize a fresh database with all migrations."""
     print("🗄️  Initializing RadioChWeb database...")

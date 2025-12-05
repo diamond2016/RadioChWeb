@@ -12,8 +12,8 @@ class UserRepository:
 
     def find_by_email(self, email: str) -> Optional[User]:
         return self.session.query(User).filter(User.email == email).first()
-    
-    def create(self, email: str, hash_password: str, role: str = 'user') -> User:
+
+    def create(self, email: str, hash_password: str, role: str = "user") -> User:
         user = User(email=email, hash_password=hash_password, role=role)
 
         self.session.add(user)
@@ -30,7 +30,7 @@ class UserRepository:
 
     def set_role(self, user: User, role: str) -> User:
         user.role = role
-        
+
         self.session.commit()
         self.session.refresh(user)
         return user

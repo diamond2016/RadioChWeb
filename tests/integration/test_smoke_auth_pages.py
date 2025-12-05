@@ -12,9 +12,17 @@ def register_blueprints(app):
     from route.auth_route import auth_bp
     from service.auth_service import AuthService
 
-    app.template_folder = str(Path(__file__).parents[2] / 'templates')
+    app.template_folder = str(Path(__file__).parents[2] / "templates")
     # Register blueprints only if they are not already registered (idempotent)
-    for bp in (main_bp, database_bp, analysis_bp, proposal_bp, radio_source_bp, listen_bp, auth_bp):
+    for bp in (
+        main_bp,
+        database_bp,
+        analysis_bp,
+        proposal_bp,
+        radio_source_bp,
+        listen_bp,
+        auth_bp,
+    ):
         if bp.name not in app.blueprints:
             app.register_blueprint(bp)
 
@@ -23,10 +31,10 @@ def test_smoke_auth_pages_render(test_app):
     register_blueprints(test_app)
     client = test_app.test_client()
 
-    r = client.get('/auth/login')
+    r = client.get("/auth/login")
     assert r.status_code == 200
-    assert b'Login' in r.data
+    assert b"Login" in r.data
 
-    r = client.get('/auth/register')
+    r = client.get("/auth/register")
     assert r.status_code == 200
-    assert b'Register' in r.data
+    assert b"Register" in r.data

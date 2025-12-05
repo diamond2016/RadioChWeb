@@ -40,7 +40,9 @@ class TestValidateAndAddWorkflow:
         """Create services with repositories."""
         proposal_repo, radio_source_repo = repositories
         validation_service = ProposalValidationService(proposal_repo, radio_source_repo)
-        radio_source_service = RadioSourceService(proposal_repo, radio_source_repo, validation_service)
+        radio_source_service = RadioSourceService(
+            proposal_repo, radio_source_repo, validation_service
+        )
         return validation_service, radio_source_service
 
     def test_complete_save_workflow(self, db_session, services):
@@ -56,7 +58,7 @@ class TestValidateAndAddWorkflow:
             is_secure=True,
             country="Italy",
             description="A test radio station",
-            image_url="test.jpg"
+            image_url="test.jpg",
         )
         db_session.add(proposal)
         db_session.commit()
@@ -74,9 +76,11 @@ class TestValidateAndAddWorkflow:
         saved_proposal = db_session.query(Proposal).filter_by(id=proposal.id).first()
         assert saved_proposal is None
 
-        saved_radio_source = db_session.query(RadioSource).filter_by(
-            stream_url="https://stream.example.com/radio.mp3"
-        ).first()
+        saved_radio_source = (
+            db_session.query(RadioSource)
+            .filter_by(stream_url="https://stream.example.com/radio.mp3")
+            .first()
+        )
         assert saved_radio_source is not None
         assert saved_radio_source.name == "Test Radio Station"
 
@@ -90,7 +94,7 @@ class TestValidateAndAddWorkflow:
             name="First Radio",
             website_url="https://first.com",
             stream_type_id=1,
-            is_secure=True
+            is_secure=True,
         )
         db_session.add(proposal1)
         db_session.commit()
@@ -105,7 +109,7 @@ class TestValidateAndAddWorkflow:
             name="Second Radio",
             website_url="https://second.com",
             stream_type_id=1,
-            is_secure=True
+            is_secure=True,
         )
         db_session.add(proposal2)
         db_session.commit()
@@ -113,7 +117,9 @@ class TestValidateAndAddWorkflow:
         # Validation should fail due to duplicate
         validation_result = validation_service.validate_proposal(proposal2.id)
         assert not validation_result.is_valid
-        assert "This stream URL already exists in the database" in validation_result.errors
+        assert (
+            "This stream URL already exists in the database" in validation_result.errors
+        )
 
     def test_proposal_rejection_workflow(self, db_session, services):
         """Test rejecting a proposal."""
@@ -125,7 +131,7 @@ class TestValidateAndAddWorkflow:
             name="Rejected Radio",
             website_url="https://reject.com",
             stream_type_id=1,
-            is_secure=True
+            is_secure=True,
         )
         db_session.add(proposal)
         db_session.commit()
@@ -150,7 +156,7 @@ class TestValidateAndAddWorkflow:
             stream_type_id=1,
             is_secure=True,
             country="Original Country",
-            description="Original description"
+            description="Original description",
         )
         db_session.add(proposal)
         db_session.commit()
@@ -160,10 +166,12 @@ class TestValidateAndAddWorkflow:
             name="Updated Name",
             website_url="https://updated.com",
             country="Updated Country",
-            description="Updated description"
+            description="Updated description",
         )
 
-        update_result = radio_source_service.update_proposal(proposal.id, update_request)
+        update_result = radio_source_service.update_proposal(
+            proposal.id, update_request
+        )
         assert update_result.name == "Updated Name"
 
         # Verify the update
@@ -183,7 +191,7 @@ class TestValidateAndAddWorkflow:
             name="Test Radio",
             website_url="https://test.com",
             stream_type_id=1,
-            is_secure=True
+            is_secure=True,
         )
         db_session.add(proposal)
         db_session.commit()
@@ -203,7 +211,7 @@ class TestValidateAndAddWorkflow:
             name="Insecure Radio",
             website_url="https://insecure.com",
             stream_type_id=1,
-            is_secure=False
+            is_secure=False,
         )
         db_session.add(proposal)
         db_session.commit()

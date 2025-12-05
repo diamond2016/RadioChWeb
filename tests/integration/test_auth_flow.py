@@ -11,14 +11,21 @@ from pathlib import Path
 
 def register_blueprints_and_auth(app):
     # Ensure Flask finds the repository `templates/` folder when tests create app instances
-    app.template_folder = str(Path(__file__).parents[2] / 'templates')
+    app.template_folder = str(Path(__file__).parents[2] / "templates")
     # Register blueprints only if they are not already registered (idempotent)
-    for bp in (main_bp, database_bp, analysis_bp, proposal_bp, radio_source_bp, listen_bp, auth_bp):
+    for bp in (
+        main_bp,
+        database_bp,
+        analysis_bp,
+        proposal_bp,
+        radio_source_bp,
+        listen_bp,
+        auth_bp,
+    ):
         if bp.name not in app.blueprints:
             app.register_blueprint(bp)
     if not hasattr(app, "login_manager"):
         AuthService(app)
-
 
 
 def test_register_login_logout_flow(test_app):
@@ -26,22 +33,27 @@ def test_register_login_logout_flow(test_app):
     client = test_app.test_client()
 
     # Register
-    resp = client.post('/auth/register', data={
-        'email': 'tester@example.com',
-        'password': 'Password123',
-        'confirm': 'Password123'
-    }, follow_redirects=True)
-    assert b'Registration successful' in resp.data
+    resp = client.post(
+        "/auth/register",
+        data={
+            "email": "tester@example.com",
+            "password": "Password123",
+            "confirm": "Password123",
+        },
+        follow_redirects=True,
+    )
+    assert b"Registration successful" in resp.data
 
     # Login
-    resp = client.post('/auth/login', data={
-        'email': 'tester@example.com',
-        'password': 'Password123'
-    }, follow_redirects=True)
+    resp = client.post(
+        "/auth/login",
+        data={"email": "tester@example.com", "password": "Password123"},
+        follow_redirects=True,
+    )
     # After login index should show Logout link and email
-    assert b'Logout' in resp.data
-    assert b'tester@example.com' in resp.data
+    assert b"Logout" in resp.data
+    assert b"tester@example.com" in resp.data
 
     # Logout
-    resp = client.get('/auth/logout', follow_redirects=True)
-    assert b'Login' in resp.data
+    resp = client.get("/auth/logout", follow_redirects=True)
+    assert b"Login" in resp.data

@@ -4,6 +4,7 @@ from database import db
 
 listen_bp = Blueprint("listen", __name__, url_prefix="/listen")
 
+
 @listen_bp.route("/<int:source_id>")
 def player(source_id: int):
     repo = RadioSourceRepository(db.session)

@@ -4,20 +4,24 @@ import os
 app = Flask(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your-secret-key'  # Change in production
+app.config["SECRET_KEY"] = "your-secret-key"  # Change in production
 basedir = os.path.abspath(os.path.dirname(__file__))
-instance_dir = os.path.join(basedir, 'instance')
+instance_dir = os.path.join(basedir, "instance")
 os.makedirs(instance_dir, exist_ok=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_dir, "radio_sources.db")}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    f'sqlite:///{os.path.join(instance_dir, "radio_sources.db")}'
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Import db from separate module
 from database import db
+
 db.init_app(app)
 
 # Enable CSRF protection for forms
 try:
     from flask_wtf import CSRFProtect
+
     csrf = CSRFProtect(app)
 except Exception:
     # If flask-wtf is not installed in the environment, app will still run
@@ -46,5 +50,5 @@ AuthService(app)
 
 # Db is created only by pyway migrations
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
