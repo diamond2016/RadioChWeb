@@ -68,3 +68,13 @@ class StreamAnalysisRepository:
             self.db.commit()
             return True
         return False
+
+    def find_by_creator(self, user_id: int) -> List[StreamAnalysis]:
+        """Get all StreamAnalysis rows created by a specific user."""
+        return (
+            self.db.query(StreamAnalysis).filter(StreamAnalysis.created_by == user_id).all()
+        )
+
+    # backward-compatible alias
+    def find_by_created_by(self, user_id: int) -> List[StreamAnalysis]:
+        return self.find_by_creator(user_id)

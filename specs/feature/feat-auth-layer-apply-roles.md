@@ -16,14 +16,22 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
 ## Implementation Steps (concrete)
 1. Branch:
    - `git checkout -b feat/auth-roles`
-2. Domain: `model/entity/user.py`
+1. Domain: `model/entity/user.py`
    - Add property:
      ```python
      @property
      def is_admin(self) -> bool:
          return (self.role or '').lower() == 'admin'
      ```
-3. Authorization helper: new `service/authorization.py`
+1. Domain `model/entity/stream_analysis` and `model/entity/proposal`:
+     - Add relation stream_analysis -> user in database, create migration
+     - Add relation proposal -> user in database, create migration
+     This wil be made adding created_by field to both tables
+
+1. Domain: `model/repository/proposal_repository.py` and `model/repository/stream_analysis_repository.py`
+  add creator-aware query helpers and set new field `created_by` when creating analyses/proposals
+
+1. Authorization helper: new `service/authorization.py`
    - Add `admin_required` decorator:
      ```python
      from functools import wraps
@@ -39,7 +47,7 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
              return func(*args, **kwargs)
          return wrapper
      ```
-4. Protect server routes (examples)
+1. Protect server routes (examples)
    - `route/proposal_route.py`:
      - Add `from service.authorization import admin_required`
      - Annotate:
@@ -51,7 +59,7 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
        ```
    - `route/analysis_route.py`:
      - Protect `approve_analysis` and `delete_analysis`.
-5. Templates: show admin UI (examples)
+1. Templates: show admin UI (examples)
    - `templates/index.html` (navbar):
      ```jinja
      {% if current_user.is_authenticated and current_user.is_admin %}
@@ -64,7 +72,7 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
        <form ...> <button ...>Approve</button> </form>
      {% endif %}
      ```
-6. Seed CLI (new) `scripts/create_admin.py` — minimal safe script:
+1. Seed CLI (new) `scripts/create_admin.py` — minimal safe script:
    ```python
    # scripts/create_admin.py
    import argparse
@@ -92,7 +100,7 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
    - Unit tests:
      - `test_user_is_admin` (verify `is_admin` behavior).
      - `test_admin_required_decorator` (use Flask test_request_context and a mocked `current_user` to assert abort).
-8. Audit (optional)
+1. Audit (optional)
    - Consider a simple `admin_actions` table for future auditing. Optional for MVP.
 
 ## File Summary (exact edits)

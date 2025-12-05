@@ -22,9 +22,14 @@ class StreamAnalysis(db.Model):
         db.Text, nullable=True
     )  # String from ffmpeg detection
     extracted_metadata = db.Column(db.Text, nullable=True)
+      # Foreign Key to User who created the analysis
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     # Relationship with StreamTypes
     stream_type = db.relationship("StreamType", back_populates="stream_analysis")
+    
+    # Relationship with User
+    stream_user = db.relationship("User", back_populates="stream_analysis")
 
     def __repr__(self):
         return f"<StreamAnalysis(id={self.id}, url='{self.stream_url}', type='{self.stream_type_id}', valid={self.is_valid})>"

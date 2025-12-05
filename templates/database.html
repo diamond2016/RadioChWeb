@@ -12,8 +12,7 @@
             <div class="container">
                 <a class="navbar-brand" href="/">RadioChWeb</a>
                 <div class="navbar-nav">
-                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Manage Sources</a>
-                    <a class="nav-link" href="{{ url_for('database.index') }}">Database</a>
+                    <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
                 </div>
             </div>
         </nav>
@@ -69,12 +68,14 @@
                             <td>{{ rs.id }}</td>
                             <td>{{ rs.name }}</td>
                             <td>{{ rs.stream_url }}</td>
+                            {% if current_user.is_authenticated and current_user.is_admin %}
                             <td>
                                 <form method="post" action="{{ url_for('radio_source.delete_source', source_id=rs.id) }}" style="display:inline">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

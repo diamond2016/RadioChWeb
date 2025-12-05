@@ -5,7 +5,7 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 
 from typing import List
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisResult
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
@@ -124,6 +124,7 @@ def analyze_url():
             raw_content_type=result.raw_content_type,
             raw_ffmpeg_output=result.raw_ffmpeg_output,
             extracted_metadata=result.extracted_metadata,
+            created_by=current_user.id,
         )
         analysis_repo.save(analysis_entity)
 
@@ -140,7 +141,7 @@ def approve_analysis(id: int):
 
     try:
         analysis_service: StreamAnalysisService = get_stream_analysis_service()
-        success = analysis_service.save_analysis_as_proposal(id)
+        success = analysis_service.save_analysis_as_proposal(id, created_by=current_user.id)
         if success:
             flash(
                 "ProposalAnalysis approved and added as proposal for radio source!",

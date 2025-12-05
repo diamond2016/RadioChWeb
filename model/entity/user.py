@@ -18,6 +18,11 @@ class User(db.Model):
         db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    # Relationship with StreamAnalysis
+    stream_analysis = db.relationship("StreamAnalysis", back_populates="stream_user")
+    # Relationship with Proposal
+    proposals = db.relationship("Proposal", back_populates="proposal_user")
+
     def get_id(self):
         return str(self.id)
 

@@ -11,21 +11,22 @@ class Proposal(db.Model):
     website_url = db.Column(db.String(500))
 
     # Classification data from analysis
-    stream_type_id = db.Column(
-        db.Integer, db.ForeignKey("stream_types.id"), nullable=False
-    )
+    stream_type_id = db.Column(db.Integer, db.ForeignKey("stream_types.id"), nullable=False)
     is_secure = db.Column(db.Boolean, nullable=False, default=False)
 
     # User-editable fields
     country = db.Column(db.String(50))
     description = db.Column(db.Text)
     image_url = db.Column(db.String(500))
-
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     # Timestamps
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
-    # Relationship
+    # Relationship with StreamType
     stream_type = db.relationship("StreamType", back_populates="proposals")
+
+    # Relationship with User
+    proposal_user = db.relationship("User", back_populates="proposals")
 
     def __repr__(self):
         return f"<Proposal(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"

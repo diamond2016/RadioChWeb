@@ -56,3 +56,13 @@ class ProposalRepository:
     def get_all_proposals(self) -> List[Proposal]:
         """Retrieve all proposals from the database."""
         return self.db.query(Proposal).all()
+
+    def find_by_creator(self, user_id: int) -> List[Proposal]:
+        """Get all Proposals created by a specific user."""
+        return (
+            self.db.query(Proposal).filter(Proposal.created_by == user_id).all()
+        )
+
+    # backward-compatible alias
+    def find_by_created_by(self, user_id: int) -> List[Proposal]:
+        return self.find_by_creator(user_id)

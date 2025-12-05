@@ -461,7 +461,7 @@ class StreamAnalysisService:
         else:
             return "None"
 
-    def save_analysis_as_proposal(self, stream_or_id) -> bool:
+    def save_analysis_as_proposal(self, stream_or_id, created_by: int | None = None) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
 
@@ -490,6 +490,9 @@ class StreamAnalysisService:
             print("Cannot create proposal for invalid analysis or missing data.")
             return False
 
+        # Determine created_by: prefer explicit arg, then analysis entity attribute if present
+        resolved_created_by = created_by if created_by is not None else getattr(stream_entity, "created_by", None)
+
         proposal = Proposal(
             stream_url=stream_url,
             name="",
@@ -499,6 +502,7 @@ class StreamAnalysisService:
             image_url=None,
             stream_type_id=stream_type_id,
             is_secure=is_secure,
+            created_by=resolved_created_by,
             created_at=date.today(),
         )
 
