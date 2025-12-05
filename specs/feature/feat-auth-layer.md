@@ -35,7 +35,7 @@
     user_name: str
     email: str
     hash_password: str
-    last_modiied_at: datetime
+    last_modified_at: datetime
     role: str  # 'user' or 'admin'
 ```
 
