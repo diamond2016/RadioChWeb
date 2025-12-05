@@ -2,7 +2,6 @@
 -- Creates new table for stream analysis: stream_analysis
 
 -- Create stream_analysis table
-DROP TABLE IF EXISTS stream_analysis;
 CREATE TABLE stream_analysis (
     id INTEGER NOT NULL,
     stream_url VARCHAR(200) NOT NULL,
@@ -11,8 +10,9 @@ CREATE TABLE stream_analysis (
     is_secure BOOLEAN NOT NULL,
     error_code VARCHAR(200),
     detection_method VARCHAR(200),
-    raw_content_type VARCHAR(200),
-    raw_ffmpeg_output VARCHAR(200),
+    raw_content_type TEXT NULL,
+    raw_ffmpeg_output TEXT NULL,
+    extracted_metadata TEXT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
 );
