@@ -5,7 +5,7 @@ Implements spec 002: validate-and-add-radio-source.
 
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
@@ -85,11 +85,10 @@ def propose():
         name = request.form.get("name")
         url = request.form.get("url")
         description = request.form.get("description", "")
-        user_name = request.form.get("user_name", "Anonymous")
 
         # Create proposal
         proposal = Proposal(
-            name=name, url=url, description=description, user_name=user_name
+            name=name, url=url, description=description, proposal_user=current_user
         )
 
         # Validate and save
@@ -107,8 +106,9 @@ def propose():
         except Exception as e:
             flash(f"Error submitting proposal: {str(e)}", "error")
 
-        # After proposing or when visiting this endpoint, show the proposals listing
+        # After proposing show the proposals listing
         return redirect(url_for("proposal.index"))
+    
 
 
 @login_required

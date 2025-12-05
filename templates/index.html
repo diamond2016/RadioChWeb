@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioChWeb - Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+/* Keep the URL input on its own row and the buttons directly below.
+   Buttons won't wrap under the input and will stay on a single row when possible. */
+.radio-card .card-body .url-row { display: flex; flex-direction: column; }
+.radio-card .card-body .action-row {
+  margin-top: .5rem;
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap; /* allow wrapping when extremely narrow */
+}
+.radio-card .card-body .action-row .btn { white-space: nowrap; }
+</style>
 </head>
 <body>
     <header>
@@ -46,17 +58,29 @@
             <!-- Radio source cards -->
             {% for source in sources %}
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card radio-card shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">{{ source.name }}</h5>
-                        <p class="card-text">{{ source.description or 'No description available' }}</p>
-                        <a href="{{ source.website_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm">{{ source.website_url }}</a>
-                        <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-primary">View Details</a>
-                        <!-- listen page -->
-                        <a href="{{ url_for('listen.player', source_id=source.id) }}"
-                        onclick="openStreamWindow(event, '{{ url_for('listen.player', source_id=source.id) }}', 720, 480)"
-                        class="btn btn-secondary">Listen</a>
-                    </div>
+                        <h5 class="card-title">{{ source.title }}</h5>
+                        <p class="card-text">{{ source.description or "No description available" }}</p>
+
+                        <!-- URL always in its own block -->
+                        <div class="url-row">
+                          <input type="text"
+                                 class="form-control"
+                                 aria-label="website url"
+                                 value="{{ source.website_url }}"
+                                 readonly>
+                        </div>
+
+                        <!-- Buttons always rendered below the URL -->
+                        <div class="action-row">
+                            <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-primary">View Details</a>
+                            <!-- listen page -->
+                            <a href="{{ url_for('listen.player', source_id=source.id) }}"
+                            onclick="openStreamWindow(event, '{{ url_for('listen.player', source_id=source.id) }}', 720, 480)"
+                            class="btn btn-secondary">Listen</a>
+                        </div>
+                      </div>
                 </div>
             </div>
             {% endfor %}

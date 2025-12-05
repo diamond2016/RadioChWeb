@@ -2,7 +2,7 @@
 StreamAnalysysRepository - Data access layer for StreamAnalysys entity.
 """
 
-from typing import Optional, List, Dict
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from model.entity.stream_analysis import StreamAnalysis
 
