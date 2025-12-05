@@ -120,7 +120,14 @@ def delete_analysis(id: int):
     ...
 ```
 
+## Rationale of roles
+- User not authenticated: listen, browse sources, view proposals, but no user or admin actions.
+- Normal user (`role=user`): register/login, analyze streams, submit proposals, edit its own proposals, but no approve/reject, not edit7delete of radio sources.  
+- Admin user (`role=admin`): all normal user actions + approve/reject proposals, delete analyses, manage radio sources.
+
+
 ## Testing notes and expected behavior
+  
 - Admin success: approve endpoint returns redirect and DB effect (proposal created / radio source saved).
 - Normal user: call returns HTTP 403 (Abort), or custom error page — tests should expect 403.
 - Test fixtures: use `tests/conftest.py` test DB and call `AuthService.register_user(..., role='admin')` or create user directly via repository + hashed password.

@@ -38,9 +38,6 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-user_repo = UserRepository()
-
-
 @auth_bp.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change_password():
@@ -63,9 +60,6 @@ def change_password():
     return render_template("user/change_password.html", form=form)
 
 
-user_repo = UserRepository()
-
-
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -74,13 +68,7 @@ def login():
             form.email.data
         )  # adapt to your repo/service call
 
-        if found_user and auth_service.verify_password(
-            form.password.data, found_user.hash_password
-        ):
-            login_user(found_user)
-            flash("Signed in successfully", "success")
-            next_page = request.args.get("next") or url_for("main.index")
-            return redirect(next_page)
+
         verified = False
         if found_user:
             res = auth_service.verify_password(

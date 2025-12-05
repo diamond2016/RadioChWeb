@@ -13,10 +13,10 @@
                 <a class="navbar-brand" href="/">RadioChWeb</a>
                 <div class="navbar-nav">
                     <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
+                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="{{ url_for('analysis.index') }}">Analyze Stream</a>
                     <a class="nav-link" href="{{ url_for('proposal.index') }}">View Proposals</a>
                     <a class="nav-link" href="{{ url_for('database.index') }}">Database</a>
-                    {% if current_user.is_authenticated %}
                     <a class="nav-link" href="#">Signed in as {{ current_user.email }}</a>
                     <a class="nav-link me-2" href="{{ url_for('auth.change_password') }}">Change password</a>
                     <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
