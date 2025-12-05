@@ -29,8 +29,7 @@ def test_update_proposal_post(test_app, test_db):
     # Register blueprint so url_for('proposal.index') resolves during the view
     from route.proposal_route import proposal_bp
     
-    # Register blueprint so url_for('proposal.index') resolves during the view
-    from route.proposal_route import proposal_bp
+
     # register only if not present to avoid "register_blueprint after first request" errors
     if proposal_bp.name not in test_app.blueprints:
         test_app.register_blueprint(proposal_bp)
