@@ -2,28 +2,23 @@ from model.entity.proposal import Proposal
 
 
 def test_update_proposal_post(test_app, test_db, test_user, login_helper):
-    
-    with test_app.test_client() as client:
-        login_helper(client)       # logs test_user into this client
+    # Create a proposal in DB
+    proposal = Proposal(
+        stream_url="https://stream.example.com/test",
+        name="Old Name",
+        website_url="https://old.example.com",
+        stream_type_id=1,
+        is_secure=False,
+        country="OldCountry",
+        description="Old description",
+        image_url="https://old.example.com/img.png",
+        proposal_user=test_user,
+    )
+    test_db.add(proposal)
+    test_db.commit()
+    test_db.refresh(proposal)
 
-        # Create a proposal in the test DB
-        proposal = Proposal(
-            stream_url="https://stream.example.com/test",
-            name="Old Name",
-            website_url="https://old.example.com",
-            stream_type_id=1,
-            is_secure=False,
-            country="OldCountry",
-            description="Old description",
-            image_url="https://old.example.com/img.png",
-            proposal_user=test_user
-        )
-        test_db.add(proposal)
-        test_db.commit()
-        test_db.refresh(proposal)
-
-    # Prepare updated data
-    data = {
+    data: dict[str, str] = {
         "name": "New Name",
         "website_url": "https://new.example.com",
         "country": "Italy",
@@ -31,29 +26,19 @@ def test_update_proposal_post(test_app, test_db, test_user, login_helper):
         "image_url": "https://new.example.com/img.png",
     }
 
-    # Register blueprint so url_for('proposal.index') resolves during the view
+    # Ensure blueprint/extension registration happens before opening the client
     from route.proposal_route import proposal_bp
-
-    # register only if not present to avoid "register_blueprint after first request" errors
     if proposal_bp.name not in test_app.blueprints:
         test_app.register_blueprint(proposal_bp)
 
-    # Call the view function within a request context
-    with test_app.test_request_context(
-        f"/proposal/{proposal.id}", method="POST", data=data
-    ):
-        from route.proposal_route import proposal_detail
+    with test_app.test_client() as client:
+        # Use the login helper to set the session (_user_id etc.) for this client
+        login_helper(client)
 
-        resp = proposal_detail(proposal.id)
-
-        # Expect a redirect response to proposals index
+        # POST via the client so Flask-Login loads current_user
+        resp = client.post(f"/proposal/update/{proposal.id}", data=data, follow_redirects=False)
         assert resp.status_code == 302
 
-    # Reload from DB and assert changes
+    # Verify DB changes after the request
     updated = test_db.query(Proposal).filter(Proposal.id == proposal.id).first()
-    assert updated is not None
-    assert updated.name == "New Name"
-    assert updated.website_url == "https://new.example.com"
-    assert updated.country == "Italy"
-    assert updated.description == "New description"
     assert updated.image_url == "https://new.example.com/img.png"

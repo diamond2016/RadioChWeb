@@ -56,26 +56,31 @@ def test_approve_analysis_route_creates_proposal(test_app, test_db, login_helper
     test_app.secret_key = "test-secret"
 
     # Insert a StreamAnalysis row with required fields
+    sa = StreamAnalysis(
+    stream_url="http://test/propose",
+    is_valid=True,
+    is_secure=True,
+    stream_type_id=1,
+    stream_user=test_user
+    )
+
+    test_db.add(sa)
+    test_db.commit()
+    assert sa.id is not None
+    
+    # Ensure blueprint/extension registration happens before opening the client
+    from route.analysis_route import analysis_bp
+    if analysis_bp.name not in test_app.blueprints:
+        test_app.register_blueprint(analysis_bp)
+
+    # Patch shutil.which so constructing StreamAnalysisService inside route doesn't raise
     with test_app.test_client() as client:
         login_helper(client) # Log in as test_user
-        sa = StreamAnalysis(
-            stream_url="http://test/propose",
-            is_valid=True,
-            is_secure=True,
-            stream_type_id=1,
-            stream_user=test_user
-        )
-        test_db.add(sa)
-        test_db.commit()
-        assert sa.id is not None
-
         with patch(
             "service.stream_analysis_service.shutil.which", return_value="/usr/bin/ffmpeg"
         ):
             with patch("route.analysis_route.url_for", return_value="/"):
-                with test_app.test_request_context(
-                    f"/analysis/approve/{sa.id}", method="POST"
-                ):
+                with test_app.test_client() as client:
                     resp = client.post(f"/analysis/approve/{sa.id}")
                     assert resp is not None
 
