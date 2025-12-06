@@ -1,0 +1,36 @@
+<!-- ...new file... -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Vintage radio background">
+  <defs>
+    <pattern id="icons" width="240" height="240" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+      <!-- pale icon color -->
+      <g fill="#c9d6e3" fill-opacity="0.20" stroke="none">
+        <!-- vintage radio rectangle -->
+        <rect x="20" y="80" width="120" height="60" rx="8"/>
+        <circle cx="40" cy="110" r="6"/>
+        <rect x="70" y="98" width="40" height="12" rx="3"/>
+        <!-- small antenna -->
+        <path d="M80 40 L90 70" stroke="#c9d6e3" stroke-opacity="0.20" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M75 46 A28 28 0 0 1 95 64" stroke="#c9d6e3" stroke-opacity="0.10" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </g>
+    </pattern>
+
+    <linearGradient id="bggrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fafb"/>
+      <stop offset="1" stop-color="#f0f4f8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft base -->
+  <rect width="100%" height="100%" fill="url(#bggrad)"/>
+
+  <!-- tiled icons -->
+  <rect width="100%" height="100%" fill="url(#icons)"/>
+
+  <!-- subtle vignette to keep center readable -->
+  <radialGradient id="v" cx="50%" cy="40%" r="75%">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.0"/>
+    <stop offset="70%" stop-color="#ffffff" stop-opacity="0.02"/>
+    <stop offset="100%" stop-color="#000000" stop-opacity="0.02"/>
+  </radialGradient>
+  <rect width="100%" height="100%" fill="url(#v)"/>
+</svg>
