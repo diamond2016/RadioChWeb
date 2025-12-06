@@ -15,7 +15,7 @@ def test_update_proposal_post(test_app, test_db, test_user, login_helper):
         proposal_user=test_user,
     )
     test_db.add(proposal)
-    test_db.commit()
+    test_db.flush()
     test_db.refresh(proposal)
 
     data: dict[str, str] = {

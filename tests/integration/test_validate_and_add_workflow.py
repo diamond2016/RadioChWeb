@@ -12,28 +12,22 @@ These tests verify the complete end-to-end workflow:
 import pytest
 from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
-from model.entity.stream_type import StreamType
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from service.proposal_validation_service import ProposalValidationService
 from service.radio_source_service import RadioSourceService
 from model.dto.validation import ProposalUpdateRequest
-from tests.conftest import login_helper, test_app, test_user
 
 
 class TestValidateAndAddWorkflow:
     """Integration tests for the complete validate and add workflow."""
 
-    @pytest.fixture(scope="function")
-    def db_session(self, test_db):
-        """Use the test database session from conftest."""
-        return test_db
 
     @pytest.fixture
-    def repositories(self, db_session):
+    def repositories(self, test_db):
         """Create repositories with test session."""
-        proposal_repo = ProposalRepository(db_session)
-        radio_source_repo = RadioSourceRepository(db_session)
+        proposal_repo = ProposalRepository(test_db)
+        radio_source_repo = RadioSourceRepository(test_db)
         return proposal_repo, radio_source_repo
 
     @pytest.fixture
@@ -46,7 +40,8 @@ class TestValidateAndAddWorkflow:
         )
         return validation_service, radio_source_service
 
-    def test_complete_save_workflow(self, db_session, services):
+
+    def test_complete_save_workflow(self, test_db, test_user, services):
         """Test the complete workflow: create proposal -> validate -> save as radio source."""
         validation_service, radio_source_service = services
 
@@ -62,8 +57,8 @@ class TestValidateAndAddWorkflow:
             image_url="test.jpg",
             proposal_user=test_user
         )
-        db_session.add(proposal)
-        db_session.commit()
+        test_db.add(proposal)
+        test_db.flush()
 
         # Validate the proposal
         validation_result = validation_service.validate_proposal(proposal.id)
@@ -75,18 +70,18 @@ class TestValidateAndAddWorkflow:
         assert save_result.stream_url == "https://stream.example.com/radio.mp3"
 
         # Verify proposal was deleted and radio source was created
-        saved_proposal = db_session.query(Proposal).filter_by(id=proposal.id).first()
+        saved_proposal = test_db.query(Proposal).filter_by(id=proposal.id).first()
         assert saved_proposal is None
 
         saved_radio_source = (
-            db_session.query(RadioSource)
+            test_db.query(RadioSource)
             .filter_by(stream_url="https://stream.example.com/radio.mp3")
             .first()
         )
         assert saved_radio_source is not None
         assert saved_radio_source.name == "Test Radio Station"
 
-    def test_duplicate_stream_url_prevention(self, db_session, services):
+    def test_duplicate_stream_url_prevention(self, test_db, test_user, services):
         """Test that duplicate stream URLs are prevented."""
         validation_service, radio_source_service = services
 
@@ -97,9 +92,10 @@ class TestValidateAndAddWorkflow:
             website_url="https://first.com",
             stream_type_id=1,
             is_secure=True,
+            proposal_user=test_user
         )
-        db_session.add(proposal1)
-        db_session.commit()
+        test_db.add(proposal1)
+        test_db.flush()
 
         # Save first proposal
         save_result1 = radio_source_service.save_from_proposal(proposal1.id)
@@ -114,8 +110,9 @@ class TestValidateAndAddWorkflow:
             is_secure=True,
             proposal_user=test_user
         )
-        db_session.add(proposal2)
-        db_session.commit()
+        test_db.add(proposal2)
+
+        test_db.flush()
 
         # Validation should fail due to duplicate
         validation_result = validation_service.validate_proposal(proposal2.id)
@@ -124,10 +121,10 @@ class TestValidateAndAddWorkflow:
             "This stream URL already exists in the database" in validation_result.errors
         )
 
-    def test_proposal_rejection_workflow(self, db_session, services):
+    def test_proposal_rejection_workflow(self, test_db, test_user, services):
         """Test rejecting a proposal."""
         _, radio_source_service = services
-
+        
         # Create a proposal
         proposal = Proposal(
             stream_url="https://reject.example.com/stream.mp3",
@@ -137,36 +134,35 @@ class TestValidateAndAddWorkflow:
             is_secure=True,
             proposal_user=test_user
         )
-        db_session.add(proposal)
-        db_session.commit()
+        test_db.add(proposal)
+        test_db.flush()
 
         # Reject the proposal
         reject_result = radio_source_service.reject_proposal(proposal.id)
         assert reject_result is True
 
         # Verify proposal was deleted
-        deleted_proposal = db_session.query(Proposal).filter_by(id=proposal.id).first()
+        deleted_proposal = test_db.query(Proposal).filter_by(id=proposal.id).first()
         assert deleted_proposal is None
 
-    def test_proposal_update_workflow(self, db_session, services):
+
+    def test_proposal_update_workflow(self, test_db, test_user, services):
         """Test updating proposal data."""
         _, radio_source_service = services
-        with test_app.test_client() as client:
-            login_helper(client)    
 
-            # Create a proposal
-            proposal = Proposal(
-                stream_url="https://update.example.com/stream.mp3",
-                name="Original Name",
-                website_url="https://original.com",
-                stream_type_id=1,
-                is_secure=True,
-                country="Original Country",
-                description="Original description",
-                proposal_user=client
-            )
-            db_session.add(proposal)
-            db_session.commit()
+        # Create a proposal
+        proposal = Proposal(
+            stream_url="https://update.example.com/stream.mp3",
+            name="Original Name",
+            website_url="https://original.com",
+            stream_type_id=1,
+            is_secure=True,
+            country="Original Country",
+            description="Original description",
+            proposal_user=test_user
+        )
+        test_db.add(proposal)
+        test_db.flush()
 
         # Update the proposal
         update_request = ProposalUpdateRequest(
@@ -182,13 +178,14 @@ class TestValidateAndAddWorkflow:
         assert update_result.name == "Updated Name"
 
         # Verify the update
-        updated_proposal = db_session.query(Proposal).filter_by(id=proposal.id).first()
+        updated_proposal = test_db.query(Proposal).filter_by(id=proposal.id).first()
         assert updated_proposal.name == "Updated Name"
         assert updated_proposal.website_url == "https://updated.com"
         assert updated_proposal.country == "Updated Country"
         assert updated_proposal.description == "Updated description"
 
-    def test_validation_with_missing_required_fields(self, db_session, services):
+
+    def test_validation_with_missing_required_fields(self, test_db, test_user, services):
         """Test validation fails with missing required fields."""
         validation_service, _ = services
 
@@ -201,15 +198,16 @@ class TestValidateAndAddWorkflow:
             is_secure=True,
             proposal_user=test_user
         )
-        db_session.add(proposal)
-        db_session.commit()
+        test_db.add(proposal)
+        test_db.flush()
 
         # Validation should fail
         validation_result = validation_service.validate_proposal(proposal.id)
         assert not validation_result.is_valid
         assert "Stream URL is required and cannot be empty" in validation_result.errors
 
-    def test_insecure_stream_warning(self, db_session, services):
+
+    def test_insecure_stream_warning(self, test_db, test_user, services):
         """Test warning for insecure HTTP streams."""
         validation_service, _ = services
 
@@ -222,8 +220,8 @@ class TestValidateAndAddWorkflow:
             is_secure=False,
             proposal_user=test_user
         )
-        db_session.add(proposal)
-        db_session.commit()
+        test_db.add(proposal)
+        test_db.flush()
 
         # Validation should succeed but with warning
         validation_result = validation_service.validate_proposal(proposal.id)

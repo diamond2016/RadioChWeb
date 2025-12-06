@@ -10,7 +10,6 @@ def register_blueprints(app):
     from route.radio_source_route import radio_source_bp
     from route.listen_route import listen_bp
     from route.auth_route import auth_bp
-    from service.auth_service import AuthService
 
     app.template_folder = str(Path(__file__).parents[2] / "templates")
     # Register blueprints only if they are not already registered (idempotent)
