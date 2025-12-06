@@ -79,22 +79,41 @@ def sample_urls():
 
 @pytest.fixture
 def test_user(test_db):
-    """Create a test user with role 'user'."""
-    from model.entity.user import User  # Assuming User model is in model.entity.user
-    user = User(email="testuser@example.com", hash_password="hashed_password1", role="user")  # Adjust fields as per User model
+    """Create (or return existing) a test user with role 'user'."""
+    from model.entity.user import User
+
+    existing = test_db.query(User).filter_by(email="testuser@example.com").first()
+    if existing:
+        return existing
+
+    user = User(
+        email="testuser@example.com",
+        hash_password="hashed_password1",
+        role="user",
+    )
     test_db.add(user)
-    test_db.commit()
+    test_db.flush()  # assign id without committing
     return user
 
 
 @pytest.fixture
 def admin_user(test_db):
-    """Create an admin user with role 'admin'."""
-    from model.entity.user import User  # Assuming User model is in model.entity.user
-    user = User(email="adminuser@example.com", hash_password="hashed_password2", role="admin")  # Adjust fields as per User model
+    """Create (or return existing) an admin user with role 'admin'."""
+    from model.entity.user import User
+
+    existing = test_db.query(User).filter_by(email="adminuser@example.com").first()
+    if existing:
+        return existing
+
+    user = User(
+        email="adminuser@example.com",
+        hash_password="hashed_password2",
+        role="admin",
+    )
     test_db.add(user)
-    test_db.commit()
+    test_db.flush()
     return user
+
 
 # role="user" login helper
 @pytest.fixture

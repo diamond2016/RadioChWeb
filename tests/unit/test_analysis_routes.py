@@ -1,9 +1,5 @@
-import pytest
 from unittest.mock import patch
 
-from route.analysis_route import analysis_bp, delete_analysis, approve_analysis
-from route.proposal_route import proposal_bp
-from database import db
 from model.entity.stream_analysis import StreamAnalysis
 from model.entity.proposal import Proposal
 
