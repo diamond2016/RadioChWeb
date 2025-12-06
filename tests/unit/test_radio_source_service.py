@@ -16,7 +16,7 @@ from service.radio_source_service import RadioSourceService
 from service.proposal_validation_service import ProposalValidationService
 from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
-from model.entity.stream_analysis import StreamAnalysis
+
 
 from model.dto.validation import ProposalUpdateRequest
 from model.dto.validation import ValidationResult
@@ -106,6 +106,7 @@ class TestRadioSourceService:
         mock_radio_source_repo.save.assert_called_once()
         mock_proposal_repo.delete.assert_called_once_with(1)
 
+
     def test_save_from_proposal_validation_failure(
         self, radio_source_service, mock_validation_service
     ):
@@ -122,6 +123,7 @@ class TestRadioSourceService:
         ):
             radio_source_service.save_from_proposal(1)
 
+
     def test_save_from_proposal_not_found(
         self, radio_source_service, mock_proposal_repo, mock_validation_service
     ):
@@ -134,6 +136,7 @@ class TestRadioSourceService:
         # Act & Assert
         with pytest.raises(ValueError, match="Proposal with ID 1 not found"):
             radio_source_service.save_from_proposal(1)
+
 
     def test_reject_proposal_success(self, radio_source_service, mock_proposal_repo):
         """Test successfully rejecting a proposal."""
@@ -155,6 +158,7 @@ class TestRadioSourceService:
         assert result
         mock_proposal_repo.delete.assert_called_once_with(1)
 
+
     def test_reject_proposal_not_found(self, radio_source_service, mock_proposal_repo):
         """Test rejecting fails when proposal not found."""
         # Arrange
@@ -165,6 +169,7 @@ class TestRadioSourceService:
 
         # Assert
         assert not result
+
 
     def test_update_proposal_success(self, radio_source_service, mock_proposal_repo):
         """Test successfully updating proposal data."""
@@ -267,17 +272,6 @@ class TestRadioSourceService:
         # Assert
         assert result == proposals
 
-    def test_reject_proposal(self, radio_source_service, mock_proposal_repo):
-        """Test successfully rejecting a proposal."""
-        # Arrange
-        mock_proposal_repo.delete.return_value = True
-
-        # Act
-        result = radio_source_service.reject_proposal(1)
-
-        # Assert
-        assert result is True
-        mock_proposal_repo.delete.assert_called_once_with(1)
 
     def test_reject_proposal_not_found(self, radio_source_service, mock_proposal_repo):
         """Test rejecting a proposal that doesn't exist."""

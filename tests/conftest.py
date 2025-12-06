@@ -14,10 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # to make tables found at db.create_all()
 from database import db
 from model.entity.stream_type import StreamType
-from model.entity.stream_analysis import StreamAnalysis
-from model.entity.user import User
-from model.entity.radio_source import RadioSource
-from model.entity.proposal import Proposal
+
 
 
 @pytest.fixture(scope="session")

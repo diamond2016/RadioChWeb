@@ -13,7 +13,7 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
 - Complex RBAC (permissions table) — defer to later if needed.
 - UI redesign — add minimal UI changes only (navbar badges/links).
 
-## Implementation Steps (concrete)
+## Implementation Steps (main points)
 1. Branch:
    - `git checkout -b feat/auth-roles`
 1. Domain: `model/entity/user.py`
@@ -91,19 +91,15 @@ Add server-side role-based authorization (user vs admin). Use the existing `role
    if __name__ == '__main__':
        main()
    ```
-   - Run locally (do not commit secrets): `python scripts/create_admin.py --email admin@example.com --password 'Strong!'`
-7. Tests (new)
-   - `tests/integration/test_auth_admin_flow.py` (skeleton):
-     - Create admin via `AuthService.register_user(..., role='admin')` or create via the repo directly in test DB.
-     - Log in with test client, POST to admin-only endpoints and assert success and DB side-effect.
-     - Log in as normal user and assert 403 on admin endpoints.
-   - Unit tests:
-     - `test_user_is_admin` (verify `is_admin` behavior).
-     - `test_admin_required_decorator` (use Flask test_request_context and a mocked `current_user` to assert abort).
-1. Audit (optional)
-   - Consider a simple `admin_actions` table for future auditing. Optional for MVP.
+   - Run locally (do not commit secrets): `python scripts/create_admin.py --email $ADMIN_EMAIL --password $ADMIN_PASSWORD`
 
-## File Summary (exact edits)
+1. Tests (new)
+  In general use the existing test DB fixture in `tests/conftest.py` to create users with different roles and test the behavior of protected endpoints.
+
+1. Audit (optional)
+   - Consider a simple `admin_actions` table for future auditing. Optional for MVP. This will be made adding a new table with fields: id, admin_user_id, action_type, target_id, timestamp, in a future PR.
+
+## File Summary (main, for exact list see PR)
 - `model/entity/user.py` — add `is_admin` property.
 - `service/authorization.py` — new.
 - `route/proposal_route.py` — import decorator + protect `approve_proposal`.
