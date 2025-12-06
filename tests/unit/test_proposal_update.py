@@ -1,7 +1,7 @@
 from model.entity.proposal import Proposal
 
 
-def test_update_proposal_post(test_app, test_db, login_helper):
+def test_update_proposal_post(test_app, test_db, test_user, login_helper):
     
     with test_app.test_client() as client:
         login_helper(client)       # logs test_user into this client
@@ -16,7 +16,7 @@ def test_update_proposal_post(test_app, test_db, login_helper):
             country="OldCountry",
             description="Old description",
             image_url="https://old.example.com/img.png",
-            proposal_user=client
+            proposal_user=test_user
         )
         test_db.add(proposal)
         test_db.commit()

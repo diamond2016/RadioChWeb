@@ -2,23 +2,28 @@
 Test configuration and fixtures for RadioChWeb tests.
 """
 
-from flask_login import login_user
 import pytest
 import sys
 from pathlib import Path
 from flask import Flask
 from unittest.mock import Mock
 
-
 # Add current directory to Python path for tests
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# to make tables found at db.create_all()
 from database import db
 from model.entity.stream_type import StreamType
-from route.auth_route import login
+from model.entity.stream_analysis import StreamAnalysis
+from model.entity.user import User
+from model.entity.radio_source import RadioSource
+from model.entity.proposal import Proposal
+
 
 @pytest.fixture(scope="session")
 def test_app():
+
+
     """Create a test Flask application."""
     app = Flask(__name__)
     app.config["TESTING"] = True

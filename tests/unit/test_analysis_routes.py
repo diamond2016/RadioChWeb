@@ -69,15 +69,15 @@ def test_approve_analysis_route_creates_proposal(test_app, test_db, login_helper
         test_db.commit()
         assert sa.id is not None
 
-    with patch(
-        "service.stream_analysis_service.shutil.which", return_value="/usr/bin/ffmpeg"
-    ):
-        with patch("route.analysis_route.url_for", return_value="/"):
-            with test_app.test_request_context(
-                f"/analysis/approve/{sa.id}", method="POST"
-            ):
-                resp = approve_analysis(sa.id)
-                assert resp is not None
+        with patch(
+            "service.stream_analysis_service.shutil.which", return_value="/usr/bin/ffmpeg"
+        ):
+            with patch("route.analysis_route.url_for", return_value="/"):
+                with test_app.test_request_context(
+                    f"/analysis/approve/{sa.id}", method="POST"
+                ):
+                    resp = client.post(f"/analysis/approve/{sa.id}")
+                    assert resp is not None
 
     # Verify the StreamAnalysis row was removed after proposing
     found = (
