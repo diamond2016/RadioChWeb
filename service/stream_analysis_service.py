@@ -218,7 +218,7 @@ class StreamAnalysisService:
         normalized plain-text snippet. Returns None when no metadata block found.
 
         Strategy:
-        - Normalize newlines, find last occurrence of a line matching '^\s*Metadata:\s*$'.
+        - Normalize newlines, find last occurrence of a line matching '^\\s*Metadata:\\s*$'.
         - Capture subsequent indented lines (leading whitespace) until an empty
           line or a non-indented section header is found.
         - Strip control characters (keep newline and tab), normalize colon spacing,
@@ -230,7 +230,7 @@ class StreamAnalysisService:
         norm = output.replace('\r\n', '\n').replace('\r', '\n')
 
         # Find all 'Metadata:' markers; choose the last one
-        meta_matches = [m.start() for m in re.finditer(r"^\s*Metadata:\s*$", norm, flags=re.MULTILINE)]
+        meta_matches = [m.start() for m in re.finditer("^\\s*Metadata:\\s*$", norm, flags=re.MULTILINE)]
         if not meta_matches:
             return None
 
