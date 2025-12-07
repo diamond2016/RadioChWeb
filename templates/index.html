@@ -17,10 +17,10 @@
       /* reduce visual noise under large text blocks */
       .hero, .page-title {
         background: transparent;
-        padding: 2rem 0;
+        padding: 1rem 0;
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 768px) and (max-height: 600px) {
         body { background-attachment: scroll; }
         .card { background: rgba(255,255,255,0.98); }
       }
@@ -65,7 +65,7 @@
         </nav>
     </header>
 
-    <main class="container mt-4 site-main">
+    <main class="container mt-3 site-main">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="mt-2">

@@ -1,17 +1,16 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Listen - {{ source.name or 'Radio' }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <style>
-    body { display:flex; align-items:center; justify-content:center; height:100vh; background:#f8f9fa; }
-    .player { max-width:720px; width:100%; padding:1.5rem; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; }
-    .stream-url { word-break:break-all; font-size:.9rem; color:#6c757d; margin-top:.5rem; }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block head_content %}
+    <title>Listen {{ source.name }} - RadioChWeb</title>
+{% endblock %}
+{% block styles %}
+<style>
+.player { max-width:720px; width:100%; padding:1.5rem; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.08); text-align:center; 
+  background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('/static/images/new_radio_background.svg');}
+.stream-url { word-break:break-all; font-size:.9rem; color:#6c757d; margin-top:.5rem; }
+</style>
+{% endblock %}
+
+{% block body_content %}
   <div class="player">
     <h5 class="mb-3">{{ source.name or 'Live Stream' }}</h5>
 
@@ -32,12 +31,12 @@
       <button class="btn btn-sm btn-outline-secondary" onclick="window.close()">Close</button>
     </div>
   </div>
-
+{% endblock %}
+{% block scripts %}
   <script>
     // Autoplay often blocked: optional attempt (muted first if desired)
     const audio = document.getElementById('streamPlayer');
     // Try autoplay if you want (may be blocked by browser):
     // audio.play().catch(()=>{/* user gesture required */});
   </script>
-</body>
-</html>
+{% endblock %}

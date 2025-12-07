@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
+{% block head_content %}
     <title>{{ source.name }} - RadioChWeb</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <header>
+{% endblock %}
+
+{% block body_content %} 
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="{{ url_for('main.index') }}">RadioChWeb</a>
@@ -59,11 +55,10 @@
             </div>
         </div>
     </main>
+{% endblock %}
 
-    {% include 'footer.html' %}
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
+{% block scripts %}
+    <script>
     function openStreamWindow(evt, url, w = 700, h = 480) {
         evt.preventDefault();
         const left = Math.max(0, Math.round((screen.width - w) / 2));
@@ -72,6 +67,5 @@
         window.open(url, 'streamPlayerWindow', features);
         return false;
     }
-</script>
-</body>
-</html>
+    </script>
+{% endblock %}
