@@ -16,6 +16,10 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     last_modified_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    # Relationships
+    proposals = db.relationship("Proposal", back_populates="user")
+    stream_analysis = db.relationship("StreamAnalysis", back_populates="user")
+
     def get_id(self):
         return str(self.id)
 

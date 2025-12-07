@@ -1,4 +1,4 @@
--- V2__initialize_stream_types.sql
+-- V2_0__initialize_stream_types.sql
 -- Initialize the stream_types table with predefined classifications from spec 003
 -- This creates the 14 predefined stream type combinations
 

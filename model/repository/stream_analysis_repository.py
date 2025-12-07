@@ -65,3 +65,7 @@ class StreamAnalysisRepository:
             self.db.commit()
             return True
         return False
+    
+    def get_analyses_by_user(self, user_id: int) -> List[StreamAnalysis]:
+        """Retrieve all stream analyses submitted by a specific user."""
+        return self.db.query(StreamAnalysis).filter(StreamAnalysis.created_by == user_id).all()

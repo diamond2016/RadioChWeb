@@ -53,3 +53,7 @@ class ProposalRepository:
     def get_all_proposals(self) -> List[Proposal]:
         """Retrieve all proposals from the database."""
         return self.db.query(Proposal).all()
+    
+    def get_proposals_by_user(self, user_id: int) -> List[Proposal]:
+        """Retrieve all proposals submitted by a specific user."""
+        return self.db.query(Proposal).filter(Proposal.created_by == user_id).all()

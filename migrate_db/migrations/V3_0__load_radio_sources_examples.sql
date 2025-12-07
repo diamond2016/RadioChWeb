@@ -1,4 +1,4 @@
--- V4_0__load_radio_sources_examples.sql
+-- V3_0__load_radio_sources_examples.sql
 -- Create some examples of radio sources to browse in main page
 
 -- Insert examples of radio sources

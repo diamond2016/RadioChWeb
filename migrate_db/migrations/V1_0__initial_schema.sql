@@ -30,6 +30,18 @@ CREATE INDEX idx_radio_sources_stream_url ON radio_sources(stream_url);
 CREATE INDEX idx_radio_sources_stream_type_id ON radio_sources(stream_type_id);
 CREATE INDEX idx_radio_sources_is_secure ON radio_sources(is_secure);
 
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    hash_password VARCHAR(512) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'user',
+    is_active BOOLEAN NOT NULL DEFAULT 1,
+    created_at DATETIME,
+    last_modified_at DATETIME
+);
+CREATE INDEX idx_users_email ON users(email);
+
 DROP TABLE IF EXISTS proposals;
 CREATE TABLE proposals (
     id INTEGER NOT NULL,
@@ -42,9 +54,32 @@ CREATE TABLE proposals (
     country VARCHAR(50),
     description VARCHAR(200),
     created_at DATETIME,
+    created_by INTEGER,
     PRIMARY KEY (id),
-    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
+    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 CREATE INDEX idx_proposals_url ON proposals(stream_url);
 CREATE INDEX idx_proposals_stream_type_id ON proposals(stream_type_id);
 CREATE INDEX idx_proposals_is_secure ON proposals(is_secure);
+CREATE INDEX idx_proposals_created_by ON proposals(created_by);
+
+DROP TABLE IF EXISTS stream_analysis;
+CREATE TABLE stream_analysis (
+    id INTEGER NOT NULL,
+    stream_url VARCHAR(200) NOT NULL,
+    stream_type_id INTEGER,
+    is_valid BOOLEAN NOT NULL,
+    is_secure BOOLEAN NOT NULL,
+    error_code VARCHAR(200),
+    detection_method VARCHAR(200),
+    raw_content_type TEXT NULL,
+    raw_ffmpeg_output TEXT NULL,
+    extracted_metadata TEXT NULL,
+    created_by INTEGER,
+    PRIMARY KEY (id),
+    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
+CREATE INDEX idx_stream_analysis_stream_url ON stream_analysis(stream_url);
+CREATE INDEX idx_stream_analysis_created_by ON stream_analysis(created_by);
