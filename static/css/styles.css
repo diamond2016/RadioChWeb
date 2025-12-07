@@ -1,0 +1,21 @@
+:root{
+  --header-h: 64px; /* approximate header height */
+  --footer-h: 64px; /* footer height to subtract from viewport */
+  --bg-overlay: rgba(255,255,255,0.60); /* tweak for lighter/darker overlay */
+}
+
+.site-main{
+  min-height: calc(100vh - var(--header-h) - var(--footer-h));
+  background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('/static/images/new_radio_background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.site-main h1, .site-main h2, .site-main h3, .site-main h4, .site-main h5, .site-main h6 {
+  color: #333;
+}
