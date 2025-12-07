@@ -1,0 +1,20 @@
+<style>
+:root{
+  --header-h: 64px; /* approximate header height */
+  --footer-h: 64px; /* footer height to subtract from viewport */
+}
+
+.site-main{
+  min-height: calc(100vh - var(--header-h) - var(--footer-h));
+  background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('{{ url_for('static', filename='images/new_radio_background.png') }}');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+</style>
+
+<footer class="bg-transparent text-dark text-center py-3 mt-4">
+    <p>&copy; 2025 <a href="https://github.com/diamond2016/"><em>diamondnet</em></a></p>
+</footer>

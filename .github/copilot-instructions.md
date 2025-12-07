@@ -123,4 +123,12 @@ If something here is out-of-date
 - Consult ARCHITECTURE.md and web-interface.md for authoritative domain details and update this file via a small PR if you find inaccuracies.
 - If a command fails, perform a focused code search for the failing module/file to gather corrective steps and update these instructions.
 
+Sofware code production
+
+- Follow best practices for Python and Flask development.
+- Write clear, maintainable code with comments where necessary.
+- Ensure all new code is covered by tests.
+- Prefer last version of packages e.g Pydantic v2 over 1 or SqlAlchemy v2 over v1 unless there is a specific reason not to.
+- When introduced new dependencies or patterns, add always a detaild explanation in order to allow learning of designer. 
+
 End of instructions.
