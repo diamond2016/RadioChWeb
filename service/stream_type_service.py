@@ -6,6 +6,7 @@ Provides methods to find and manage the predefined stream types from spec 003.
 from typing import Optional, List, Dict
 from model.repository.stream_type_repository import StreamTypeRepository
 from model.dto.stream_type import StreamTypeDTO
+from model.entity.stream_type import StreamType
 
 
 class StreamTypeService:
@@ -28,9 +29,11 @@ class StreamTypeService:
         """
         return self.repository.find_by_combination(protocol, format, metadata)
     
+
     def get_stream_type(self, stream_type_id: int) -> Optional[StreamTypeDTO]:
         """Get StreamType by ID."""
-        stream_type = self.repository.get_by_id(stream_type_id)
+        stream_type: StreamType = self.repository.get_by_id(stream_type_id)
+
         if stream_type:
             # Map from model to DTO, renaming metadata_type to metadata
             return StreamTypeDTO(

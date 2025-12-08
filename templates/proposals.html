@@ -54,6 +54,10 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger btn-sm">Approve Proposal</button>
                         </form>
+                        <form method="post" action="{{ url_for('proposal.reject_proposal', proposal_id=proposal.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-secondary btn-sm">Reject Proposal</button>
+                        </form>
                     {% endif %}
                     </div>
                 </div>

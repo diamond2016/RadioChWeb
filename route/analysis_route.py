@@ -4,7 +4,7 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 """
 
 from typing import List
-from flask import Blueprint, request, render_template, redirect, session, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash
 
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisResult
@@ -31,14 +31,14 @@ def get_radio_source_repo() -> RadioSourceRepository:
     return RadioSourceRepository(db.session)
 
 def get_validation_service() -> ProposalValidationService:
-    proposal_repo = get_proposal_repo()
-    radio_source_repo = get_radio_source_repo()
+    proposal_repo: ProposalRepository = get_proposal_repo()
+    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
     return ProposalValidationService(proposal_repo, radio_source_repo)
 
 def get_radio_source_service() -> RadioSourceService:
-    proposal_repo = get_proposal_repo()
-    radio_source_repo = get_radio_source_repo()
-    validation_service = get_validation_service()
+    proposal_repo: ProposalRepository = get_proposal_repo()
+    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
+    validation_service: ProposalValidationService = get_validation_service()
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
 
 def get_stream_type_repo() -> StreamTypeRepository:
@@ -107,7 +107,7 @@ def approve_analysis(id: int):
     
     try:
         analysis_service: StreamAnalysisService = get_stream_analysis_service()
-        success = analysis_service.save_analysis_as_proposal(id)
+        success: bool = analysis_service.save_analysis_as_proposal(id)
         if success:
             flash('ProposalAnalysis approved and added as proposal for radio source!', 'success')
         else:
@@ -124,7 +124,7 @@ def delete_analysis(id: int):
     analysis_service: StreamAnalysisService = get_stream_analysis_service()
     
     try:
-        success = analysis_service.delete_analysis(id)
+        success: bool = analysis_service.delete_analysis(id)
         if success:
             flash('Stream analysis deleted successfully!', 'success')
         else:

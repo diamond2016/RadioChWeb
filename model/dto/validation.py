@@ -2,15 +2,15 @@
 Validation DTOs for proposal validation and security checks.
 """
 
+from dataclasses import dataclass
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
 from enum import Enum
 
-
-class SecurityStatus(str, Enum):
-    SAFE = "SAFE"
-    WARNING = "WARNING"
-    UNSAFE = "UNSAFE"
+@dataclass
+class SecurityStatus:
+    is_secure: bool
+    warning_message: Optional[str]
 
 
 class ValidationResult(BaseModel):

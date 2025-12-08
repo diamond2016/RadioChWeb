@@ -38,6 +38,14 @@ class ProposalRepository:
         self.db.refresh(proposal)
         return proposal
     
+    def update(self, proposal: Proposal) -> Proposal:
+        """Save (create or update) a Proposal."""
+        if proposal.id is not None:
+            self.db.add(proposal)
+        self.db.commit()
+        self.db.refresh(proposal)
+        return proposal
+    
     def delete(self, proposal_id: int) -> bool:
         """Delete a Proposal by ID."""
         proposal = self.find_by_id(proposal_id)

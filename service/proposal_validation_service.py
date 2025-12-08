@@ -7,6 +7,7 @@ as RadioSourceNodes, including duplicate detection and security checks.
 
 from typing import Optional
 from urllib.parse import urlparse
+from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.dto.validation import ValidationResult, SecurityStatus
@@ -28,8 +29,8 @@ class ProposalValidationService:
         proposal_repo: ProposalRepository,
         radio_source_repo: RadioSourceRepository
     ):
-        self.proposal_repo = proposal_repo
-        self.radio_source_repo = radio_source_repo
+        self.proposal_repo: ProposalRepository = proposal_repo
+        self.radio_source_repo: RadioSourceRepository = radio_source_repo
     
     def validate_proposal(self, proposal_id: int) -> ValidationResult:
         """
@@ -50,7 +51,7 @@ class ProposalValidationService:
         result = ValidationResult(is_valid=True)
         
         # Check proposal exists
-        proposal = self.proposal_repo.find_by_id(proposal_id)
+        proposal: Proposal | None = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             result.add_error(f"Proposal with ID {proposal_id} not found")
             return result
@@ -90,6 +91,7 @@ class ProposalValidationService:
         
         return result
     
+
     def check_duplicate_stream_url(self, stream_url: str) -> bool:
         """
         Check if a stream URL already exists in RadioSourceNode table.
@@ -102,6 +104,7 @@ class ProposalValidationService:
         """
         return self.radio_source_repo.find_by_url(stream_url) is not None
     
+
     def get_security_status(self, proposal_id: int) -> Optional[SecurityStatus]:
         """
         Get the security status of a proposal.
@@ -113,11 +116,14 @@ class ProposalValidationService:
             SecurityStatus object with is_secure flag and warning message,
             or None if proposal not found
         """
-        proposal = self.proposal_repo.find_by_id(proposal_id)
+        proposal: Proposal | None = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             return None
         
-        return SecurityStatus.from_is_secure(proposal.is_secure)
+        if not proposal.is_secure:
+            return SecurityStatus(is_secure=False, warning_message="This stream uses HTTP (not secure)")
+        return SecurityStatus(is_secure=True, warning_message=None)
+
     
     def _is_valid_url(self, url: str) -> bool:
         """

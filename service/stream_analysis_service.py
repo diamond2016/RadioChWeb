@@ -16,6 +16,7 @@ from flask_login import current_user, login_required
 from model.dto.user import UserDTO
 from model.dto.stream_analysis import StreamAnalysisResult, DetectionMethod, ErrorCode
 from model.entity.proposal import Proposal
+from model.entity.stream_analysis import StreamAnalysis
 from model.repository import user_repository
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.stream_type_service import StreamTypeService
@@ -447,20 +448,16 @@ class StreamAnalysisService:
     
     # an authenticated user can transfor a stream and create a proposal
     @login_required
-    def save_analysis_as_proposal(self, stream_or_id) -> bool:
+    def save_analysis_as_proposal(self, stream_id: int) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
 
-        Accepts either a `StreamAnalysisResult`/entity-like object or an integer id.
+        Accepts integer id of StreamAnalysis.
         Returns True on successful creation, False otherwise.
         """
         # Resolve input to an analysis entity/object
         stream_entity = None
-        if isinstance(stream_or_id, int):
-            stream_entity = self.analysis_repository.find_by_id(stream_or_id)
-        else:
-            # Assume stream_or_id is a DTO-like object with attributes
-            stream_entity = stream_or_id
+        stream_entity: StreamAnalysis | None = self.analysis_repository.find_by_id(stream_id)
 
         if not stream_entity:
             print("Cannot create proposal: analysis not found or invalid input.")
@@ -498,42 +495,26 @@ class StreamAnalysisService:
             self.proposal_repository.save(proposal)
             print("Proposal created for stream URL: {}".format(stream_url))
             # After successfully creating a proposal, try to remove the originating analysis
-            try:
-                # If stream_or_id was an int, delete by that id; if it was an object, try to get its id
-                if isinstance(stream_or_id, int):
-                    self.analysis_repository.delete(stream_or_id)
-                else:
-                    stream_id = getattr(stream_entity, 'id', None)
-                    if stream_id:
-                        self.analysis_repository.delete(stream_id)
-            except Exception:
-                # Non-fatal: proposal creation succeeded, analysis deletion failed
-                pass
-
+            self.delete_analysis(stream_id)
             return True
-        except Exception as e:
+        
+        except Exception as e:  
             print(f"Failed to save proposal: {e}")
             return False
 
 
     # an authenticated user can delete a stream analysis created by him
     @login_required
-    def delete_analysis(self, stream_or_id) -> bool:
+    def delete_analysis(self, stream_id: int) -> bool:
         """
         Delete a StreamAnalysis by id or by object.
 
         Returns True if deletion was successful, False otherwise.
         """
-        if isinstance(stream_or_id, int):
-            return self.analysis_repository.delete(stream_or_id)
-
         if (not current_user or not hasattr(current_user, 'id') or current_user.id != stream_entity.user.id):
             print("Cannot delete analysis: no authenticated user or no matching user.")
             return False
         
         # If an object provided, try to get id
-        stream_id = getattr(stream_or_id, 'id', None)
-        if stream_id:
-            return self.analysis_repository.delete(stream_id)
 
-        return False
+        return self.analysis_repository.delete(stream_id)
