@@ -12,9 +12,11 @@ import shutil
 from urllib.parse import urlparse
 from typing import Optional, Dict, Any
 
-from flask_login import login_required
+from flask_login import current_user, login_required
+from model.dto.user import UserDTO
 from model.dto.stream_analysis import StreamAnalysisResult, DetectionMethod, ErrorCode
 from model.entity.proposal import Proposal
+from model.repository import user_repository
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.stream_type_service import StreamTypeService
 from model.repository.proposal_repository import ProposalRepository
@@ -34,6 +36,7 @@ class StreamAnalysisService:
         self.stream_type_service: StreamTypeService = stream_type_service
         self.proposal_repository: ProposalRepository = proposal_repository
         self.analysis_repository: StreamAnalysisRepository = analysis_repository
+        self.user_repository: user_repository.UserRepository = user_repository.UserRepository()
         self._check_prerequisites()
 
     def _check_prerequisites(self) -> None:
@@ -63,12 +66,15 @@ class StreamAnalysisService:
         """
         print("Starting analysis for URL: {}".format(url))
         # FR-004: Check for unsupported protocols first
+        user: UserDTO = self.user_repository.toDTO(current_user.id)
+
         if not self._is_supported_protocol(url):
             return StreamAnalysisResult(
                 stream_url=url,
                 is_valid=False,
                 is_secure=False,
-                error_code=ErrorCode.UNSUPPORTED_PROTOCOL
+                error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+                user = user
             )
         
         # Determine if URL is secure (HTTPS vs HTTP)
@@ -89,7 +95,8 @@ class StreamAnalysisService:
                 stream_url=url,
                 is_valid=False,
                 is_secure=is_secure,
-                error_code=ErrorCode.TIMEOUT
+                error_code=ErrorCode.TIMEOUT,
+                user = user
             )
             
             # FR-003: Compare results, ffmpeg is authoritative
@@ -101,7 +108,8 @@ class StreamAnalysisService:
                 stream_url=url,
                 is_valid=False,
                 is_secure=is_secure,
-                error_code=ErrorCode.NETWORK_ERROR
+                error_code=ErrorCode.NETWORK_ERROR,
+                user = user
             )
     
     def _is_supported_protocol(self, url: str) -> bool:
@@ -146,6 +154,7 @@ class StreamAnalysisService:
         except Exception as e:
             return {"success": False, "content_type": None, "raw_output": str(e)}
     
+
     def _analyze_with_ffmpeg(self, url: str, timeout_seconds: int) -> Dict[str, Any]:
         """
         Analyze stream using ffmpeg -i for deep format analysis.
@@ -184,6 +193,7 @@ class StreamAnalysisService:
         except Exception as e:
             return {"success": False, "format": None, "codec": None, "raw_output": str(e)}
     
+
     def _extract_content_type(self, headers: str) -> Optional[str]:
         """Extract content-type from HTTP headers."""
         # Handle both actual newlines and literal \n in headers
@@ -193,6 +203,7 @@ class StreamAnalysisService:
                 return line.split(':', 1)[1].strip()
         return None
     
+
     def _parse_ffmpeg_output(self, output: str) -> Optional[Dict[str, str]]:
         """
         Parse ffmpeg output to extract format and codec information.
@@ -221,6 +232,7 @@ class StreamAnalysisService:
             "format": format_name,
             "codec": codec
         }
+
 
     def _extract_metadata_from_ffmpeg_output(self, output: str) -> Optional[str]:
         """
@@ -284,11 +296,14 @@ class StreamAnalysisService:
             cleaned = cleaned[:4096]
         return cleaned
     
+
     def _resolve_analysis_results(self, curl_result: dict, ffmpeg_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """
         Resolve analysis results from curl and ffmpeg.
         FR-003: FFmpeg is authoritative when results differ.
         """
+        user: UserDTO = self.user_repository.toDTO(current_user.id)
+
         # If ffmpeg failed, try to use curl results
         if not ffmpeg_result["success"]:
             if curl_result["success"]:
@@ -301,11 +316,14 @@ class StreamAnalysisService:
                     error_code=ErrorCode.UNREACHABLE,
                     raw_content_type=curl_result.get("raw_output"),
                     raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
-                    extracted_metadata=ffmpeg_result.get("extracted_metadata")
+                    extracted_metadata=ffmpeg_result.get("extracted_metadata"),
+                    user = user
                 )
         
         # FFmpeg succeeded - use it as authoritative source
         format_name = ffmpeg_result["format"]
+        user: UserDTO = self.user_repository.toDTO(current_user.id)
+
         if not format_name:
             return StreamAnalysisResult(
                 is_valid=False,
@@ -314,7 +332,8 @@ class StreamAnalysisService:
                 error_code=ErrorCode.INVALID_FORMAT,
                 raw_content_type=curl_result.get("raw_output"),
                 raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
-                extracted_metadata=ffmpeg_result.get("extracted_metadata")
+                extracted_metadata=ffmpeg_result.get("extracted_metadata"),
+                user = user
             )
         
         # Determine protocol (HTTP/HTTPS based on URL, or HLS if m3u8 detected)
@@ -340,18 +359,22 @@ class StreamAnalysisService:
             detection_method=detection_method,
             raw_content_type=curl_result.get("raw_output"),
             raw_ffmpeg_output=ffmpeg_result.get("raw_output"),
-            extracted_metadata=ffmpeg_result.get("extracted_metadata")
+            extracted_metadata=ffmpeg_result.get("extracted_metadata"),
+            user = user
         )
     
     def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """Classify stream based only on curl content-type headers."""
         content_type = curl_result["content_type"]
+        user: UserDTO = self.user_repository.toDTO(current_user.id)
+
         if not content_type:
             return StreamAnalysisResult(
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
-                raw_content_type=curl_result.get("raw_output")
+                raw_content_type=curl_result.get("raw_output"),
+                user = user
             )
         
         # Map content-type to format
@@ -374,7 +397,8 @@ class StreamAnalysisService:
                 stream_url=curl_result.get("stream_url", None),
                 is_secure=is_secure,
                 detection_method=DetectionMethod.HEADER,
-                raw_content_type=curl_result.get("raw_output")
+                raw_content_type=curl_result.get("raw_output"),
+                user = user
             )
         
         if not format_name:
@@ -382,7 +406,8 @@ class StreamAnalysisService:
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
-                raw_content_type=curl_result.get("raw_output")
+                raw_content_type=curl_result.get("raw_output"),
+                user = user
             )
         
         protocol = "HTTPS" if is_secure else "HTTP"
@@ -396,7 +421,8 @@ class StreamAnalysisService:
             stream_url=curl_result.get("stream_url", None),
             is_secure=is_secure,
             detection_method=DetectionMethod.HEADER,
-            raw_content_type=curl_result.get("raw_output")
+            raw_content_type=curl_result.get("raw_output"),
+            user = user
         )
     
     def _detect_metadata_support(self, headers: str) -> str:
@@ -450,6 +476,10 @@ class StreamAnalysisService:
             print("Cannot create proposal for invalid analysis or missing data.")
             return False
 
+        if (not current_user or not hasattr(current_user, 'id') or current_user.id != stream_entity.user.id):
+            print("Cannot create proposal: no authenticated user or no matching user.")
+            return False
+        
         proposal = Proposal(
             stream_url=stream_url,
             name="",
@@ -460,6 +490,7 @@ class StreamAnalysisService:
             stream_type_id=stream_type_id,
             is_secure=is_secure,
             created_at=date.today(),
+            user=self.user_repository.find_by_id(current_user.id)
         )
 
         # Save proposal to repository
@@ -484,6 +515,7 @@ class StreamAnalysisService:
             print(f"Failed to save proposal: {e}")
             return False
 
+
     # an authenticated user can delete a stream analysis created by him
     @login_required
     def delete_analysis(self, stream_or_id) -> bool:
@@ -495,6 +527,10 @@ class StreamAnalysisService:
         if isinstance(stream_or_id, int):
             return self.analysis_repository.delete(stream_or_id)
 
+        if (not current_user or not hasattr(current_user, 'id') or current_user.id != stream_entity.user.id):
+            print("Cannot delete analysis: no authenticated user or no matching user.")
+            return False
+        
         # If an object provided, try to get id
         stream_id = getattr(stream_or_id, 'id', None)
         if stream_id:

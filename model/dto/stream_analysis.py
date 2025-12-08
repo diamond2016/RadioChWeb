@@ -8,6 +8,8 @@ from pydantic import BaseModel, HttpUrl, ConfigDict
 from pydantic import field_validator
 from enum import Enum
 
+from model.dto.user import UserDTO
+
 
 class DetectionMethod(str, Enum):
     HEADER = "HEADER"
@@ -37,8 +39,7 @@ class StreamAnalysisRequest(BaseModel):
 
 class StreamAnalysisResult(BaseModel):
     """
-    Data structure returned by analysis process (persisted for page proposal.html).
-    This is the main return type from spec 003 analyze-and-classify process.
+    Data structure returned by analysis process (persisted in page analysis.html).
     """
     is_valid: bool
     is_secure: bool  # False for HTTP, true for HTTPS
@@ -50,6 +51,7 @@ class StreamAnalysisResult(BaseModel):
     raw_content_type: Optional[str] = None  # String from curl headers
     raw_ffmpeg_output: Optional[str] = None  # String from ffmpeg detection
     extracted_metadata: Optional[str] = None  # Normalized metadata extracted from ffmpeg stderr
+    user: UserDTO  # The user who requested the analysis
         
     @field_validator('extracted_metadata')
     def _clean_extracted_metadata(cls, v: Optional[str]) -> Optional[str]:

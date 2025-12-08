@@ -1,5 +1,6 @@
 from typing import Optional
 from database import db
+from model.dto.user import UserDTO
 from model.entity.user import User
 
 
@@ -34,3 +35,13 @@ class UserRepository:
         self.session.commit()
         self.session.refresh(user)
         return user
+    
+    def toDTO(self, user_id: int) -> UserDTO:
+        user = self.find_by_id(user_id)
+        if user is None:
+            return None
+        return UserDTO(
+            id=user.id,
+            email=user.email,
+            role=user.role
+        )

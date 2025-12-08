@@ -4,16 +4,15 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 """
 
 from typing import List
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash
+
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisResult
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
-from model.entity.proposal import Proposal
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.stream_analysis_service import StreamAnalysisService
-from service.stream_type_service import StreamTypeService
 
 
 analysis_bp = Blueprint('analysis', __name__, url_prefix='/analysis')
@@ -98,7 +97,8 @@ def analyze_url():
             detection_method=result.detection_method.name if result.detection_method else None,
             raw_content_type=result.raw_content_type,
             raw_ffmpeg_output=result.raw_ffmpeg_output,
-            extracted_metadata=result.extracted_metadata
+            extracted_metadata=result.extracted_metadata,
+            created_by=result.user.id if result.user else None
         )
         analysis_repo.save(analysis_entity)              
    

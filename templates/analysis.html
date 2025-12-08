@@ -25,7 +25,9 @@
                 <label for="url" class="form-label">Stream URL</label>
                 <input type="url" class="form-control" id="url" name="url" required>
             </div>
+            {% if current_user.is_authenticated %}
             <button type="submit" class="btn btn-primary">Analyze</button>
+            {% endif %}
         </form>
 
         <h2 class="mt-4">Analysis Results</h2>
@@ -56,6 +58,7 @@
                     <td>{{ stream.detection_method }}</td>
                     <td style="white-space: pre-wrap;">{{ stream.extracted_metadata }}</td>
                         </td>
+                    {% if (current_user.is_authenticated and current_user.id == stream.created_by) or (current_user.is_authenticated and current_user.is_admin) %}
                     <td>
                         <form method="post" action="{{ url_for('analysis.delete_analysis', id=stream.id) }}" style="display:inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -68,6 +71,7 @@
                             <button type="submit" class="btn btn-primary btn-sm">Propose</button>
                         </form>
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
