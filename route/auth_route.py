@@ -33,6 +33,7 @@ class LoginForm(FlaskForm):
 
 user_repo = UserRepository()
 
+@login_required
 @auth_bp.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
@@ -55,8 +56,6 @@ def change_password():
     return render_template('user/change_password.html', form=form)
 
 user_repo = UserRepository()
-
-
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -90,6 +89,7 @@ def login():
     return render_template('user/login.html', form=form)
 
 
+@login_required
 @auth_bp.route('/logout')
 @login_required
 def logout():
