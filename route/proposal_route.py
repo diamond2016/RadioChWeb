@@ -5,6 +5,7 @@ Implements spec 003: propose-new-radio-source and spec 004: admin-approve-propos
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
+from model.dto.radio_source import RadioSourceDTO
 from model.dto.validation import ValidationResult
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
@@ -116,7 +117,12 @@ def update_proposal(proposal_id):
         # Accept either 'image' (form) or 'image_url' (tests/clients)
         image_url: str | None = request.form.get('image_url') or request.form.get('image') or None  
 
-        update_dto = ProposalUpdateRequest(
+        existing: ProposalDTO | None = proposal_service.get_proposal(proposal_id)    
+        update_dto = ProposalDTO(
+            id=existing.id,
+            stream_url=existing.stream_url,
+            is_secure=existing.is_secure,
+            stream_type_id=existing.stream_type_id,
             name=name,
             website_url=website_url,
             country=country,
@@ -142,7 +148,7 @@ def approve_proposal(proposal_id):
     radio_source_service = get_radio_source_service()
     
     try:
-        success: RadioSource = radio_source_service.save_from_proposal(proposal_id)
+        success: RadioSourceDTO = radio_source_service.save_from_proposal(proposal_id)
         if success:
             flash('Proposal approved and added as radio source!', 'success')
         else:

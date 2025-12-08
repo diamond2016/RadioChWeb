@@ -99,7 +99,6 @@ class RadioSourceService:
             raise RuntimeError(f"Failed to save radio source: {str(e)}")
 
 
-    @login_required
     def get_all_radio_sources(self) -> list[RadioSourceDTO]:
         """
         Get all radio sources.
@@ -114,7 +113,31 @@ class RadioSourceService:
         return radio_source_dtos   
 
 
-
+    def get_radio_source_by_id(self, id) -> RadioSourceDTO | None:
+        """ get a radio source by id"""
+        radio_source: RadioSource | None = self.radio_source_repo.find_by_id(id)
+        if radio_source:
+            return RadioSourceDTO.model_validate(radio_source)
+        return None
+    
+    # only admin can edit a radio source
+    @admin_required
+    def update_radio_source(self, radio_source_dto: RadioSourceDTO) -> RadioSourceDTO:
+        """ update a radio source"""
+        radio_source: RadioSource | None = self.radio_source_repo.find_by_id(radio_source_dto.id)
+        if not radio_source:
+            raise ValueError(f"Radio source with ID {radio_source_dto.id} not found")
+        
+        # Update fields
+        radio_source.name = radio_source_dto.name
+        radio_source.stream_url = radio_source_dto.stream_url
+        radio_source.description = radio_source_dto.description
+        radio_source.stream_type_id = radio_source_dto.stream_type_id
+        
+        # Save updated radio source
+        updated_radio_source: RadioSource = self.radio_source_repo.save(radio_source)
+        return RadioSourceDTO.model_validate(updated_radio_source)
+    
     # only admin can delete a radio source
     @admin_required
     def delete_radio_source(self, id) -> bool:

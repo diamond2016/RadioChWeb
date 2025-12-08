@@ -5,6 +5,8 @@ Provides CRUD operations for radio sources.
 
 from typing import List
 from flask import Blueprint, request,render_template, redirect, url_for, flash
+from model.dto.radio_source import RadioSourceDTO
+from model.entity.radio_source import RadioSource
 from model.entity.stream_type import StreamType
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.radio_source_service import RadioSourceService
@@ -27,10 +29,12 @@ def get_stream_type_repo() -> StreamTypeRepository:
 
 
 @radio_source_bp.route('/<int:source_id>')
-def source_detail(source_id):
+def source_detail(source_id: int):
     """Display radio source details."""
-    radio_source_repo = get_radio_source_repo()
-    source = radio_source_repo.find_by_id(source_id)
+    
+    radio_source_service: RadioSourceService = get_radio_source_service()
+    source: RadioSourceDTO | None = radio_source_service.get_radio_source_by_id(source_id)
+
     if not source:
         flash('Radio source not found', 'error')
         return redirect(url_for('main.index'))
@@ -39,11 +43,11 @@ def source_detail(source_id):
 
 
 @radio_source_bp.route('/edit/<int:source_id>', methods=['GET', 'POST'])
-def edit_source(source_id):
+def edit_source(source_id: int):
     """Edit radio source."""
-    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
+    radio_source_service: RadioSourceService = get_radio_source_service()
     stream_type_repo: StreamTypeRepository = get_stream_type_repo()
-    source = radio_source_repo.find_by_id(source_id)
+    source: RadioSourceDTO | None = radio_source_service.get_radio_source_by_id(source_id)
     
     if not source:
         flash('Radio source not found', 'error')
@@ -56,7 +60,7 @@ def edit_source(source_id):
         source.stream_type_id = int(request.form.get('stream_type_id'))
 
         try:
-            radio_source_repo.save(source)
+            radio_source_service.update_radio_source(source)
             flash('Radio source updated successfully!', 'success')
             return redirect(url_for('radio_source.source_detail', source_id=source.id))
         
@@ -70,7 +74,7 @@ def edit_source(source_id):
 
 
 @radio_source_bp.route('/delete/<int:source_id>', methods=['POST'])
-def delete_source(source_id):
+def delete_source(source_id: int):
     """Delete radio source."""
     radio_source_service: RadioSourceService = get_radio_source_service()
     

@@ -80,7 +80,7 @@ def analyze_url():
         flash(f'Analysis result: {result.stream_type_display_name if result.stream_type_display_name else "Unknown"}', 'info')
 
         # Save detail in repo
-        analysis_repo = get_analysis_repo()
+        analysis_repo: StreamAnalysisRepository = get_analysis_repo()
         analysis_entity = StreamAnalysis(
             stream_url=url,
             is_valid=result.is_valid,

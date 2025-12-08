@@ -44,16 +44,20 @@ def change_password():
         new = form.new_password.data
         user = current_user
         res = auth_service.verify_password(old, user.hash_password)
+
         if isinstance(res, tuple):
             verified = bool(res[0])
         else:
             verified = bool(res)
+        
         if not verified:
             flash('Current password incorrect', 'error')
             return render_template('user/change_password.html', form=form), 400
+        
         auth_service.change_password(user, new)
         flash('Password changed successfully', 'success')
         return redirect(url_for('main.index'))
+    
     return render_template('user/change_password.html', form=form)
 
 user_repo = UserRepository()
