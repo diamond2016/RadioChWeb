@@ -5,6 +5,7 @@ Proposal DTOs for proposal data transfer.
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
+from model.dto import user
 from model.dto.stream_type import StreamTypeDTO
 from model.dto.user import UserDTO
 
@@ -52,14 +53,14 @@ class ProposalDTO(BaseModel):
     stream_url: str
     name: str
     website_url: Optional[str] = None
-    stream_type: StreamTypeDTO
+    stream_type_id: int
     is_secure: bool
     country: Optional[str] = None
     description: Optional[str] = None
     image_url: Optional[str] = None
-    created_by: UserDTO
-    is_secure: bool
+    created_at: Optional[str] = None  # ISO formatted datetime string
+    stream_type: Optional[StreamTypeDTO] = None
+    user: Optional[user.UserDTO] = None
 
     model_config = ConfigDict(from_attributes=True)
-    def __repr__(self):
-        return f"<Proposal(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"
+    

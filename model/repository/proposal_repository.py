@@ -24,7 +24,7 @@ class ProposalRepository:
     
     def find_by_url(self, url: str) -> Optional[Proposal]:
         """Get Proposal by URL."""
-        return self.db.query(Proposal).filter(Proposal.url == url).first()
+        return self.db.query(Proposal).filter(Proposal.stream_url == url).first()
     
     def find_all(self) -> List[Proposal]:
         """Get all Proposals."""
@@ -71,20 +71,3 @@ class ProposalRepository:
         """Retrieve all proposals submitted by a specific user."""
         return self.db.query(Proposal).filter(Proposal.created_by == user_id).all()
     
-    def to_dto(self, proposal_id: int) -> Optional[ProposalDTO]:
-        proposal: Proposal | None = self.find_by_id(proposal_id)
-        if proposal is None:
-            return None
-        
-        return ProposalDTO(
-            id=proposal.id,
-            stream_url=proposal.stream_url,
-            name=proposal.name,
-            website_url=proposal.website_url,
-            stream_type=self.stream_type_repo.to_dto(proposal.stream_type_id) if proposal.stream_type_id else None,
-            country=proposal.country,
-            description=proposal.description,
-            image_url=proposal.image_url,
-            created_by=self.user_repo.to_dto(proposal.created_by) if proposal.created_by else None,
-            is_secure=proposal.is_secure
-        )

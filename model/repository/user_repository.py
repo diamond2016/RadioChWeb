@@ -36,13 +36,3 @@ class UserRepository:
         self.session.refresh(user)
         return user
     
-    def to_dto(self, user_id: int) -> Optional[UserDTO]:
-        user = self.find_by_id(user_id)
-        if user is None:
-            return None
-        
-        return UserDTO(
-            id=user.id,
-            email=user.email,
-            role=user.role
-        )

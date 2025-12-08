@@ -26,7 +26,7 @@ class AuthService:
         lm.init_app(app)
 
         @lm.user_loader
-        def load_user(user_id):
+        def user_loader(user_id: int) -> User | None:
             return self.user_repo.find_by_id(int(user_id))
 
         self.login_manager = lm

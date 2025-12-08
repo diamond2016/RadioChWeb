@@ -76,16 +76,3 @@ class StreamTypeRepository:
         stream_types: List[StreamType] = self.find_all()
         return {st.type_key: st.id for st in stream_types}
     
-
-    def to_dto(self, stream_type_id: int) -> Optional[StreamTypeDTO]:
-        """Convert StreamType entity to StreamTypeDTO."""
-        stream_type: StreamType | None = self.find_by_id(stream_type_id)
-        if stream_type is None:
-            return None
-        return StreamTypeDTO(
-            id=stream_type.id,
-            protocol=stream_type.protocol,
-            format=stream_type.format,
-            metadata_type=stream_type.metadata_type,
-            display_name=stream_type.display_name
-        )
