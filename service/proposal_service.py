@@ -12,7 +12,7 @@ from model.entity import proposal
 from service.auth_service import admin_required
 from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
-from model.dto.proposal import ProposalDTO, ProposalUpdateRequest
+from model.dto.proposal import ProposalDTO
 
 
 class ProposalService:
@@ -21,16 +21,16 @@ class ProposalService:
 
     # a user can propose from analyze stream an can update proposals if is their own
     @login_required
-    def update_proposal(self, proposal_id: int, updates: ProposalUpdateRequest) -> ProposalDTO:
+    def update_proposal(self, proposal_id: int, updates: ProposalDTO) -> ProposalDTO:
         """Update editable fields of a proposal and persist changes.
 
-        Editable fields: name, website_url, country, description, image (mapped to image_url)
+        Non Editable fields: id, stream_url, stream_type_id, is_secure 
         """
         proposal = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             raise ValueError(f"Proposal with ID {proposal_id} not found")
 
-        if not updates.has_updates():
+        if not updates:
             raise ValueError("No updates provided")
 
         if updates.name is not None:
@@ -51,7 +51,7 @@ class ProposalService:
         result: proposal = self.proposal_repo.update(proposal)
         if result is None:
             return None
-        return self.proposal_repo.to_dto(result.id)
+        return ProposalDTO.model_validate(proposal)
     
 
     def get_proposal(self, proposal_id: int) -> Optional[ProposalDTO]:
@@ -64,10 +64,11 @@ class ProposalService:
         Returns:
             Proposal if found, None otherwise
         """
-        result: proposal = self.proposal_repo.find_by_id(proposal_id)
+        result: Proposal = self.proposal_repo.find_by_id(proposal_id)
         if result is None:
             return None
-        return self.proposal_repo.to_dto(result.id)
+        
+        return ProposalDTO.model_validate(result)
     
 
     def get_all_proposals(self) -> list[ProposalDTO]:
@@ -81,7 +82,7 @@ class ProposalService:
         proposals: List[Proposal] = self.proposal_repo.get_all_proposals()
         proposal_dtos: List[ProposalDTO] = []
         for proposal in proposals:
-            new_proposal: ProposalDTO = self.proposal_repo.to_dto(proposal.id)
+            new_proposal: ProposalDTO = ProposalDTO.model_validate(proposal)
             proposal_dtos.append(new_proposal)
         return proposal_dtos   
 

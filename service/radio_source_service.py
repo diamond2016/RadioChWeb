@@ -7,8 +7,12 @@ transaction handling.
 """
 
 from datetime import datetime
+from typing import List
 
 from flask_login import login_required
+from model.dto.radio_source import RadioSourceDTO
+from model.dto.validation import ValidationResult
+from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from service.auth_service import admin_required
@@ -38,7 +42,7 @@ class RadioSourceService:
     
     # admin can transfor a proposal in radio source
     @admin_required
-    def save_from_proposal(self, proposal_id: int) -> RadioSource:
+    def save_from_proposal(self, proposal_id: int) -> RadioSourceDTO:
         """
         Save a proposal as a RadioSourceNode in the database.
         
@@ -53,19 +57,19 @@ class RadioSourceService:
             
         Returns:
             The saved RadioSourceNode
-            
+            as a RadioSourceDTO
         Raises:
             ValueError: If validation fails or proposal not found
             RuntimeError: If database operation fails
         """
         # Validate proposal
-        validation_result = self.validation_service.validate_proposal(proposal_id)
+        validation_result: ValidationResult = self.validation_service.validate_proposal(proposal_id)
         if not validation_result.is_valid:
             error_msg = "; ".join(validation_result.errors)
             raise ValueError(f"Proposal validation failed: {error_msg}")
         
         # Get proposal
-        proposal = self.proposal_repo.find_by_id(proposal_id)
+        proposal: Proposal | None = self.proposal_repo.find_by_id(proposal_id)
         if not proposal:
             raise ValueError(f"Proposal with ID {proposal_id} not found")
         
@@ -81,30 +85,34 @@ class RadioSourceService:
             image_url=proposal.image_url,
             created_at=datetime.now()
         )
-        
+     
         try:
             # Save RadioSourceNode (this will commit the transaction)
-            saved_source = self.radio_source_repo.save(radio_source)
+            saved_source: RadioSource = self.radio_source_repo.save(radio_source)
             
             # Delete proposal after successful save
             self.proposal_repo.delete(proposal_id)
             
-            return saved_source
+            return RadioSourceDTO.model_validate(saved_source)
             
         except Exception as e:
             raise RuntimeError(f"Failed to save radio source: {str(e)}")
-    
-    # to check:  there is analog function in proposal_service
+
+
     @login_required
-    
-    def get_all_radio_sources(self) -> list[RadioSource]:
+    def get_all_radio_sources(self) -> list[RadioSourceDTO]:
         """
         Get all radio sources.
-        
         Returns:
             List of all radio sources
         """
-        return self.radio_source_repo.find_all()
+        radio_sources: List[RadioSource] = self.radio_source_repo.find_all()
+        radio_source_dtos: List[RadioSourceDTO] = []
+        for radio_source in radio_sources:
+            new_radio_source: RadioSourceDTO = RadioSourceDTO.model_validate(radio_source)
+            radio_source_dtos.append(new_radio_source)
+        return radio_source_dtos   
+
 
 
     # only admin can delete a radio source

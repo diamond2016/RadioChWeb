@@ -35,19 +35,20 @@ class StreamTypeService:
         stream_type: StreamType = self.repository.get_by_id(stream_type_id)
 
         if stream_type:
-            # Map from model to DTO, renaming metadata_type to metadata
-            return StreamTypeDTO(
-                id=stream_type.id,
-                protocol=stream_type.protocol,
-                format=stream_type.format,
-                metadata=stream_type.metadata_type,
-                display_name=stream_type.display_name
-            )
+            stream_type_dto = StreamTypeDTO.model_validate({
+                "id": stream_type.id,
+                "protocol": stream_type.protocol,
+                "format": stream_type.format,
+                "metadata": stream_type.metadata_type,
+                "display_name": stream_type.display_name
+            })
+            return stream_type_dto
         return None
     
     def get_all_stream_types(self) -> List[StreamTypeDTO]:
         """Get all available StreamTypes."""
-        stream_types = self.repository.get_all()
+        stream_types: List[StreamType] = self.repository.get_all()
+
         return [StreamTypeDTO(
             id=st.id,
             protocol=st.protocol,
@@ -56,6 +57,7 @@ class StreamTypeService:
             display_name=st.display_name
         ) for st in stream_types]
     
+
     def get_predefined_types_map(self) -> Dict[str, int]:
         """
         Get a map of type keys (PROTOCOL-FORMAT-METADATA) to IDs.
@@ -63,6 +65,7 @@ class StreamTypeService:
         """
         return self.repository.get_type_key_to_id_map()
     
+
     def initialize_predefined_types(self) -> None:
         """
         Initialize the database with the 14 predefined StreamTypes from spec 003.
@@ -87,6 +90,7 @@ class StreamTypeService:
         
         for protocol, format_type, metadata, display_name in predefined_types:
             self.repository.create_if_not_exists(protocol, format_type, metadata, display_name)
+
 
     def get_display_name(self, stream_type_id: int) -> Optional[str]:
         """Get the display name of a StreamType by its ID."""

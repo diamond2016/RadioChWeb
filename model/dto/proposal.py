@@ -51,7 +51,7 @@ class ProposalDTO(BaseModel):
     """Data model for a proposal."""    
     id: int
     stream_url: str
-    name: str
+    name: Optional[str] = None
     website_url: Optional[str] = None
     stream_type_id: int
     is_secure: bool
