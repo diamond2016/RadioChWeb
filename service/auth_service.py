@@ -1,5 +1,8 @@
+from functools import wraps
+from typing import Any, Callable
+from flask import abort
 from passlib.context import CryptContext
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user, login_required
 
 from model.repository.user_repository import UserRepository
 from model.entity.user import User
@@ -59,3 +62,13 @@ class AuthService:
     def change_password(self, user: User, new_password: str) -> User:
         new_hash: str = self.hash_password(new_password)
         return self.user_repo.update_password(user, new_hash)
+
+
+def admin_required(func: Callable[..., Any]) -> Callable[..., Any]:   
+    @wraps(func)
+    @login_required
+    def wrapper(*args, **kwargs):
+        if not getattr(current_user, "is_admin", False):
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper

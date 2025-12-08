@@ -8,8 +8,11 @@ transaction handling.
 
 from datetime import datetime
 from typing import Optional
+
+from flask_login import login_required
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
+from service.auth_service import admin_required
 from service.proposal_validation_service import ProposalValidationService
 from model.entity.radio_source import RadioSource
 from model.entity.proposal import Proposal
@@ -36,6 +39,8 @@ class RadioSourceService:
         self.radio_source_repo = radio_source_repo
         self.validation_service = validation_service
     
+    # admin can transfor a proposal in radio source
+    @admin_required
     def save_from_proposal(self, proposal_id: int) -> RadioSource:
         """
         Save a proposal as a RadioSourceNode in the database.
@@ -92,7 +97,8 @@ class RadioSourceService:
         except Exception as e:
             raise RuntimeError(f"Failed to save radio source: {str(e)}")
     
-    
+    # to check:  there is analog function in proposal_service
+    @login_required
     def update_proposal(self, proposal_id: int, updates: ProposalUpdateRequest) -> Proposal:
         """
         Update user-editable fields of a proposal.
@@ -171,13 +177,17 @@ class RadioSourceService:
         """
         return self.radio_source_repo.find_all()
 
+
+    # only admin can delete a radio source
+    @admin_required
     def delete_radio_source(self, id) -> bool:
         """ delete a radio source"""
         if id:
             return self.radio_source_repo.delete(id)
         return False
     
-
+    # only admin can disapprove a proposal as can approve
+    @admin_required
     def reject_proposal(self, proposal_id: int) -> bool:
         """
         Reject (delete) a proposal by id.

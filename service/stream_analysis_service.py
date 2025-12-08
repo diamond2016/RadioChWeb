@@ -45,6 +45,9 @@ class StreamAnalysisService:
         if not shutil.which("curl"):
             raise RuntimeError("curl is not installed or not accessible in PATH. Required for header analysis.")
     
+
+    # an authenticated user can analyze a stream and create a stream analysis
+    @login_required
     def analyze_stream(self, url: str, timeout_seconds: int = 30) -> StreamAnalysisResult:
         """
         Main entry point for stream analysis (spec 003).
@@ -85,7 +88,12 @@ class StreamAnalysisService:
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.TIMEOUT
-            )
+            )self._analyze_with_ffmpeg(url, timeout_seconds)
+            
+            # FR-003: Compare results, ffmpeg is authoritative
+            final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
+            # print("Analysis result for URL {}: {}".format(url, final_result))
+            return final_result
         except Exception:
             return StreamAnalysisResult(
                 stream_url=url,
@@ -408,7 +416,9 @@ class StreamAnalysisService:
             return "Icecast"
         else:
             return "None"
-        
+    
+    # an authenticated user can transfor a stream and create a proposal
+    @login_required
     def save_analysis_as_proposal(self, stream_or_id) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
@@ -472,6 +482,8 @@ class StreamAnalysisService:
             print(f"Failed to save proposal: {e}")
             return False
 
+    # an authenticated user can delete a stream analysis created by him
+    @login_required
     def delete_analysis(self, stream_or_id) -> bool:
         """
         Delete a StreamAnalysis by id or by object.
