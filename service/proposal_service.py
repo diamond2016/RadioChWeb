@@ -6,6 +6,7 @@ updating user-editable fields. This keeps proposal domain logic
 separate from the RadioSource service.
 """
 
+from flask_login import login_required
 from model.repository.proposal_repository import ProposalRepository
 from model.dto.validation import ProposalUpdateRequest
 from model.entity.proposal import Proposal

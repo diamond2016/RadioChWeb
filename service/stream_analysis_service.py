@@ -11,12 +11,14 @@ import re
 import shutil
 from urllib.parse import urlparse
 from typing import Optional, Dict, Any
+
+from flask_login import login_required
 from model.dto.stream_analysis import StreamAnalysisResult, DetectionMethod, ErrorCode
 from model.entity.proposal import Proposal
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.stream_type_service import StreamTypeService
 from model.repository.proposal_repository import ProposalRepository
-from model.entity.stream_analysis import StreamAnalysis
+
 
 class StreamAnalysisService:
     """
@@ -88,7 +90,7 @@ class StreamAnalysisService:
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.TIMEOUT
-            )self._analyze_with_ffmpeg(url, timeout_seconds)
+            )
             
             # FR-003: Compare results, ffmpeg is authoritative
             final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
