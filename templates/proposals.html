@@ -45,17 +45,11 @@
                             Submitted: {{ proposal.created_at.strftime('%Y-%m-%d %H:%M') if proposal.created_at else 'Unknown' }}
                         </p>
                     </div>
-                    {% if current_user.is_authenticated and current_user.id == proposal.user_id %}
+                    {% if (current_user.is_authenticated and current_user.id == proposal.user_id) or (current_user.is_authenticated and current_user.is_admin) %}
                     <div class="card-footer">
-                        <a href="{{ url_for('proposal.proposal_detail', proposal_id=proposal.id) }}" class="btn btn-primary">Review Proposal</a>
+                        <a href="{{ url_for('proposal.update_proposal', proposal_id=proposal.id) }}" class="btn btn-secondary btn-sm">Review Proposal</a>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.is_admin %}
-                        <div class="card-footer">
-                        <form method="post" action="{{ url_for('proposal.update_proposal', proposal_id=proposal.id) }}" style="display:inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-warning btn-sm">Edit Proposal</button>
-                        </form>
-                        </div>
                         <div class="card-footer">
                         <form method="post" action="{{ url_for('proposal.approve_proposal', proposal_id=proposal.id) }}" style="display:inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

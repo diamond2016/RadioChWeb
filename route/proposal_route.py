@@ -105,7 +105,7 @@ def propose():
 @proposal_bp.route('/update/<int:proposal_id>', methods=['GET', 'POST'])
 def update_proposal(proposal_id):
     proposal_service = get_proposal_service()
-    proposal: ProposalDTO = proposal_service.get_proposal_by_id(proposal_id)
+    proposal: ProposalDTO = proposal_service.get_proposal(proposal_id)
     
     if request.method == 'POST':
         # Read form values and delegate update to ProposalService
