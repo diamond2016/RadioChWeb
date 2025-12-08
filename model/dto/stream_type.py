@@ -10,7 +10,7 @@ class StreamTypeDTO(BaseModel):
     id: int
     protocol: str  # HTTP, HTTPS, HLS
     format: str    # MP3, AAC, OGG
-    metadata: str  # Icecast, Shoutcast, None (mapped from metadata_type)
+    metadata_type: str  # Icecast, Shoutcast, None (mapped from metadata_type)
     display_name: str
     
     @property

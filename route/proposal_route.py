@@ -5,16 +5,18 @@ Implements spec 003: propose-new-radio-source and spec 004: admin-approve-propos
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
+from model.dto.validation import ValidationResult
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
-from model.dto.proposal import ProposalUpdateRequest
+from model.dto.proposal import ProposalDTO, ProposalUpdateRequest
 from model.repository.stream_type_repository import StreamTypeRepository
 from route.analysis_route import get_stream_type_repo
 from service.proposal_service import ProposalService
 from database import db
 from service.proposal_validation_service import ProposalValidationService
+from service.proposal_service import ProposalService
 from service.radio_source_service import RadioSourceService
 from service.stream_type_service import StreamTypeService
 
@@ -28,15 +30,15 @@ def get_radio_source_repo() -> RadioSourceRepository:
     return RadioSourceRepository(db.session)
 
 def get_validation_service() -> ProposalValidationService:
-    proposal_repo = get_proposal_repo()
-    radio_source_repo = get_radio_source_repo()
+    proposal_repo: ProposalRepository = get_proposal_repo()
+    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
     from service.proposal_validation_service import ProposalValidationService
     return ProposalValidationService(proposal_repo, radio_source_repo)
 
 def get_radio_source_service() -> RadioSourceService:
-    proposal_repo = get_proposal_repo()
-    radio_source_repo = get_radio_source_repo()
-    validation_service = get_validation_service()
+    proposal_repo: ProposalRepository = get_proposal_repo()
+    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
+    validation_service: ProposalValidationService = get_validation_service()
     from service.radio_source_service import RadioSourceService
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
 
@@ -54,18 +56,18 @@ def get_proposal_service() -> ProposalService:
 @proposal_bp.route('/', methods=['GET'])
 def index():
     """Display the proposals page with all proposals"""
-    proposal_repo: ProposalRepository = get_proposal_repo()
 
     # Get all proposals for display (pass entity objects so templates can access id)
-    proposals_from_db: List[Proposal] = proposal_repo.find_all()
-    return render_template('proposals.html', proposals=proposals_from_db)
+    proposal_service: ProposalService = get_proposal_service()   
+    proposals: List[ProposalDTO] = proposal_service.get_all_proposals()
+    return render_template('proposals.html', proposals=proposals)
 
 
 @proposal_bp.route('/propose', methods=['GET', 'POST'])
 def propose():
     """Handle proposal submission form."""
-    proposal_repo = get_proposal_repo()
-    validation_service = get_validation_service()
+    proposal_repo: ProposalRepository = get_proposal_repo()
+    validation_service: ProposalValidationService = get_validation_service()
 
     if request.method == 'POST':
         # Extract form data
@@ -84,7 +86,7 @@ def propose():
 
         # Validate and save
         try:
-            result = validation_service.validate_proposal(proposal)
+            result: ValidationResult = validation_service.validate_proposal(proposal)
             if result.is_valid:
                 # Save proposal
                 proposal_repo.save(proposal)
@@ -101,39 +103,34 @@ def propose():
 
 
 @proposal_bp.route('/update/<int:proposal_id>', methods=['GET', 'POST'])
-def proposal_detail(proposal_id):
+def update_proposal(proposal_id):
+    proposal_service = get_proposal_service()
+    proposal: ProposalDTO = proposal_service.get_proposal_by_id(proposal_id)
+    
     if request.method == 'POST':
         # Read form values and delegate update to ProposalService
-        name = request.form.get('name')
-        website_url = request.form.get('website_url')
-        country = request.form.get('country')
-        description = request.form.get('description')
+        name: str | None = request.form.get('name')
+        website_url: str | None = request.form.get('website_url')
+        country: str | None = request.form.get('country')
+        description: str | None = request.form.get('description')
         # Accept either 'image' (form) or 'image_url' (tests/clients)
-        image = request.form.get('image_url') or request.form.get('image') or None  
+        image_url: str | None = request.form.get('image_url') or request.form.get('image') or None  
 
         update_dto = ProposalUpdateRequest(
             name=name,
             website_url=website_url,
             country=country,
             description=description,
-            image=image
+            image_url=image_url
         )
-
         proposal_service: ProposalService = get_proposal_service()
         try:
             proposal_service.update_proposal(proposal_id, update_dto)
             flash('Proposal updated successfully', 'success')
+
         except Exception as e:
             flash(f'Failed to update proposal: {str(e)}', 'error')
 
-        return redirect(url_for('proposal.index'))
-
-    """Display proposal details and validation status."""
-    proposal_repo = get_proposal_repo()
-    
-    proposal = proposal_repo.find_by_id(proposal_id)
-    if not proposal:
-        flash('Proposal not found', 'error')
         return redirect(url_for('proposal.index'))
 
     return render_template('proposal_detail.html',proposal=proposal)
@@ -153,4 +150,21 @@ def approve_proposal(proposal_id):
     except Exception as e:
         flash(f'Error approving proposal: {str(e)}', 'error')
 
+    return redirect(url_for('proposal.index'))
+
+
+@proposal_bp.route('/reject/<int:proposal_id>', methods=['POST'])
+def reject_proposal(proposal_id):
+    """Deletes(rejects) a proposal to radio source."""
+    proposal_service: ProposalService = get_proposal_service()
+    
+    try:
+        success: bool = proposal_service.reject_proposal(proposal_id)
+        if success:
+            flash('Proposal rejected successfully!', 'success')
+        else:
+            flash('Failed to reject proposal', 'error')
+    except Exception as e:
+        flash(f'Error rejecting proposal: {str(e)}', 'error')
+        
     return redirect(url_for('proposal.index'))

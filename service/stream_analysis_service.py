@@ -67,7 +67,7 @@ class StreamAnalysisService:
         """
         print("Starting analysis for URL: {}".format(url))
         # FR-004: Check for unsupported protocols first
-        user: UserDTO = self.user_repository.toDTO(current_user.id)
+        user: UserDTO = self.user_repository.to_dto(current_user.id)
 
         if not self._is_supported_protocol(url):
             return StreamAnalysisResult(
@@ -303,7 +303,7 @@ class StreamAnalysisService:
         Resolve analysis results from curl and ffmpeg.
         FR-003: FFmpeg is authoritative when results differ.
         """
-        user: UserDTO = self.user_repository.toDTO(current_user.id)
+        user: UserDTO = self.user_repository.to_dto(current_user.id)
 
         # If ffmpeg failed, try to use curl results
         if not ffmpeg_result["success"]:
@@ -323,7 +323,7 @@ class StreamAnalysisService:
         
         # FFmpeg succeeded - use it as authoritative source
         format_name = ffmpeg_result["format"]
-        user: UserDTO = self.user_repository.toDTO(current_user.id)
+        user: UserDTO = self.user_repository.to_dto(current_user.id)
 
         if not format_name:
             return StreamAnalysisResult(
@@ -367,7 +367,7 @@ class StreamAnalysisService:
     def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisResult:
         """Classify stream based only on curl content-type headers."""
         content_type = curl_result["content_type"]
-        user: UserDTO = self.user_repository.toDTO(current_user.id)
+        user: UserDTO = self.user_repository.to_dto(current_user.id)
 
         if not content_type:
             return StreamAnalysisResult(
@@ -511,7 +511,8 @@ class StreamAnalysisService:
 
         Returns True if deletion was successful, False otherwise.
         """
-        if (not current_user or not hasattr(current_user, 'id') or current_user.id != stream_entity.user.id):
+        stream_entity: StreamAnalysis | None = self.analysis_repository.find_by_id(stream_id)  
+        if (not current_user or current_user.id != stream_entity.created_by):
             print("Cannot delete analysis: no authenticated user or no matching user.")
             return False
         
