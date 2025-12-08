@@ -73,10 +73,11 @@ class StreamTypeRepository:
         Get a dictionary mapping type keys (PROTOCOL-FORMAT-METADATA) to IDs.
         Useful for quick lookups during stream analysis.
         """
-        stream_types = self.get_all()
+        stream_types: List[StreamType] = self.find_all()
         return {st.type_key: st.id for st in stream_types}
     
-    def toDTO(self, stream_type_id: int) -> StreamTypeDTO:
+
+    def to_dto(self, stream_type_id: int) -> Optional[StreamTypeDTO]:
         """Convert StreamType entity to StreamTypeDTO."""
         stream_type: StreamType | None = self.find_by_id(stream_type_id)
         if stream_type is None:
