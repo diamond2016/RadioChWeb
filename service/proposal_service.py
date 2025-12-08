@@ -8,6 +8,7 @@ separate from the RadioSource service.
 
 from typing import Optional
 from flask_login import login_required
+from service.auth_service import admin_required
 from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
 from model.dto.proposal import ProposalDTO, ProposalUpdateRequest
