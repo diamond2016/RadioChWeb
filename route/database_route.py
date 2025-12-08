@@ -13,15 +13,12 @@ database_bp = Blueprint('database', __name__, url_prefix='/database')
 
 # Repository initialization functions
 def get_radio_source_repo():
-    from database import db
     return RadioSourceRepository(db.session)
 
 def get_stream_type_repo():
-    from database import db
     return StreamTypeRepository(db.session)
 
 def get_proposal_repo():
-    from database import db
     return ProposalRepository(db.session)
 
 
@@ -74,22 +71,3 @@ def index():
                          stream_types=stream_types,
                          proposals=proposals,
                          radio_sources=radio_sources)
-
-
-@database_bp.route('/api/stats')
-def get_stats():
-    """API endpoint to get database statistics."""
-    radio_source_repo = get_radio_source_repo()
-    proposal_repo = get_proposal_repo()
-    stream_type_repo = get_stream_type_repo()
-    
-    source_count = radio_source_repo.count()
-    proposal_count = proposal_repo.count()
-    stream_type_count = stream_type_repo.count()
-
-    return jsonify({
-        'total_sources': source_count,
-        'total_proposals': proposal_count,
-        'total_stream_types': stream_type_count
-    })
-

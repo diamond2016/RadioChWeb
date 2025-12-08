@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 from flask_login import LoginManager, current_user, login_required
 
 from model.repository.user_repository import UserRepository
+from model.dto.user import UserDTO
 from model.entity.user import User
 
 # Prefer a pure-Python secure scheme for portability in dev/test; keep bcrypt available
@@ -50,18 +51,21 @@ class AuthService:
 
         return verified, new_hash
 
-    def register_user(self, email: str, password: str, role: str = 'user') -> User:
-        existing: User | None = self.user_repo.find_by_email(email)
-        
+    def register_user(self, user: UserDTO, password: str) -> User:
+        existing: User | None = self.user_repo.find_by_email(user.email)
         if existing:
             raise ValueError('Email already registered')
         
         hashed: str = self.hash_password(password)
-        return self.user_repo.create(email=email, hash_password=hashed, role=role)
+        return self.user_repo.create(email=user.email, hash_password=hashed, role=user.role)
 
-    def change_password(self, user: User, new_password: str) -> User:
+
+    def change_password(self, user: UserDTO, new_password: str) -> User:
         new_hash: str = self.hash_password(new_password)
-        return self.user_repo.update_password(user, new_hash)
+        existing: User | None = self.user_repo.find_by_email(user.email)
+        if not existing:
+            raise ValueError('user not found')        
+        return self.user_repo.update_password(existing, new_hash)
 
 
 def admin_required(func: Callable[..., Any]) -> Callable[..., Any]:   

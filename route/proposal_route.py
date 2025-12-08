@@ -1,7 +1,6 @@
 """
 Proposal routes - Flask blueprint for handling proposal submissions and validation.
-Implements spec 002: validate-and-add-radio-source.
-"""
+Implements spec 003: propose-new-radio-source and spec 004: admin-approve-proposal."""
 
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
@@ -10,42 +9,44 @@ from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.entity.proposal import Proposal
-from model.dto.validation import ProposalUpdateRequest
+from model.dto.proposal import ProposalUpdateRequest
+from model.repository.stream_type_repository import StreamTypeRepository
+from route.analysis_route import get_stream_type_repo
 from service.proposal_service import ProposalService
-
+from database import db
+from service.proposal_validation_service import ProposalValidationService
+from service.radio_source_service import RadioSourceService
+from service.stream_type_service import StreamTypeService
 
 proposal_bp = Blueprint('proposal', __name__, url_prefix='/proposal')
 
 
-def get_proposal_repo():
-    from database import db
+def get_proposal_repo() -> ProposalRepository:
     return ProposalRepository(db.session)
 
-def get_radio_source_repo():
-    from database import db
+def get_radio_source_repo() -> RadioSourceRepository:
     return RadioSourceRepository(db.session)
 
-def get_validation_service():
+def get_validation_service() -> ProposalValidationService:
     proposal_repo = get_proposal_repo()
     radio_source_repo = get_radio_source_repo()
     from service.proposal_validation_service import ProposalValidationService
     return ProposalValidationService(proposal_repo, radio_source_repo)
 
-def get_radio_source_service():
+def get_radio_source_service() -> RadioSourceService:
     proposal_repo = get_proposal_repo()
     radio_source_repo = get_radio_source_repo()
     validation_service = get_validation_service()
     from service.radio_source_service import RadioSourceService
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
 
-def get_stream_type_service():
-    stream_type_repo = get_stream_type_repo()
+def get_stream_type_service() -> StreamTypeService:
+    stream_type_repo: StreamTypeRepository = get_stream_type_repo()
     from service.stream_type_service import StreamTypeService
     return StreamTypeService(stream_type_repo)
 
-
-def get_proposal_service():
-    proposal_repo = get_proposal_repo()
+def get_proposal_service() -> ProposalService:
+    proposal_repo: ProposalRepository = get_proposal_repo()
     from service.proposal_service import ProposalService
     return ProposalService(proposal_repo)
 

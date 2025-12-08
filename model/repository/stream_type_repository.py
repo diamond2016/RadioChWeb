@@ -4,6 +4,7 @@ StreamTypeRepository - Data access layer for StreamType entities.
 
 from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
+from model.dto.stream_type import StreamTypeDTO
 from model.entity.stream_type import StreamType
 
 
@@ -74,3 +75,10 @@ class StreamTypeRepository:
         """
         stream_types = self.get_all()
         return {st.type_key: st.id for st in stream_types}
+    
+    def toDTO(self, stream_type_id: int) -> StreamTypeDTO:
+        """Convert StreamType entity to StreamTypeDTO."""
+        stream_type: StreamType | None = self.find_by_id(stream_type_id)
+        if stream_type is None:
+            return None
+        return stream_type.to_dto()

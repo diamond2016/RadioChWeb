@@ -6,10 +6,11 @@ updating user-editable fields. This keeps proposal domain logic
 separate from the RadioSource service.
 """
 
+from typing import Optional
 from flask_login import login_required
-from model.repository.proposal_repository import ProposalRepository
-from model.dto.validation import ProposalUpdateRequest
 from model.entity.proposal import Proposal
+from model.repository.proposal_repository import ProposalRepository
+from model.dto.proposal import ProposalDTO, ProposalUpdateRequest
 
 
 class ProposalService:
@@ -42,8 +43,75 @@ class ProposalService:
         if updates.description is not None:
             proposal.description = updates.description
 
-        # DTO field is 'image' but entity stores 'image_url'
-        if updates.image is not None:
-            proposal.image_url = updates.image
+        if updates.image_url is not None:
+            proposal.image_url = updates.image_url
 
         return self.proposal_repo.save(proposal)
+    
+
+    def get_proposal(self, proposal_id: int) -> Optional[ProposalDTO]:
+        """
+        Get a proposal by ID.
+        
+        Args:
+            proposal_id: ID of the proposal
+            
+        Returns:
+            Proposal if found, None otherwise
+        """
+        return self.proposal_repo.find_by_id(proposal_id)
+    
+
+    def get_all_proposals(self) -> list[ProposalDTO]:
+        """
+        Get all proposals.
+        
+        Returns:
+            List of all proposals
+        """
+
+        proposals = self.proposal_repo.get_all_proposals()
+        for proposal in proposals:
+            
+            proposal.stream_type  # ensure stream_type is loaded
+            proposal.created_by   # ensure created_by is loaded 
+        return proposals
+    
+
+
+    # only admin can disapprove a proposal as can approve
+    @admin_required
+    def reject_proposal(self, proposal_id: int) -> bool:
+        """
+        Reject (delete) a proposal by id.
+
+        Returns True if deletion succeeded, False otherwise.
+        This method is defensive about repository method names to preserve backward compatibility.
+        """
+        try:
+            # preferred repo API
+            if hasattr(self.proposal_repo, "delete_by_id"):
+                return bool(self.proposal_repo.delete_by_id(proposal_id))
+
+            # alternate common name
+            if hasattr(self.proposal_repo, "delete"):
+                return bool(self.proposal_repo.delete(proposal_id))
+
+            # fallback: load entity and try repository delete_entity or session
+            finder = getattr(self.proposal_repo, "find_by_id", None)
+            if callable(finder):
+                prop: Proposal = finder(proposal_id)
+                if prop is None:
+                    return False
+                if hasattr(self.proposal_repo, "delete_entity"):
+                    return bool(self.proposal_repo.delete_entity(prop))
+                session = getattr(self.proposal_repo, "session", None)
+                if session is not None:
+                    session.delete(prop)
+                    session.commit()
+                    return True
+
+            # no supported API found
+            return False
+        except Exception:
+            return False

@@ -4,7 +4,7 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 """
 
 from typing import List
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, session, url_for, flash
 
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisResult
@@ -12,52 +12,45 @@ from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.repository.stream_type_repository import StreamTypeRepository
+from service.proposal_validation_service import ProposalValidationService
+from service.radio_source_service import RadioSourceService
 from service.stream_analysis_service import StreamAnalysisService
-
+from database import db
+from service.stream_type_service import StreamTypeService
 
 analysis_bp = Blueprint('analysis', __name__, url_prefix='/analysis')
 
 # Repository and service initialization functions
 def get_analysis_repo() -> StreamAnalysisRepository:
-    from database import db
-    return StreamAnalysisRepository(db.session)
+    return StreamAnalysisRepository(db_session=db.session)
 
-def get_proposal_repo():
-    from database import db
+def get_proposal_repo() -> ProposalRepository:
     return ProposalRepository(db.session)
 
-def get_radio_source_repo():
-    from database import db
+def get_radio_source_repo() -> RadioSourceRepository:
     return RadioSourceRepository(db.session)
 
-def get_validation_service():
+def get_validation_service() -> ProposalValidationService:
     proposal_repo = get_proposal_repo()
     radio_source_repo = get_radio_source_repo()
-    from service.proposal_validation_service import ProposalValidationService
     return ProposalValidationService(proposal_repo, radio_source_repo)
 
-def get_radio_source_service():
+def get_radio_source_service() -> RadioSourceService:
     proposal_repo = get_proposal_repo()
     radio_source_repo = get_radio_source_repo()
     validation_service = get_validation_service()
-    from service.radio_source_service import RadioSourceService
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
 
 def get_stream_type_repo() -> StreamTypeRepository:
-    from database import db
-    from model.repository.stream_type_repository import StreamTypeRepository
     return StreamTypeRepository(db.session)
 
-def get_stream_analysis_service() -> StreamAnalysisService:
-    stream_type_service = get_stream_type_service()
-    from service.stream_analysis_service import StreamAnalysisService
-    return StreamAnalysisService(stream_type_service, get_proposal_repo(), get_analysis_repo())
-
-
-def get_stream_type_service():
-    stream_type_repo = get_stream_type_repo()
-    from service.stream_type_service import StreamTypeService
+def get_stream_type_service() -> StreamTypeService:
+    stream_type_repo: StreamTypeRepository = get_stream_type_repo()
     return StreamTypeService(stream_type_repo)
+
+def get_stream_analysis_service() -> StreamAnalysisService:
+    stream_type_service: StreamTypeService = get_stream_type_service()
+    return StreamAnalysisService(stream_type_service, get_proposal_repo(), get_analysis_repo())
 
 
 @analysis_bp.route('/', methods=['GET'])

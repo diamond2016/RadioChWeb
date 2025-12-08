@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 from flask_login import login_user, logout_user, login_required, current_user
+from model.dto.user import UserDTO
 from model.entity.user import User
 from model.repository.user_repository import UserRepository
 from service.auth_service import AuthService
@@ -62,13 +63,9 @@ user_repo = UserRepository()
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        found_user: User = auth_service.user_repo.find_by_email(form.email.data)  # adapt to your repo/service call
-    
-        if found_user and auth_service.verify_password(form.password.data, found_user.hash_password):
-            login_user(found_user)
-            flash('Signed in successfully', 'success')
-            next_page = request.args.get('next') or url_for('main.index')
-            return redirect(next_page)
+        userDTO = UserDTO(id=0, email=form.email.data, role='user')
+        found_user: User = auth_service.user_repo.find_by_email(userDTO.email)  # adapt to your repo/service call
+           
         verified = False
         if found_user:
             res = auth_service.verify_password(form.password.data, found_user.hash_password)
@@ -102,7 +99,8 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         try:
-            auth_service.register_user(email=form.email.data, password=form.password.data)
+            userDTO = UserDTO(id=0, email=form.email.data, role='user')
+            auth_service.register_user(userDTO, password=form.password.data)
             flash('Registration successful. Please login.', 'success')
             return redirect(url_for('auth.login'))
         except ValueError as e:

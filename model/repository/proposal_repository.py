@@ -4,6 +4,9 @@ ProposalRepository - Data access layer for Proposal entities.
 
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from model.dto.proposal import ProposalDTO
+from model.repository.stream_type_repository import StreamTypeRepository
+from model.repository.user_repository import UserRepository
 from model.entity.proposal import Proposal
 
 
@@ -12,6 +15,8 @@ class ProposalRepository:
     
     def __init__(self, db_session: Session):
         self.db = db_session
+        self.stream_type_repo = StreamTypeRepository(db_session)
+        self.user_repo = UserRepository(db_session)
     
     def find_by_id(self, proposal_id: int) -> Optional[Proposal]:
         """Get Proposal by ID."""
@@ -57,3 +62,21 @@ class ProposalRepository:
     def get_proposals_by_user(self, user_id: int) -> List[Proposal]:
         """Retrieve all proposals submitted by a specific user."""
         return self.db.query(Proposal).filter(Proposal.created_by == user_id).all()
+    
+    def toDTO(self, proposal_id: int) -> ProposalDTO:
+        proposal: Proposal | None = self.find_by_id(proposal_id)
+        if proposal is None:
+            return None
+        
+        return ProposalDTO(
+            id=proposal.id,
+            stream_url=proposal.stream_url,
+            name=proposal.name,
+            website_url=proposal.website_url,
+            stream_type=self.stream_type_repo.toDTO(proposal.stream_type_id) if proposal.stream_type_id else None,
+            country=proposal.country,
+            description=proposal.description,
+            image_url=proposal.image_url,
+            created_by=self.user_repo.toDTO(proposal.created_by) if proposal.created_by else None,
+            is_secure=proposal.is_secure
+        )

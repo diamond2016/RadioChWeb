@@ -15,7 +15,6 @@ radio_source_bp = Blueprint('radio_source', __name__, url_prefix='/source')
 
 # Repository and service initialization functions
 def get_radio_source_repo() -> RadioSourceRepository:
-    from database import db
     return RadioSourceRepository(db.session)
 
 def get_radio_source_service() -> RadioSourceService:
@@ -24,7 +23,6 @@ def get_radio_source_service() -> RadioSourceService:
     return RadioSourceService(None, radio_source_repo, None)  # Validation service will be injected if needed
 
 def get_stream_type_repo() -> StreamTypeRepository:
-    from database import db
     return StreamTypeRepository(db.session)
 
 
