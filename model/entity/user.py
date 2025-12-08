@@ -31,5 +31,9 @@ class User(db.Model):
     def is_anonymous(self) -> bool:
         return False
 
+    @property
+    def is_admin(self) -> bool:
+        return self.role == 'admin'
+
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', role='{self.role}')>"

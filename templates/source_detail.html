@@ -34,11 +34,13 @@
                         <a href="{{ url_for('listen.player', source_id=source.id) }}"
                         onclick="openStreamWindow(event, '{{ url_for('listen.player', source_id=source.id) }}', 720, 480)"
                         class="btn btn-secondary">Listen</a>
+                        {% if current_user.is_authenticated and current_user.is_admin %}
                         <a href="{{ url_for('radio_source.edit_source', source_id=source.id) }}" class="btn btn-warning">Edit</a>
                         <form method="post" action="{{ url_for('radio_source.delete_source', source_id=source.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this source?')">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
