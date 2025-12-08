@@ -60,7 +60,7 @@ class ProposalDTO(BaseModel):
     image_url: Optional[str] = None
     created_at: Optional[str] = None  # ISO formatted datetime string
     stream_type: Optional[StreamTypeDTO] = None
-    user: Optional[user.UserDTO] = None
+    user: Optional[UserDTO] = None
 
     model_config = ConfigDict(from_attributes=True)
     
