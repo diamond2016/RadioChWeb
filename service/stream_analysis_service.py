@@ -14,7 +14,8 @@ from typing import Optional, Dict, Any
 
 from flask_login import current_user, login_required
 from model.dto.user import UserDTO
-from model.dto.stream_analysis import StreamAnalysisResult, DetectionMethod, ErrorCode
+from model.dto.stream_analysis import StreamAnalysisDTO, DetectionMethod, ErrorCode
+from model.dto.validation import ValidationDTO, SecurityStatusDTO
 from model.entity.proposal import Proposal
 from model.entity.stream_analysis import StreamAnalysis
 from model.repository import user_repository
@@ -52,9 +53,33 @@ class StreamAnalysisService:
             raise RuntimeError("curl is not installed or not accessible in PATH. Required for header analysis.")
     
 
-    # an authenticated user can analyze a stream and create a stream analysis
-    @login_required
-    def analyze_stream(self, url: str, timeout_seconds: int = 30) -> StreamAnalysisResult:
+    def _safe_current_user_id(self) -> Optional[int]:
+        """Return current_user.id or None without raising outside-app-context errors."""
+        try:
+            return current_user.id if (current_user is not None and hasattr(current_user, 'id')) else None
+        except RuntimeError:
+            return None
+
+    def _safe_current_user_dto(self) -> Optional[UserDTO]:
+        """Return a UserDTO for the current user when available, else None.
+
+        Uses repository.find_by_id to obtain the ORM user and then Pydantic's
+        model_validate (from_attributes=True) to produce a DTO.
+        """
+        uid = self._safe_current_user_id()
+        if not uid:
+            return None
+        try:
+            orm_user = self.user_repository.find_by_id(uid)
+            if orm_user:
+                return UserDTO.model_validate(orm_user)
+        except Exception:
+            return None
+        return None
+
+
+    # Service method to analyze a stream and create a stream analysis
+    def analyze_stream(self, url: str, timeout_seconds: int = 30) -> StreamAnalysisDTO:
         """
         Main entry point for stream analysis (spec 003).
         
@@ -63,20 +88,21 @@ class StreamAnalysisService:
             timeout_seconds: Maximum time to spend on analysis (default: 30s as per SC-001)
             
         Returns:
-            StreamAnalysisResult with validation and classification data
+            StreamAnalysisDTO with validation and classification data
         """
         print("Starting analysis for URL: {}".format(url))
         # FR-004: Check for unsupported protocols first
-        user: UserDTO = UserDTO.model_validate(self.user_repository.to_dto(current_user.id))
+        user: UserDTO | None = self._safe_current_user_dto()
 
         if not self._is_supported_protocol(url):
-            return StreamAnalysisResult(
+            result = StreamAnalysisDTO(
                 stream_url=url,
                 is_valid=False,
                 is_secure=False,
                 error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
                 user = user
             )
+            return self._persist_analysis_and_return_dto(result)
         
         # Determine if URL is secure (HTTPS vs HTTP)
         is_secure = self._is_secure_url(url)
@@ -87,31 +113,33 @@ class StreamAnalysisService:
             ffmpeg_result = self._analyze_with_ffmpeg(url, timeout_seconds)
             
             # FR-003: Compare results, ffmpeg is authoritative
-            final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
+            final_result: StreamAnalysisDTO = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
             # print("Analysis result for URL {}: {}".format(url, final_result))
-            return final_result
+            return self._persist_analysis_and_return_dto(final_result)
             
         except subprocess.TimeoutExpired:
-            return StreamAnalysisResult(
+            result = StreamAnalysisDTO(
                 stream_url=url,
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.TIMEOUT,
                 user = user
             )
+            return self._persist_analysis_and_return_dto(result)
             
             # FR-003: Compare results, ffmpeg is authoritative
-            final_result: StreamAnalysisResult = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
+            final_result: StreamAnalysisDTO = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
             # print("Analysis result for URL {}: {}".format(url, final_result))
             return final_result
         except Exception:
-            return StreamAnalysisResult(
+            result = StreamAnalysisDTO(
                 stream_url=url,
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.NETWORK_ERROR,
                 user = user
             )
+            return self._persist_analysis_and_return_dto(result)
     
     def _is_supported_protocol(self, url: str) -> bool:
         """Check if the URL uses a supported protocol (HTTP/HTTPS only)."""
@@ -298,19 +326,19 @@ class StreamAnalysisService:
         return cleaned
     
 
-    def _resolve_analysis_results(self, curl_result: dict, ffmpeg_result: dict, is_secure: bool) -> StreamAnalysisResult:
+    def _resolve_analysis_results(self, curl_result: dict, ffmpeg_result: dict, is_secure: bool) -> StreamAnalysisDTO:
         """
         Resolve analysis results from curl and ffmpeg.
         FR-003: FFmpeg is authoritative when results differ.
         """
-        user: UserDTO = UserDTO.model_validate(self.user_repository.to_dto(current_user.id))
+        user: UserDTO | None = self._safe_current_user_dto()
 
         # If ffmpeg failed, try to use curl results
         if not ffmpeg_result["success"]:
             if curl_result["success"]:
                 return self._classify_from_curl(curl_result, is_secure)
             else:
-                return StreamAnalysisResult(
+                return StreamAnalysisDTO(
                     stream_url=curl_result["stream_url"] if "stream_url" in curl_result else None,
                     is_valid=False,
                     is_secure=is_secure,
@@ -323,10 +351,10 @@ class StreamAnalysisService:
         
         # FFmpeg succeeded - use it as authoritative source
         format_name = ffmpeg_result["format"]
-        user: UserDTO = UserDTO.model_validate(self.user_repository.to_dto(current_user.id))
+        user: UserDTO | None = self._safe_current_user_dto()
 
         if not format_name:
-            return StreamAnalysisResult(
+            return StreamAnalysisDTO(
                 is_valid=False,
                 stream_url=ffmpeg_result["stream_url"] if "stream_url" in ffmpeg_result else None,   
                 is_secure=is_secure,
@@ -350,7 +378,7 @@ class StreamAnalysisService:
         
         detection_method = DetectionMethod.BOTH if curl_result["success"] else DetectionMethod.FFMPEG
         
-        return StreamAnalysisResult(
+        return StreamAnalysisDTO(
             is_valid=stream_type_id is not None,
             stream_type_id=stream_type_id,
             stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
@@ -364,13 +392,13 @@ class StreamAnalysisService:
             user = user
         )
     
-    def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisResult:
+    def _classify_from_curl(self, curl_result: dict, is_secure: bool) -> StreamAnalysisDTO:
         """Classify stream based only on curl content-type headers."""
         content_type = curl_result["content_type"]
-        user: UserDTO = UserDTO.model_validate(self.user_repository.to_dto(current_user.id))
+        user: UserDTO | None = self._safe_current_user_dto()
 
         if not content_type:
-            return StreamAnalysisResult(
+            return StreamAnalysisDTO(
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
@@ -391,7 +419,7 @@ class StreamAnalysisService:
             protocol = "HLS"
             format_name = "AAC"  # Most common for HLS
             stream_type_id = self.stream_type_service.find_stream_type_id(protocol, format_name, "None")
-            return StreamAnalysisResult(
+            return StreamAnalysisDTO(
                 is_valid=stream_type_id is not None,
                 stream_type_id=stream_type_id,
                 stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
@@ -401,9 +429,9 @@ class StreamAnalysisService:
                 raw_content_type=curl_result.get("raw_output"),
                 user = user
             )
-        
+
         if not format_name:
-            return StreamAnalysisResult(
+            return StreamAnalysisDTO(
                 is_valid=False,
                 is_secure=is_secure,
                 error_code=ErrorCode.INVALID_FORMAT,
@@ -415,7 +443,7 @@ class StreamAnalysisService:
         metadata = self._detect_metadata_support(curl_result.get("raw_output", ""))
         stream_type_id = self.stream_type_service.find_stream_type_id(protocol, format_name, metadata)
         
-        return StreamAnalysisResult(
+        return StreamAnalysisDTO(
             is_valid=stream_type_id is not None,
             stream_type_id=stream_type_id,
             stream_type_display_name=self.stream_type_service.get_display_name(stream_type_id) if stream_type_id else None,
@@ -425,6 +453,43 @@ class StreamAnalysisService:
             raw_content_type=curl_result.get("raw_output"),
             user = user
         )
+    
+    def _persist_analysis_and_return_dto(self, analysis_dto: StreamAnalysisDTO) -> StreamAnalysisDTO:
+        """Persist a StreamAnalysis ORM record from the DTO-like object and return a fresh DTO with transient validation attached."""
+        # Build a minimal ValidationDTO based on analysis outcome
+        validation = ValidationDTO(is_valid=getattr(analysis_dto, 'is_valid', True), message="")
+        if getattr(analysis_dto, 'is_secure', None) is not None:
+            validation.security_status = SecurityStatusDTO(is_secure=analysis_dto.is_secure)
+
+        # Map enums to plain values when persisting
+        detection = None
+        if getattr(analysis_dto, 'detection_method', None) is not None:
+            dm = analysis_dto.detection_method
+            detection = dm.value if hasattr(dm, 'value') else str(dm)
+
+        error_code_val = None
+        if getattr(analysis_dto, 'error_code', None) is not None:
+            ec = analysis_dto.error_code
+            error_code_val = ec.value if hasattr(ec, 'value') else str(ec)
+
+        analysis = StreamAnalysis(
+            stream_url=getattr(analysis_dto, 'stream_url', None),
+            stream_type_id=getattr(analysis_dto, 'stream_type_id', None),
+            is_valid=getattr(analysis_dto, 'is_valid', False),
+            is_secure=getattr(analysis_dto, 'is_secure', False),
+            error_code=error_code_val,
+            detection_method=detection,
+            raw_content_type=getattr(analysis_dto, 'raw_content_type', None),
+            raw_ffmpeg_output=getattr(analysis_dto, 'raw_ffmpeg_output', None),
+            extracted_metadata=getattr(analysis_dto, 'extracted_metadata', None),
+            created_by=self._safe_current_user_id()
+        )
+
+        saved = self.analysis_repository.save(analysis)
+
+        dto = StreamAnalysisDTO.model_validate(saved)
+        dto.validation = validation
+        return dto
     
     def _detect_metadata_support(self, headers: str) -> str:
         """
@@ -446,8 +511,7 @@ class StreamAnalysisService:
         else:
             return "None"
     
-    # an authenticated user can transfor a stream and create a proposal
-    @login_required
+    # Service method: transform an analysis into a proposal
     def save_analysis_as_proposal(self, stream_id: int) -> bool:
         """
         Approve an analysis and create a proposal for radio source.
@@ -473,10 +537,21 @@ class StreamAnalysisService:
             print("Cannot create proposal for invalid analysis or missing data.")
             return False
 
-        if (not current_user or not hasattr(current_user, 'id') or current_user.id != stream_entity.user.id):
+        current_uid = self._safe_current_user_id()
+        if (not current_uid or current_uid != getattr(stream_entity.user, 'id', None)):
             print("Cannot create proposal: no authenticated user or no matching user.")
             return False
-        
+
+        # Prefer the already-loaded user relationship from the analysis entity
+        proposal_user = getattr(stream_entity, 'user', None)
+
+        if proposal_user is None:
+            # Try to fetch from repository but fail gracefully if no app context
+            try:
+                proposal_user = self.user_repository.find_by_id(current_uid)
+            except RuntimeError:
+                proposal_user = None
+
         proposal = Proposal(
             stream_url=stream_url,
             name="",
@@ -487,7 +562,7 @@ class StreamAnalysisService:
             stream_type_id=stream_type_id,
             is_secure=is_secure,
             created_at=date.today(),
-            user=self.user_repository.find_by_id(current_user.id)
+            created_by=current_uid
         )
 
         # Save proposal to repository
@@ -503,8 +578,7 @@ class StreamAnalysisService:
             return False
 
 
-    # an authenticated user can delete a stream analysis created by him
-    @login_required
+    # Service method: delete a StreamAnalysis by id
     def delete_analysis(self, stream_id: int) -> bool:
         """
         Delete a StreamAnalysis by id or by object.
@@ -512,7 +586,8 @@ class StreamAnalysisService:
         Returns True if deletion was successful, False otherwise.
         """
         stream_entity: StreamAnalysis | None = self.analysis_repository.find_by_id(stream_id)  
-        if (not current_user or current_user.id != stream_entity.created_by):
+        current_uid = self._safe_current_user_id()
+        if (not current_uid or current_uid != getattr(stream_entity, 'created_by', None)):
             print("Cannot delete analysis: no authenticated user or no matching user.")
             return False
         

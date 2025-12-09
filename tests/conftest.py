@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from database import db
 from model.entity.stream_type import StreamType
+from model.entity.user import User
 
 @pytest.fixture(scope="session")
 def test_app():
@@ -95,3 +96,23 @@ def _initialize_stream_types():
         db.session.add(stream_type)
 
     db.session.commit()
+
+
+@pytest.fixture
+def test_user(test_db):
+    """Create a persisted test user with role 'user'. Returns ORM User."""
+    user = User(email='test_user@example.com', hash_password='testhash', role='user')
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+    return user
+
+
+@pytest.fixture
+def test_admin(test_db):
+    """Create a persisted test user with role 'admin'. Returns ORM User."""
+    admin = User(email='test_admin@example.com', hash_password='adminhash', role='admin')
+    test_db.add(admin)
+    test_db.commit()
+    test_db.refresh(admin)
+    return admin

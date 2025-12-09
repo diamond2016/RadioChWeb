@@ -130,5 +130,7 @@ Sofware code production
 - Ensure all new code is covered by tests.
 - Prefer last version of packages e.g Pydantic v2 over 1 or SqlAlchemy v2 over v1 unless there is a specific reason not to.
 - When introduced new dependencies or patterns, add always a detaild explanation in order to allow learning of designer. 
+- Every functionality should be covered by tests
+- Ask for clarifications when requirements when it is needed to change functionalities or add new ones.
 
 End of instructions.
