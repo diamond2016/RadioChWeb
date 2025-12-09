@@ -615,9 +615,15 @@ No changes to tests were needed for the final pass (I preserved the tests you al
 
 
 ## STEP4 Auth Service migration
-I expect almost ok but it need to be checked against the new models/dto. 
+STEP4 Auth service migration. I expect almost ok but it needs to be aligned against the new models/dto. 
 
+1) In auth_service we have user creation and password change that must return UserDTO instead of ORM.Check in particular init_init_app
+2) It is important to check admin_required (logic is ok, but check if ok being outside the class AuthService, I decided so to avoid circular imports)
+3) Move related tssts from test_service_auth.py to tests/service/test_auth_service.py
 
+** == **
+09.12.2025 17:00 TIMESTEMP DONE STEP1..4
+** = **
 
 ## Overall strategy (short)
 Services accept/return DTOs only; convert ORM ↔ DTO at service boundary with XDTO.model_validate(orm_obj) and XDTO.model_validate(updated_orm) for returns.

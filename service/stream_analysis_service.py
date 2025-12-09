@@ -472,6 +472,15 @@ class StreamAnalysisService:
             ec = analysis_dto.error_code
             error_code_val = ec.value if hasattr(ec, 'value') else str(ec)
 
+        # Determine creator id: prefer DTO user.id, else current user id
+        creator_id = getattr(getattr(analysis_dto, 'user', None), 'id', None) or self._safe_current_user_id()
+
+        # If analysis is valid but no creator id available, do NOT persist.
+        # This enforces that valid analyses require an authenticated user to be saved.
+        if getattr(analysis_dto, 'is_valid', False) and not creator_id:
+            analysis_dto.validation = validation
+            return analysis_dto
+
         analysis = StreamAnalysis(
             stream_url=getattr(analysis_dto, 'stream_url', None),
             stream_type_id=getattr(analysis_dto, 'stream_type_id', None),
@@ -482,7 +491,7 @@ class StreamAnalysisService:
             raw_content_type=getattr(analysis_dto, 'raw_content_type', None),
             raw_ffmpeg_output=getattr(analysis_dto, 'raw_ffmpeg_output', None),
             extracted_metadata=getattr(analysis_dto, 'extracted_metadata', None),
-            created_by=self._safe_current_user_id()
+            created_by=creator_id
         )
 
         saved = self.analysis_repository.save(analysis)
