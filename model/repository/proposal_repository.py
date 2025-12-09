@@ -3,7 +3,7 @@ ProposalRepository - Data access layer for Proposal entities.
 """
 
 from typing import Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from model.dto.proposal import ProposalDTO
 from model.repository.stream_type_repository import StreamTypeRepository
 from model.repository.user_repository import UserRepository
@@ -20,7 +20,7 @@ class ProposalRepository:
     
     def find_by_id(self, proposal_id: int) -> Optional[Proposal]:
         """Get Proposal by ID."""
-        return self.db.query(Proposal).filter(Proposal.id == proposal_id).first()
+        return self.db.query(Proposal).options(selectinload(Proposal.stream_type), selectinload(Proposal.user)).filter(Proposal.id == proposal_id).first()
     
     def find_by_url(self, url: str) -> Optional[Proposal]:
         """Get Proposal by URL."""
@@ -28,7 +28,7 @@ class ProposalRepository:
     
     def find_all(self) -> List[Proposal]:
         """Get all Proposals."""
-        return self.db.query(Proposal).all()
+        return self.db.query(Proposal).options(selectinload(Proposal.stream_type), selectinload(Proposal.user)).all()
     
     def save(self, proposal: Proposal) -> Proposal:
         """Save (create or update) a Proposal."""
@@ -65,9 +65,9 @@ class ProposalRepository:
     
     def get_all_proposals(self) -> List[Proposal]:
         """Retrieve all proposals from the database."""
-        return self.db.query(Proposal).all()
+        return self.db.query(Proposal).options(selectinload(Proposal.stream_type), selectinload(Proposal.user)).all()
     
     def get_proposals_by_user(self, user_id: int) -> List[Proposal]:
         """Retrieve all proposals submitted by a specific user."""
-        return self.db.query(Proposal).filter(Proposal.created_by == user_id).all()
+        return self.db.query(Proposal).options(selectinload(Proposal.stream_type), selectinload(Proposal.user)).filter(Proposal.created_by == user_id).all()
     

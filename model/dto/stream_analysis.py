@@ -4,6 +4,7 @@ StreamAnalysisResult is the main return type from the analyze-and-classify proce
 """
 
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel, HttpUrl, ConfigDict
 from pydantic import field_validator
 from enum import Enum
@@ -52,6 +53,8 @@ class StreamAnalysisResult(BaseModel):
     raw_ffmpeg_output: Optional[str] = None  # String from ffmpeg detection
     extracted_metadata: Optional[str] = None  # Normalized metadata extracted from ffmpeg stderr
     user: UserDTO  # The user who requested the analysis
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
         
     @field_validator('extracted_metadata')
     def _clean_extracted_metadata(cls, v: Optional[str]) -> Optional[str]:

@@ -1,4 +1,5 @@
 from database import db
+from sqlalchemy.sql import func
 
 class StreamAnalysis(db.Model):
     __tablename__ = 'stream_analysis'
@@ -19,6 +20,10 @@ class StreamAnalysis(db.Model):
     stream_type = db.relationship("StreamType", back_populates="stream_analysis")
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     user = db.relationship("User", back_populates="stream_analysis")
+
+    # Timestamps
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     def __repr__(self):
         return f"<StreamAnalysis(id={self.id}, url='{self.stream_url}', type='{self.stream_type_id}', valid={self.is_valid})>"

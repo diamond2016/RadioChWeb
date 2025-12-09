@@ -23,6 +23,7 @@ CREATE TABLE radio_sources (
     description VARCHAR(200),
     image_url VARCHAR(200),
     created_at DATETIME,
+    updated_at DATETIME,
     PRIMARY KEY (id),
     FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
 );
@@ -37,7 +38,7 @@ CREATE TABLE users (
     hash_password VARCHAR(512) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'user',
     created_at DATETIME,
-    last_modified_at DATETIME
+    updated_at DATETIME
 );
 CREATE INDEX idx_users_email ON users(email);
 
@@ -53,6 +54,7 @@ CREATE TABLE proposals (
     country VARCHAR(50),
     description VARCHAR(200),
     created_at DATETIME,
+    updated_at DATETIME,
     created_by INTEGER,
     PRIMARY KEY (id),
     FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
@@ -76,6 +78,8 @@ CREATE TABLE stream_analysis (
     raw_ffmpeg_output TEXT NULL,
     extracted_metadata TEXT NULL,
     created_by INTEGER,
+    created_at DATETIME,
+    updated_at DATETIME,
     PRIMARY KEY (id),
     FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
     FOREIGN KEY (created_by) REFERENCES users(id)
