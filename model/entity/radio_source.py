@@ -25,6 +25,7 @@ class RadioSource(db.Model):
     # Relationships
     stream_type = db.relationship("StreamType", back_populates="radio_sources", lazy="select")
     user = db.relationship("User", back_populates="radio_sources", lazy="select")
+    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
 
     def __repr__(self):
         return f"<RadioSource(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"

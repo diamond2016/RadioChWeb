@@ -18,7 +18,7 @@ class User(UserMixin, db.Model):
 
     # Relationships
     proposals = db.relationship("Proposal", back_populates="user")
-    stream_analysis = db.relationship("StreamAnalysis", back_populates="user")
+    stream_analyses = db.relationship("StreamAnalysis", back_populates="user")
     radio_sources = db.relationship("RadioSource", back_populates="user")
 
     def get_id(self):

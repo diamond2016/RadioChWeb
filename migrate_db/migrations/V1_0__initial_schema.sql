@@ -24,8 +24,10 @@ CREATE TABLE radio_sources (
     image_url VARCHAR(200),
     created_at DATETIME,
     updated_at DATETIME,
+    created_by INTEGER,
     PRIMARY KEY (id),
-    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id)
+    FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 CREATE INDEX idx_radio_sources_stream_url ON radio_sources(stream_url);
 CREATE INDEX idx_radio_sources_stream_type_id ON radio_sources(stream_type_id);
@@ -65,8 +67,8 @@ CREATE INDEX idx_proposals_stream_type_id ON proposals(stream_type_id);
 CREATE INDEX idx_proposals_is_secure ON proposals(is_secure);
 CREATE INDEX idx_proposals_created_by ON proposals(created_by);
 
-DROP TABLE IF EXISTS stream_analysis;
-CREATE TABLE stream_analysis (
+DROP TABLE IF EXISTS stream_analyses;
+CREATE TABLE stream_analyses (
     id INTEGER NOT NULL,
     stream_url VARCHAR(200) NOT NULL,
     stream_type_id INTEGER,
@@ -84,5 +86,5 @@ CREATE TABLE stream_analysis (
     FOREIGN KEY (stream_type_id) REFERENCES stream_types(id),
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
-CREATE INDEX idx_stream_analysis_stream_url ON stream_analysis(stream_url);
-CREATE INDEX idx_stream_analysis_created_by ON stream_analysis(created_by);
+CREATE INDEX idx_stream_analyses_stream_url ON stream_analyses(stream_url);
+CREATE INDEX idx_stream_analyses_created_by ON stream_analyses(created_by);
