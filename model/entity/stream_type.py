@@ -9,10 +9,10 @@ class StreamType(db.Model):
     metadata_type = db.Column(db.String(15), nullable=False)  # Icecast, Shoutcast, None
     display_name = db.Column(db.String(100), nullable=False)   # Human-readable name
 
-   # Relationship with RadioSource
+    # Relationship with RadioSource
     radio_sources = db.relationship("RadioSource", back_populates="stream_type")
-    # Relationship with StreamAnalysis
-    stream_analysis = db.relationship("StreamAnalysis", back_populates="stream_type")   
+     # Relationship with StreamAnalysis (plural)
+    stream_analyses = db.relationship("StreamAnalysis", back_populates="stream_type")   
     # Relationship with Proposals
     proposals = db.relationship("Proposal", back_populates="stream_type")   
     

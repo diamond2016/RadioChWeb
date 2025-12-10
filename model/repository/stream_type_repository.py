@@ -4,7 +4,6 @@ StreamTypeRepository - Data access layer for StreamType entities.
 
 from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
-from model.dto.stream_type import StreamTypeDTO
 from model.entity.stream_type import StreamType
 
 
@@ -33,7 +32,7 @@ class StreamTypeRepository:
         Returns:
             StreamType ID if found, None otherwise
         """
-        stream_type = self.db.query(StreamType).filter(
+        stream_type: StreamType | None = self.db.query(StreamType).filter(
             StreamType.protocol == protocol,
             StreamType.format == format_type,
             StreamType.metadata_type == metadata
@@ -46,7 +45,7 @@ class StreamTypeRepository:
         Create a StreamType if it doesn't already exist.
         Used for initializing predefined types.
         """
-        existing = self.db.query(StreamType).filter(
+        existing: StreamType | None = self.db.query(StreamType).filter(
             StreamType.protocol == protocol,
             StreamType.format == format_type,
             StreamType.metadata_type == metadata
@@ -55,13 +54,13 @@ class StreamTypeRepository:
         if existing:
             return existing
         
-        new_type = StreamType(
+        new_type: StreamType = StreamType(
             protocol=protocol,
             format=format_type,
             metadata_type=metadata,
             display_name=display_name
         )
-        
+
         self.db.add(new_type)
         self.db.commit()
         self.db.refresh(new_type)

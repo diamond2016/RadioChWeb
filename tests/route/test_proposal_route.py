@@ -36,8 +36,8 @@ def test_update_proposal_post(test_app, test_db):
 
     # Call the view function within a request context
     with test_app.test_request_context(f'/proposal/{proposal.id}', method='POST', data=data):
-        from route.proposal_route import proposal_detail
-        resp = proposal_detail(proposal.id)
+        from route.proposal_route import update_proposal
+        resp = update_proposal(proposal.id)
 
         # Expect a redirect response to proposals index
         assert resp.status_code == 302

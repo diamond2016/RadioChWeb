@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch
 
 from route.analysis_route import analysis_bp, delete_analysis, approve_analysis
@@ -6,6 +5,7 @@ from route.proposal_route import proposal_bp
 from database import db
 from model.entity.stream_analysis import StreamAnalysis
 from model.entity.proposal import Proposal
+from flask import session
 
 
 def _register_blueprints(app):
@@ -13,14 +13,14 @@ def _register_blueprints(app):
     app.register_blueprint(proposal_bp, url_prefix='/proposal')
 
 
-def test_delete_analysis_route_removes_row(test_app, test_db):
+def test_delete_analysis_route_removes_row(test_app, test_db, test_user):
     # Ensure session works for flashing
     test_app.secret_key = 'test-secret'
 
     # Insert a StreamAnalysis row
     sa = StreamAnalysis(stream_url='http://test/delete', is_valid=True, is_secure=False, stream_type_id=1)
     test_db.add(sa)
-    test_db.commit()
+    test_db.flush()
 
     assert sa.id is not None
 
@@ -29,6 +29,13 @@ def test_delete_analysis_route_removes_row(test_app, test_db):
         # Patch url_for used inside the view to avoid needing registered endpoints
         with patch('route.analysis_route.url_for', return_value='/'):
             with test_app.test_request_context(f'/analysis/delete/{sa.id}', method='POST'):
+                # Log in the created test user by setting session keys so login_manager recognizes the user
+                session['_user_id'] = str(test_user.id)
+                session['_fresh'] = True
+                # Also mark the analysis as created by this user so ownership check succeeds
+                sa.created_by = test_user.id
+                test_db.add(sa)
+                test_db.flush()
                 resp = delete_analysis(sa.id)
                 # view returns a redirect response object (or response)
                 assert resp is not None
@@ -38,19 +45,26 @@ def test_delete_analysis_route_removes_row(test_app, test_db):
     assert found is None
 
 
-def test_approve_analysis_route_creates_proposal(test_app, test_db):
+def test_approve_analysis_route_creates_proposal(test_app, test_db, test_user):
     # Ensure session works for flashing
     test_app.secret_key = 'test-secret'
 
     # Insert a StreamAnalysis row with required fields
     sa = StreamAnalysis(stream_url='http://test/propose', is_valid=True, is_secure=True, stream_type_id=1)
     test_db.add(sa)
-    test_db.commit()
+    test_db.flush()
     assert sa.id is not None
 
     with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
         with patch('route.analysis_route.url_for', return_value='/'):
             with test_app.test_request_context(f'/analysis/approve/{sa.id}', method='POST'):
+                # Log in the created test user by setting session keys so login_manager recognizes the user
+                session['_user_id'] = str(test_user.id)
+                session['_fresh'] = True
+                # Ensure ownership of the analysis points to the logged-in user
+                sa.created_by = test_user.id
+                test_db.add(sa)
+                test_db.flush()
                 resp = approve_analysis(sa.id)
                 assert resp is not None
 

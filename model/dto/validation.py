@@ -2,33 +2,43 @@
 Validation DTOs for proposal validation and security checks.
 """
 
-from dataclasses import dataclass
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict
-from enum import Enum
+from pydantic import BaseModel, Field, ConfigDict
 
-@dataclass
-class SecurityStatus:
+# Backwards import alias: some code/tests expect ProposalUpdateRequest in this module
+try:
+    from model.dto.proposal import ProposalUpdateRequest  # type: ignore
+except Exception:
+    ProposalUpdateRequest = None
+
+
+class SecurityStatusDTO(BaseModel):
     is_secure: bool
-    warning_message: Optional[str]
+    warning_message: Optional[str] = None
 
 
-class ValidationResult(BaseModel):
-    """Result of proposal validation."""
-    is_valid: bool
+class ValidationDTO(BaseModel):
+    """Result of proposal validation and security checks."""
+    is_valid: bool = True
     message: str = ""
-    security_status: Optional[SecurityStatus] = None
-    errors: List[str] = []
-    warnings: List[str] = []
+    security_status: Optional[SecurityStatusDTO] = None
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
 
     def add_error(self, error: str):
-        """Add an error message."""
+        """Add an error message and mark invalid."""
         self.errors.append(error)
         self.is_valid = False
 
     def add_warning(self, warning: str):
         """Add a warning message."""
         self.warnings.append(warning)
+
+# Backwards compatibility alias
+ValidationResult = ValidationDTO
+
+# Backwards compatibility alias for older name
+SecurityStatus = SecurityStatusDTO
 

@@ -13,7 +13,7 @@ class StreamTypeService:
     """Service for managing StreamType entities and lookup operations."""
     
     def __init__(self, stream_type_repository: StreamTypeRepository):
-        self.repository = stream_type_repository
+        self.repository: StreamTypeRepository = stream_type_repository
     
     def find_stream_type_id(self, protocol: str, format: str, metadata: str) -> Optional[int]:
         """
@@ -32,14 +32,14 @@ class StreamTypeService:
 
     def get_stream_type(self, stream_type_id: int) -> Optional[StreamTypeDTO]:
         """Get StreamType by ID."""
-        stream_type: StreamType = self.repository.get_by_id(stream_type_id)
+        stream_type: StreamType = self.repository.find_by_id(stream_type_id)
 
         if stream_type:
-            stream_type_dto = StreamTypeDTO.model_validate({
+            stream_type_dto: StreamTypeDTO = StreamTypeDTO.model_validate({
                 "id": stream_type.id,
                 "protocol": stream_type.protocol,
                 "format": stream_type.format,
-                "metadata": stream_type.metadata_type,
+                "metadata_type": stream_type.metadata_type,
                 "display_name": stream_type.display_name
             })
             return stream_type_dto
@@ -47,17 +47,19 @@ class StreamTypeService:
     
     def get_all_stream_types(self) -> List[StreamTypeDTO]:
         """Get all available StreamTypes."""
-        stream_types: List[StreamType] = self.repository.get_all()
-
-        return [StreamTypeDTO(
-            id=st.id,
-            protocol=st.protocol,
-            format=st.format,
-            metadata=st.metadata_type,
-            display_name=st.display_name
-        ) for st in stream_types]
+        stream_types: List[StreamType] = self.repository.find_all()
+        stream_types_dto: list[StreamTypeDTO] = []
+        for st in stream_types:
+            stream_type_dto: StreamTypeDTO = StreamTypeDTO.model_validate({
+                "id": st.id,
+                "protocol": st.protocol,
+                "format": st.format,
+                "metadata_type": st.metadata_type,
+                "display_name": st.display_name
+            })
+            stream_types_dto.append(stream_type_dto)
+        return stream_types_dto
     
-
     def get_predefined_types_map(self) -> Dict[str, int]:
         """
         Get a map of type keys (PROTOCOL-FORMAT-METADATA) to IDs.
@@ -94,7 +96,7 @@ class StreamTypeService:
 
     def get_display_name(self, stream_type_id: int) -> Optional[str]:
         """Get the display name of a StreamType by its ID."""
-        stream_type = self.repository.find_by_id(stream_type_id)
+        stream_type: StreamType | None = self.repository.find_by_id(stream_type_id)
         if stream_type:
             return stream_type.display_name
         return None

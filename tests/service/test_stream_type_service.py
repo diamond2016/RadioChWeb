@@ -1,9 +1,13 @@
 """
 Unit tests for StreamTypeService.
+
+Moved from `tests/unit` into `tests/service` during test reorganization.
 """
 
+from typing import List
 import pytest
 from unittest.mock import Mock
+from model.entity.stream_type import StreamType
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.stream_type_service import StreamTypeService
 from model.dto.stream_type import StreamTypeDTO
@@ -48,35 +52,35 @@ class TestStreamTypeService:
         mock_entity.format = "MP3"
         mock_entity.metadata_type = "Icecast"
         mock_entity.display_name = "HTTPS MP3 Icecast"
-        mock_repository.get_by_id.return_value = mock_entity
+        mock_repository.find_by_id.return_value = mock_entity
 
-        result = stream_type_service.get_stream_type(1)
+        result: StreamTypeDTO | None = stream_type_service.get_stream_type(1)
 
         assert isinstance(result, StreamTypeDTO)
         assert result.id == 1
         assert result.protocol == "HTTPS"
         assert result.format == "MP3"
-        assert result.metadata == "Icecast"
+        assert result.metadata_type == "Icecast"
         assert result.display_name == "HTTPS MP3 Icecast"
 
     def test_get_stream_type_not_found(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting stream type when not found."""
-        mock_repository.get_by_id.return_value = None
+        mock_repository.find_by_id.return_value = None
 
-        result = stream_type_service.get_stream_type(999)
+        result: StreamTypeDTO | None = stream_type_service.get_stream_type(999)
 
         assert result is None
 
     def test_get_all_stream_types(self, stream_type_service: StreamTypeService, mock_repository: StreamTypeRepository):
         """Test getting all stream types."""
         # Mock entities
-        mock_entities = [
-            Mock(id=1, protocol="HTTP", format="MP3", metadata_type="Icecast", display_name="HTTP MP3 Icecast"),
-            Mock(id=2, protocol="HTTPS", format="AAC", metadata_type="Shoutcast", display_name="HTTPS AAC Shoutcast")
+        mock_entities: list[StreamType] = [
+            StreamType(id=1, protocol="HTTP", format="MP3", metadata_type="Icecast", display_name="HTTP MP3 Icecast"),
+            StreamType(id=2, protocol="HTTPS", format="AAC", metadata_type="Shoutcast", display_name="HTTPS AAC Shoutcast")
         ]
-        mock_repository.get_all.return_value = mock_entities
+        mock_repository.find_all.return_value = mock_entities
 
-        result = stream_type_service.get_all_stream_types()
+        result: List[StreamTypeDTO] = stream_type_service.get_all_stream_types()
 
         assert len(result) == 2
         assert all(isinstance(dto, StreamTypeDTO) for dto in result)

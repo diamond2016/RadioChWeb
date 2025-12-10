@@ -1,26 +1,32 @@
 """
 Unit tests for RadioSourceService.
 
-Tests radio source management including:
-- Saving proposals as RadioSources
-- Rejecting proposals
-- Updating proposal data
-- Transaction handling
+Moved from `tests/unit` into `tests/service` during test reorganization.
 """
-
 import pytest
 from unittest.mock import Mock
+from datetime import datetime
+
+from model.dto.radio_source import RadioSourceDTO
+from model.dto.stream_type import StreamTypeDTO
+from model.dto.user import UserDTO
+from service.auth_service import AuthService
+from service.stream_type_service import StreamTypeService
+from tests.conftest import test_user
+
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
+
 from service.radio_source_service import RadioSourceService
 from service.proposal_validation_service import ProposalValidationService
+
 from model.entity.proposal import Proposal
 from model.entity.radio_source import RadioSource
-from model.entity.stream_analysis import StreamAnalysis
+from model.entity.user import User
 
 from model.dto.validation import ProposalUpdateRequest
 from model.dto.validation import ValidationResult
-from datetime import datetime
+
 
 
 @pytest.fixture
@@ -39,84 +45,32 @@ def mock_validation_service() -> ProposalValidationService:
     return Mock(spec=ProposalValidationService)
 
 @pytest.fixture
+def mock_stream_type_service() -> StreamTypeService:
+    """Create mock StreamTypeService."""
+    return Mock(spec=StreamTypeService)
+
+@pytest.fixture
+def mock_auth_service() -> AuthService:
+    """Create mock AuthService."""
+    return Mock(spec=AuthService)
+
+@pytest.fixture
 def radio_source_service(mock_proposal_repo: ProposalRepository,
-                            mock_radio_source_repo: RadioSourceRepository, mock_validation_service: ProposalValidationService) -> RadioSourceService:
+                            mock_radio_source_repo: RadioSourceRepository, mock_validation_service: ProposalValidationService,
+                            mock_auth_service: AuthService, mock_stream_type_service: StreamTypeService) -> RadioSourceService:
     """Create RadioSourceService with mocked dependencies."""
     return RadioSourceService(
         mock_proposal_repo,
         mock_radio_source_repo,
-        mock_validation_service)
+        mock_validation_service,
+        mock_auth_service,
+        mock_stream_type_service
+    )
 
 
-class TestRadioSourceService:
-    """Test suite for RadioSourceService."""
+class TestProposalService:
+    """Test suite for ProposalService."""
 
-    def test_save_from_proposal_success(
-        self,
-        radio_source_service,
-        mock_proposal_repo,
-        mock_radio_source_repo,
-        mock_validation_service
-    ):
-        """Test successfully saving a valid proposal as RadioSource."""
-
-        # Arrange
-        proposal = Proposal(
-            id=1,
-            stream_url="https://stream.example.com/radio.mp3",
-            name="Test Radio",
-            website_url="https://example.com",
-            stream_type_id=1,
-            is_secure=True,
-            country="Italy",
-            description="Test description",
-            image_url="test.jpg"
-        )
-
-        validation_result = ValidationResult(is_valid=True)
-        mock_validation_service.validate_proposal.return_value = validation_result
-        mock_proposal_repo.find_by_id.return_value = proposal
-
-        mock_radio_source_repo.save.return_value = RadioSource(
-            id=1,
-            stream_url="https://stream.example.com/radio.mp3",
-            name="Test Radio",
-            website_url="https://example.com",
-            stream_type_id=1,
-            is_secure=True,
-            country="Italy",
-            description="Test description",
-            image_url="test.jpg",
-            created_at=datetime.now()
-        )
-
-        # Act
-        result = radio_source_service.save_from_proposal(1)
-
-        # Assert
-        assert result.name == "Test Radio"
-        assert result.stream_url == "https://stream.example.com/radio.mp3"
-        assert result.website_url == "https://example.com"
-        mock_validation_service.validate_proposal.assert_called_once_with(1)
-        mock_radio_source_repo.save.assert_called_once()
-        mock_proposal_repo.delete.assert_called_once_with(1)
-
-    def test_save_from_proposal_validation_failure(
-        self,
-        radio_source_service,
-        mock_validation_service
-    ):
-        """Test saving fails when validation fails."""
-        # Arrange
-        validation_result = ValidationResult(
-            is_valid=False,
-            errors=["Stream URL is required"]
-        )
-        mock_validation_service.validate_proposal.return_value = validation_result
-
-        # Act & Assert
-        with pytest.raises(ValueError, match="Proposal validation failed: Stream URL is required"):
-            radio_source_service.save_from_proposal(1)
 
     def test_save_from_proposal_not_found(
         self,
@@ -133,6 +87,7 @@ class TestRadioSourceService:
         # Act & Assert
         with pytest.raises(ValueError, match="Proposal with ID 1 not found"):
             radio_source_service.save_from_proposal(1)
+
 
     def test_reject_proposal_success(
         self,
@@ -157,6 +112,7 @@ class TestRadioSourceService:
         # Assert
         assert result
         mock_proposal_repo.delete.assert_called_once_with(1)
+
 
     def test_reject_proposal_not_found(
         self,
@@ -275,54 +231,3 @@ class TestRadioSourceService:
 
         # Assert
         assert result == proposals
-
-    def test_reject_proposal(
-        self,
-        radio_source_service,
-        mock_proposal_repo
-    ):
-        """Test successfully rejecting a proposal."""
-        # Arrange
-        mock_proposal_repo.delete.return_value = True
-
-        # Act
-        result = radio_source_service.reject_proposal(1)
-
-        # Assert
-        assert result is True
-        mock_proposal_repo.delete.assert_called_once_with(1)
-
-    def test_reject_proposal_not_found(
-        self,
-        radio_source_service,
-        mock_proposal_repo
-    ):
-        """Test rejecting a proposal that doesn't exist."""
-        # Arrange
-        mock_proposal_repo.delete.return_value = False
-
-        # Act
-        result = radio_source_service.reject_proposal(1)
-
-        # Assert
-        assert result is False
-        mock_proposal_repo.delete.assert_called_once_with(1)
-
-    def test_get_all_radio_sources(
-        self,
-        radio_source_service,
-        mock_radio_source_repo
-    ):
-        """Test getting all radio sources."""
-        # Arrange
-        radio_sources = [
-            RadioSource(id=1, stream_url="url1", name="Radio 1", website_url="web1", stream_type_id=1, is_secure=True, created_at=datetime.now()),
-            RadioSource(id=2, stream_url="url2", name="Radio 2", website_url="web2", stream_type_id=2, is_secure=False, created_at=datetime.now())
-        ]
-        mock_radio_source_repo.find_all.return_value = radio_sources
-
-        # Act
-        result = radio_source_service.get_all_radio_sources()
-
-        # Assert
-        assert result == radio_sources

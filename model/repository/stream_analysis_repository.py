@@ -2,8 +2,8 @@
 StreamAnalysysRepository - Data access layer for StreamAnalysys entity.
 """
 
-from typing import Optional, List, Dict
-from sqlalchemy.orm import Session
+from typing import Optional, List
+from sqlalchemy.orm import Session, selectinload
 from model.entity.stream_analysis import StreamAnalysis
 
 
@@ -15,11 +15,11 @@ class StreamAnalysisRepository:
     
     def find_by_id(self, id: int) -> Optional[StreamAnalysis]:
         """Get StreamAnalysis by ID."""
-        return self.db.query(StreamAnalysis).filter(StreamAnalysis.id == id).first()
+        return self.db.query(StreamAnalysis).options(selectinload(StreamAnalysis.stream_type), selectinload(StreamAnalysis.user)).filter(StreamAnalysis.id == id).first()
     
     def find_all(self) -> List[StreamAnalysis]:
         """Get all StreamAnalysises."""
-        return self.db.query(StreamAnalysis).all()
+        return self.db.query(StreamAnalysis).options(selectinload(StreamAnalysis.stream_type), selectinload(StreamAnalysis.user)).all()
     
     def count(self) -> int:
         """Count total StreamAnalysises."""
@@ -32,7 +32,7 @@ class StreamAnalysisRepository:
         Returns:
             StreamAnalysis if found, None otherwise
         """
-        stream_analysis = self.db.query(StreamAnalysis).filter(
+        stream_analysis: StreamAnalysis | None = self.db.query(StreamAnalysis).options(selectinload(StreamAnalysis.stream_type), selectinload(StreamAnalysis.user)).filter(
             StreamAnalysis.stream_url == stream_url
         ).first()
         
@@ -44,7 +44,7 @@ class StreamAnalysisRepository:
         Create a StreamAnalysis if it doesn't already exist.
         Used for initializing predefined types.
         """
-        existing = self.db.query(StreamAnalysis).filter(
+        existing: StreamAnalysis | None = self.db.query(StreamAnalysis).filter(
             StreamAnalysis.stream_url == new_analysis.stream_url
         ).first()
         
@@ -59,7 +59,7 @@ class StreamAnalysisRepository:
     
     def delete(self, id: int) -> bool:
         """Delete a StreamAnalysis by ID."""
-        existing = self.find_by_id(id)
+        existing: StreamAnalysis | None = self.find_by_id(id)
         if existing:
             self.db.delete(existing)
             self.db.commit()
@@ -68,4 +68,4 @@ class StreamAnalysisRepository:
     
     def get_analyses_by_user(self, user_id: int) -> List[StreamAnalysis]:
         """Retrieve all stream analyses submitted by a specific user."""
-        return self.db.query(StreamAnalysis).filter(StreamAnalysis.created_by == user_id).all()
+        return self.db.query(StreamAnalysis).options(selectinload(StreamAnalysis.stream_type), selectinload(StreamAnalysis.user)).filter(StreamAnalysis.created_by == user_id).all()

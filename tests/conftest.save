@@ -9,9 +9,11 @@ import sys
 from pathlib import Path
 from flask import Flask, app
 from unittest.mock import Mock
-import uuid
 
 from sqlalchemy.orm.scoping import scoped_session
+
+from model.entity import user
+
 
 # Add current directory to Python path for tests
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -19,7 +21,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from database import db
 from model.entity.stream_type import StreamType
 from model.entity.user import User
-
 
 @pytest.fixture(scope="session")
 def test_app():
@@ -35,27 +36,14 @@ def test_app():
 
     db.init_app(app)
 
-    # Use an application context only for setup (create tables, initial data)
-    # but do not keep an app context open across tests. Tests should open
-    # their own `app.app_context()` (see `test_db` fixture) to avoid
-    # app-context stack corruption during teardown.
     with app.app_context():
         db.create_all()
         # Initialize stream types
-        from model.entity.radio_source import RadioSource
-        from model.entity.stream_type import StreamType
-        from model.entity.proposal import Proposal
-        from model.entity.user import User
-        from model.entity.stream_analysis import StreamAnalysis
-
         _initialize_stream_types()
         # ensure LoginManager is configured early
         from service.auth_service import AuthService
         AuthService(app)
-
-    # Do not yield while an app context is active. Yield the app object
-    # so other fixtures/tests can manage app contexts explicitly.
-    yield app
+        yield app
 
 
 @pytest.fixture
@@ -119,24 +107,18 @@ def _initialize_stream_types():
 @pytest.fixture
 def test_user(test_db: scoped_session[Session]):
     """Create a persisted test user with role 'user'. Returns ORM User."""
-    # Use unique email per fixture run to avoid UNIQUE constraint collisions
-    unique_email = f"test_user_{uuid.uuid4().hex}@example.com"
-    user = User(email=unique_email, hash_password='testhash', role='user')
+    user = User(email='test_user@example.com', hash_password='testhash', role='user')
     test_db.add(user)
-    # Use flush instead of commit so the outer test transaction/savepoint
-    # remains under test framework control. Committing inside the fixture
-    # can leak state across tests and break isolation.
-    test_db.flush()
+    test_db.commit()
     test_db.refresh(user)
     return user
 
 @pytest.fixture
 def test_admin(test_db: scoped_session[Session]):
     """Create a persisted test user with role 'admin'. Returns ORM User."""
-    unique_email = f"test_admin_{uuid.uuid4().hex}@example.com"
-    admin = User(email=unique_email, hash_password='adminhash', role='admin')
+    admin = User(email='test_admin@example.com', hash_password='adminhash', role='admin')
     test_db.add(admin)
-    test_db.flush()
+    test_db.commit()
     test_db.refresh(admin)
     return admin
 
@@ -151,6 +133,21 @@ def logged_in_client(test_app: app.Flask, test_user: User):
         yield client
 
 @pytest.fixture
+def user_logged_in_client2(test_app: app.Flask, test_user: User):
+    """Create a test client logged in as an admin user using flask_login."""
+
+    with test_app.test_client() as client:
+        with test_app.test_request_context():
+            # login_user sets up current_user and session appropriately
+            login_user(test_user)
+            # Now persist the session into the test client cookies
+            # by copying cookies from the context into the client via session_transaction.
+            with client.session_transaction() as sess:
+                # No-op: session already modified by login_user; this triggers save on exit
+                pass
+        yield client
+
+@pytest.fixture
 def admin_logged_in_client(test_app: app.Flask, test_admin: User):
     """Create a test client logged in as an admin user."""
     with test_app.test_client() as client:
@@ -158,3 +155,18 @@ def admin_logged_in_client(test_app: app.Flask, test_admin: User):
             sess['_user_id'] = str(test_admin.id)
             sess['_fresh'] = True
         yield client    
+
+@pytest.fixture
+def admin_logged_in_client2(test_app: app.Flask, test_admin: User):
+    """Create a test client logged in as an admin user using flask_login."""
+
+    with test_app.test_client() as client:
+        with test_app.test_request_context():
+            # login_user sets up current_user and session appropriately
+            login_user(test_admin)
+            # Now persist the session into the test client cookies
+            # by copying cookies from the context into the client via session_transaction.
+            with client.session_transaction() as sess:
+                # No-op: session already modified by login_user; this triggers save on exit
+                pass
+        yield client

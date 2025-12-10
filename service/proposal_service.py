@@ -7,9 +7,7 @@ separate from the RadioSource service.
 """
 
 from typing import List, Optional
-from flask_login import login_required
 from model.entity import proposal
-from service.auth_service import admin_required
 from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
 from model.dto.proposal import ProposalDTO
@@ -20,7 +18,6 @@ class ProposalService:
         self.proposal_repo: ProposalRepository = proposal_repo
 
     # a user can propose from analyze stream an can update proposals if is their own
-    @login_required
     def update_proposal(self, proposal_id: int, updates: ProposalDTO) -> ProposalDTO:
         """Update editable fields of a proposal and persist changes.
 
@@ -86,22 +83,16 @@ class ProposalService:
             proposal_dtos.append(new_proposal)
         return proposal_dtos   
 
-
-    # only admin can disapprove a proposal as can approve. If rejected is deleted
-    @admin_required
     def reject_proposal(self, proposal_id: int) -> bool:
         """
-        Reject (delete) a proposal by id.
+        Reject (delete) a proposal by its ID.
 
-        Returns True if deletion succeeded, False otherwise.
-        This method is defensive about repository method names to preserve backward compatibility.
+        Returns True when the proposal existed and was deleted, False otherwise.
         """
-        try:
-            proposal: Proposal = self.proposal_repo.find_by_id(proposal_id)
-            if proposal is None:
-                return False
-            self.proposal_repo.delete(proposal_id)
-            return True
-        
-        except AttributeError:  
-            return False
+        if proposal_id is None:
+            raise ValueError("proposal_id must be provided")
+
+        deleted: bool = self.proposal_repo.delete(proposal_id)
+        return deleted
+
+

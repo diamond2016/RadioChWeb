@@ -1,6 +1,6 @@
 """
 Unit tests for StreamAnalysisService - Core spec 003 implementation.
-Tests TR-001: comprehensive unit tests for service layer components.
+Adjusted to expect DTOs (StreamAnalysisDTO) returned by service.
 """
 
 import pytest
@@ -13,28 +13,31 @@ from model.repository.proposal_repository import ProposalRepository
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 
 # Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from service.stream_analysis_service import StreamAnalysisService
 from service.stream_type_service import StreamTypeService
-from model.dto.stream_analysis import ErrorCode, DetectionMethod, StreamAnalysisResult
+from model.dto.stream_analysis import ErrorCode, DetectionMethod, StreamAnalysisDTO
+from model.dto.user import UserDTO
 
 
 @pytest.fixture
 def mock_stream_type_service() -> StreamTypeService:
     """Mock StreamTypeService for testing."""
-    # annotate the variable as a generic Mock for better completions/typing in editors
     mock_service: Mock = Mock(spec=StreamTypeService)
     mock_service.find_stream_type_id.return_value = 1
-    # Provide a sensible display name to avoid Pydantic validation errors
     mock_service.get_display_name.return_value = "Test Stream"
-    # cast to the interface/class so the fixture's return type is StreamTypeService (Pylance-friendly)
     return cast(StreamTypeService, mock_service)
 
 @pytest.fixture
 def mock_stream_analysis_repo() -> StreamAnalysisRepository:
     """Mock StreamAnalysisRepository for testing."""
     mock_repo: Mock = Mock(spec=StreamAnalysisRepository)
+    # make save return the same object with an id
+    def save_side(obj):
+        obj.id = getattr(obj, 'id', 1)
+        return obj
+    mock_repo.save.side_effect = save_side
     return cast(StreamAnalysisRepository, mock_repo)
 
 
@@ -48,7 +51,6 @@ def mock_proposal_repo() -> ProposalRepository:
 @pytest.fixture
 def analysis_service(mock_stream_type_service: StreamTypeService, mock_proposal_repo: ProposalRepository, mock_stream_analysis_repo: StreamAnalysisRepository) -> StreamAnalysisService:
     """Create StreamAnalysisService with mocked dependencies."""
-    # patch shutil.which only during construction so the constructor doesn't raise
     with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
         service = StreamAnalysisService(stream_type_service=mock_stream_type_service, 
                                         proposal_repository=mock_proposal_repo, analysis_repository=mock_stream_analysis_repo)
@@ -59,23 +61,20 @@ class TestStreamAnalysisService:
     """Test cases for StreamAnalysisService."""
 
     def test_unsupported_protocol_rejection(self, analysis_service: StreamAnalysisService) -> None:
-        """Test FR-004: RTMP/RTSP URLs are rejected."""
         rtmp_url = "rtmp://stream.example.com/live"
 
-        result: StreamAnalysisResult = analysis_service.analyze_stream(url=rtmp_url)
+        result: StreamAnalysisDTO = analysis_service.analyze_stream(url=rtmp_url)
 
         assert not result.is_valid
         assert result.error_code == ErrorCode.UNSUPPORTED_PROTOCOL
         assert not result.is_secure
 
     def test_https_security_detection(self, analysis_service: StreamAnalysisService) -> None:
-        """Test security detection for HTTPS URLs."""
         https_url = "https://stream.example.com/radio.mp3"
 
         with patch.object(analysis_service, '_analyze_with_curl') as mock_curl, \
              patch.object(analysis_service, '_analyze_with_ffmpeg') as mock_ffmpeg:
 
-            # Mock successful analysis
             mock_curl.return_value = {
                 "success": True,
                 "content_type": "audio/mpeg",
@@ -92,10 +91,9 @@ class TestStreamAnalysisService:
 
             result = analysis_service.analyze_stream(https_url)
 
-            assert result.is_secure  # HTTPS should be secure
+            assert result.is_secure
 
     def test_http_security_warning(self, analysis_service: StreamAnalysisService) -> None:
-        """Test FR-005: HTTP streams flagged as insecure but valid."""
         http_url = "http://stream.example.com:8000/"
 
         with patch.object(analysis_service, '_analyze_with_curl') as mock_curl, \
@@ -115,50 +113,38 @@ class TestStreamAnalysisService:
                 "security_status": "UNSAFE"
             }
 
-            result: StreamAnalysisResult = analysis_service.analyze_stream(http_url)
+            result: StreamAnalysisDTO = analysis_service.analyze_stream(http_url)
 
-            assert not result.is_secure  # HTTP should be insecure
-            assert result.is_valid       # But still valid
+            assert not result.is_secure
+            assert result.is_valid
 
     @patch('subprocess.run')
     def test_ffmpeg_authoritative_over_curl(self, mock_run: Mock, analysis_service: StreamAnalysisService) -> None:
-        """Test FR-003: FFmpeg is authoritative when results differ."""
-
-        # Mock curl detecting MP3, but ffmpeg detecting AAC
         curl_responses: list[Mock] = [
-            # First call: curl -I
             Mock(returncode=0, stdout="HTTP/1.1 200 OK\\nContent-Type: audio/mpeg\\n", stderr=""),
-            # Second call: ffmpeg -i
             Mock(returncode=0, stdout="", stderr="Stream #0:0: Audio: aac, 44100 Hz, stereo")
         ]
 
         mock_run.side_effect = curl_responses
 
-        result: StreamAnalysisResult = analysis_service.analyze_stream("https://stream.example.com/test")
+        result: StreamAnalysisDTO = analysis_service.analyze_stream("https://stream.example.com/test")
 
-        # Should use FFmpeg's AAC detection, not curl's MP3
         assert result.detection_method == DetectionMethod.BOTH
-        # The mock should have called find_stream_type_id with AAC format
 
     def test_curl_header_extraction(self, analysis_service: StreamAnalysisService) -> None:
-        """Test _extract_content_type method."""
         headers = "HTTP/1.1 200 OK\\nContent-Type: audio/mpeg\\nServer: Icecast\\n"
 
         content_type = analysis_service._extract_content_type(headers)
-        print("Extracted Content-Type:", content_type)
         assert content_type == "audio/mpeg"
 
     def test_ffmpeg_output_parsing(self, analysis_service: StreamAnalysisService) -> None:
-        """Test _parse_ffmpeg_output method."""
         ffmpeg_output = "Input #0, mp3, from 'stream':\\nStream #0:0: Audio: mp3 (mp3float), 22050 Hz, mono, fltp, 24 kb/s"
 
         result: dict | None = analysis_service._parse_ffmpeg_output(ffmpeg_output)
-        print("Extracted Content-Type:", result)
         assert result["format"] == "MP3"
         assert result["codec"] == "mp3"
 
     def test_metadata_detection_icecast(self, analysis_service: StreamAnalysisService) -> None:
-        """Test metadata detection for Icecast streams."""
         headers = "HTTP/1.1 200 OK\\nicy-name: Test Radio\\nServer: Icecast"
 
         metadata = analysis_service._detect_metadata_support(headers)
@@ -166,7 +152,6 @@ class TestStreamAnalysisService:
         assert metadata == "Icecast"
 
     def test_metadata_detection_shoutcast(self, analysis_service: StreamAnalysisService) -> None:
-        """Test metadata detection for Shoutcast streams."""
         headers = "HTTP/1.1 200 OK\\nServer: Shoutcast\\nicy-genre: Rock"
 
         metadata = analysis_service._detect_metadata_support(headers)
@@ -174,7 +159,6 @@ class TestStreamAnalysisService:
         assert metadata == "Shoutcast"
 
     def test_prerequisites_check_missing_ffmpeg(self):
-        """Test NFR-001: Prerequisites check for missing ffmpeg."""
         mock_service = Mock()
 
         with patch('service.stream_analysis_service.shutil.which', return_value=None):
@@ -183,7 +167,6 @@ class TestStreamAnalysisService:
 
     @patch('subprocess.run')
     def test_timeout_handling(self, mock_run, analysis_service: StreamAnalysisService) -> None:
-        """Test NFR-002: Timeout handling."""
         from subprocess import TimeoutExpired
         mock_run.side_effect = TimeoutExpired('curl', 30)
 
@@ -193,7 +176,6 @@ class TestStreamAnalysisService:
         assert result.error_code == ErrorCode.TIMEOUT
 
     def test_extract_metadata_from_ffmpeg_output_basic(self, analysis_service: StreamAnalysisService) -> None:
-        """Unit test for _extract_metadata_from_ffmpeg_output helper."""
         ffmpeg_stderr = (
             "Input #0, mp3, from 'stream':\n"
             "  Metadata:\n"
@@ -206,7 +188,6 @@ class TestStreamAnalysisService:
         assert extracted == "title: Test Title\nartist: Example Artist"
 
     def test_analyze_stream_populates_extracted_metadata_from_ffmpeg(self, analysis_service: StreamAnalysisService) -> None:
-        """Integration-style test: ensure analyze_stream result contains extracted_metadata."""
         url = "https://stream.example.com/test"
         ffmpeg_stderr = (
             "Input #0, mp3, from 'stream':\n"
@@ -225,7 +206,6 @@ class TestStreamAnalysisService:
                 "raw_output": "HTTP/1.1 200 OK\nContent-Type: audio/mpeg"
             }
 
-            # Return ffmpeg result including extracted_metadata (what our helper would produce)
             mock_ffmpeg.return_value = {
                 "success": True,
                 "format": "MP3",
@@ -242,7 +222,7 @@ class TestStreamAnalysisService:
     def test_save_analysis_as_proposal_basic(self, analysis_service: StreamAnalysisService) -> None:
         """Unit test promoting a analysis into a proposal."""
         with patch.object(analysis_service, 'analyze_stream') as mock_stream_analysis:
-            mock_stream_analysis.return_value = StreamAnalysisResult(
+            mock_stream_analysis.return_value = StreamAnalysisDTO(
                 stream_url="https://stream.example.com/test",
                 stream_type_display_name="Test Stream",
                 is_valid=True,
@@ -250,8 +230,22 @@ class TestStreamAnalysisService:
                 stream_type_id=1,
                 is_secure=True,
                 raw_ffmpeg_output="Stream #0:0: Audio: mp3",
-                extracted_metadata="title: Test Title\nartist: Example Artist"
+                extracted_metadata="title: Test Title\nartist: Example Artist",
+                user=UserDTO(id=1, email="test@example.com", role="user")
             )
   
-            result: bool = analysis_service.save_analysis_as_proposal(mock_stream_analysis.return_value)
-            assert result is True
+            # Create a fake saved analysis in repository
+            fake_analysis = Mock()
+            fake_analysis.id = 1
+            fake_analysis.stream_url = "https://stream.example.com/test"
+            fake_analysis.stream_type_id = 1
+            fake_analysis.is_valid = True
+            fake_analysis.is_secure = True
+            fake_analysis.user = Mock(id=1)
+
+            with patch.object(analysis_service, 'analysis_repository') as mock_repo:
+                mock_repo.find_by_id.return_value = fake_analysis
+                with patch('service.stream_analysis_service.current_user') as mock_current:
+                    mock_current.id = 1
+                    result: bool = analysis_service.save_analysis_as_proposal(1)
+                    assert result is True
