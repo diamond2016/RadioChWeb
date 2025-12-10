@@ -15,7 +15,7 @@
         <div class="row">
             <div class="col-md-8">
                 <h1>Proposal Details</h1>
-                <form method="post" action="{{ url_for('proposal.proposal_detail', proposal_id=proposal.id) }}">
+                <form method="post" action="{{ url_for('proposal.update_proposal', proposal_id=proposal.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="card">
                     <div class="card-header">

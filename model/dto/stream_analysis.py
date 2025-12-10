@@ -4,11 +4,13 @@ StreamAnalysisResult is the main return type from the analyze-and-classify proce
 """
 
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel, HttpUrl, ConfigDict
 from pydantic import field_validator
 from enum import Enum
 
 from model.dto.user import UserDTO
+from model.dto.validation import ValidationDTO
 
 
 class DetectionMethod(str, Enum):
@@ -37,7 +39,7 @@ class StreamAnalysisRequest(BaseModel):
     )
 
 
-class StreamAnalysisResult(BaseModel):
+class StreamAnalysisDTO(BaseModel):
     """
     Data structure returned by analysis process (persisted in page analysis.html).
     """
@@ -51,7 +53,10 @@ class StreamAnalysisResult(BaseModel):
     raw_content_type: Optional[str] = None  # String from curl headers
     raw_ffmpeg_output: Optional[str] = None  # String from ffmpeg detection
     extracted_metadata: Optional[str] = None  # Normalized metadata extracted from ffmpeg stderr
-    user: UserDTO  # The user who requested the analysis
+    user: Optional[UserDTO] = None  # The user who requested the analysis (may be None)
+    validation: Optional[ValidationDTO] = None  # Transient validation details (not persisted)
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
         
     @field_validator('extracted_metadata')
     def _clean_extracted_metadata(cls, v: Optional[str]) -> Optional[str]:
@@ -69,3 +74,6 @@ class StreamAnalysisResult(BaseModel):
         return self.is_valid and self.error_code is None
     
     model_config = ConfigDict(from_attributes=True)
+
+# Backwards compatibility alias: older code/tests import StreamAnalysisResult
+StreamAnalysisResult = StreamAnalysisDTO

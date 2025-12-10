@@ -20,11 +20,12 @@ class Proposal(db.Model):
 
     # Timestamps
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Relationship
-    stream_type = db.relationship("StreamType", back_populates="proposals")
+    stream_type = db.relationship("StreamType", back_populates="proposals", lazy="select")
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    user = db.relationship("User", back_populates="proposals")
+    user = db.relationship("User", back_populates="proposals", lazy="select")
     
     def __repr__(self):
         return f"<Proposal(id={self.id}, name='{self.name}', stream_url='{self.stream_url}', is_secure={self.is_secure})>"

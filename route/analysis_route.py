@@ -7,7 +7,7 @@ from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
 from model.entity.stream_analysis import StreamAnalysis
-from model.dto.stream_analysis import StreamAnalysisResult
+from model.dto.stream_analysis import StreamAnalysisDTO, StreamAnalysisResult
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
@@ -74,14 +74,18 @@ def analyze_url():
     
     try:
         analysis_service: StreamAnalysisService = get_stream_analysis_service()
-        result: StreamAnalysisResult = analysis_service.analyze_stream(url)
+        result: StreamAnalysisDTO = analysis_service.analyze_stream(url)
 
+        analysis_repo: StreamAnalysisRepository = get_analysis_repo()
         # Show the result in a simple format
         flash(f'Analysis result: {result.stream_type_display_name if result.stream_type_display_name else "Unknown"}', 'info')
-
+        if not result.is_valid:
+            flash('Stream is not valid. Analysis will be deleted', 'warning')
+            return redirect(url_for('analysis.index'))
+        
         # Save detail in repo
-        analysis_repo: StreamAnalysisRepository = get_analysis_repo()
-        analysis_entity = StreamAnalysis(
+
+        analysis_service._persist_analysis_and_return_dto(StreamAnalysisDTO(
             stream_url=url,
             is_valid=result.is_valid,
             is_secure=result.is_secure,
@@ -92,8 +96,8 @@ def analyze_url():
             raw_ffmpeg_output=result.raw_ffmpeg_output,
             extracted_metadata=result.extracted_metadata,
             created_by=result.user.id if result.user else None
-        )
-        analysis_repo.save(analysis_entity)              
+        ))
+        flash('Stream analysis saved successfully!', 'success')
    
     except Exception as e:
         flash(f'Analysis failed: {str(e)}', 'error')

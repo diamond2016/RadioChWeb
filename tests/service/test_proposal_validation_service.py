@@ -1,11 +1,7 @@
 """
 Unit tests for ProposalValidationService.
 
-Tests validation logic for proposals including:
-- Required field validation
-- URL format validation
-- Duplicate detection
-- Security status checks
+Moved from `tests/unit` into `tests/service` during test reorganization.
 """
 
 import pytest

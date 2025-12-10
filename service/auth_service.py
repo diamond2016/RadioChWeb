@@ -67,6 +67,27 @@ class AuthService:
             raise ValueError('user not found')        
         return self.user_repo.update_password(existing, new_hash)
 
+    def get_user_by_email(self, email: str) -> UserDTO | None:
+        user = self.user_repo.find_by_email(email)
+        if not user:
+            return None
+        return UserDTO.model_validate(user)
+    
+    def get_user_by_id(self, user_id: int) -> UserDTO | None:
+        if user_id is None:
+            return None
+        user = self.user_repo.find_by_id(user_id)
+        if not user:
+            return None
+        return UserDTO.model_validate(user)
+    
+    def register_user_dto(self, user_dto: UserDTO, password: str) -> UserDTO:
+        user = self.register_user(user_dto, password)
+        return self.get_user_by_id(user.id)
+
+    def change_password_dto(self, user_dto: UserDTO, new_password: str) -> UserDTO:
+        user = self.change_password(user_dto, new_password)
+        return self.get_user_by_id(user.id)
 
 def admin_required(func: Callable[..., Any]) -> Callable[..., Any]:   
     @wraps(func)

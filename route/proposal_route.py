@@ -5,17 +5,21 @@ Implements spec 003: propose-new-radio-source and spec 004: admin-approve-propos
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
+from database import db
 from model.dto.radio_source import RadioSourceDTO
 from model.dto.validation import ValidationResult
-from model.entity.radio_source import RadioSource
+from model.dto.proposal import ProposalDTO
+
+from model.entity.proposal import Proposal
+
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
-from model.entity.proposal import Proposal
-from model.dto.proposal import ProposalDTO, ProposalUpdateRequest
 from model.repository.stream_type_repository import StreamTypeRepository
+
 from route.analysis_route import get_stream_type_repo
+
+from service.auth_service import AuthService
 from service.proposal_service import ProposalService
-from database import db
 from service.proposal_validation_service import ProposalValidationService
 from service.proposal_service import ProposalService
 from service.radio_source_service import RadioSourceService
@@ -30,18 +34,22 @@ def get_proposal_repo() -> ProposalRepository:
 def get_radio_source_repo() -> RadioSourceRepository:
     return RadioSourceRepository(db.session)
 
-def get_validation_service() -> ProposalValidationService:
+def get_proposal_service() -> ProposalService:
     proposal_repo: ProposalRepository = get_proposal_repo()
-    radio_source_repo: RadioSourceRepository = get_radio_source_repo()
-    from service.proposal_validation_service import ProposalValidationService
-    return ProposalValidationService(proposal_repo, radio_source_repo)
+    return ProposalService(proposal_repo)
+
+def get_auth_service() -> AuthService:
+    return AuthService()
 
 def get_radio_source_service() -> RadioSourceService:
     proposal_repo: ProposalRepository = get_proposal_repo()
     radio_source_repo: RadioSourceRepository = get_radio_source_repo()
-    validation_service: ProposalValidationService = get_validation_service()
-    from service.radio_source_service import RadioSourceService
-    return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
+    proposal_service: ProposalService = get_proposal_service()
+    auth_service: AuthService = get_auth_service()
+    stream_type_service: StreamTypeService = get_stream_type_service()
+    
+    return RadioSourceService(proposal_repo, radio_source_repo, proposal_service, auth_service, stream_type_service)  
+
 
 def get_stream_type_service() -> StreamTypeService:
     stream_type_repo: StreamTypeRepository = get_stream_type_repo()
@@ -118,20 +126,20 @@ def update_proposal(proposal_id):
         image_url: str | None = request.form.get('image_url') or request.form.get('image') or None  
 
         existing: ProposalDTO | None = proposal_service.get_proposal(proposal_id)    
-        update_dto = ProposalDTO(
+        new = ProposalDTO(
             id=existing.id,
             stream_url=existing.stream_url,
-            is_secure=existing.is_secure,
-            stream_type_id=existing.stream_type_id,
-            name=name,
-            website_url=website_url,
-            country=country,
-            description=description,
-            image_url=image_url
+            name=name if name is not None else existing.name,
+            website_url=website_url if website_url is not None else existing.website_url,
+            country=country if country is not None else existing.country,       
+            description=description if description is not None else existing.description,   
+            image_url=image_url if image_url is not None else existing.image_url,
+            stream_type=existing.stream_type,
+            is_secure=existing.is_secure
         )
         proposal_service: ProposalService = get_proposal_service()
         try:
-            proposal_service.update_proposal(proposal_id, update_dto)
+            proposal_service.update_proposal(proposal_id, new)
             flash('Proposal updated successfully', 'success')
 
         except Exception as e:

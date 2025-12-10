@@ -12,29 +12,18 @@ class User(UserMixin, db.Model):
     hash_password = db.Column(db.String(512), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='user')
 
-    # Timestamps: keep `created_at` and `last_modified_at` per project preference
+    # Timestamps: keep `created_at` and `updated_at`
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    last_modified_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
     proposals = db.relationship("Proposal", back_populates="user")
-    stream_analysis = db.relationship("StreamAnalysis", back_populates="user")
+    stream_analyses = db.relationship("StreamAnalysis", back_populates="user")
+    radio_sources = db.relationship("RadioSource", back_populates="user")
 
     def get_id(self):
         return str(self.id)
 
-    @property
-    def is_authenticated(self) -> bool:
-        return True
-
-    @property
-    def is_anonymous(self) -> bool:
-        return False
-
-    @property
-    def is_admin(self) -> bool:
-        return self.role == 'admin'
-    
     @property
     def is_admin(self) -> bool:
         return self.role == 'admin'

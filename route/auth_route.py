@@ -54,7 +54,7 @@ def change_password():
             flash('Current password incorrect', 'error')
             return render_template('user/change_password.html', form=form), 400
         
-        auth_service.change_password(user, new)
+        auth_service.change_password_dto(user, new)
         flash('Password changed successfully', 'success')
         return redirect(url_for('main.index'))
     
@@ -104,7 +104,7 @@ def register():
     if form.validate_on_submit():
         try:
             userDTO = UserDTO(id=0, email=form.email.data, role='user')
-            auth_service.register_user(userDTO, password=form.password.data)
+            auth_service.register_user_dto(userDTO, password=form.password.data)
             flash('Registration successful. Please login.', 'success')
             return redirect(url_for('auth.login'))
         except ValueError as e:

@@ -17,6 +17,10 @@ from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from service.proposal_validation_service import ProposalValidationService
 from service.radio_source_service import RadioSourceService
+from service.stream_type_service import StreamTypeService
+from model.repository.stream_type_repository import StreamTypeRepository
+from model.repository.user_repository import UserRepository
+from service.auth_service import AuthService
 from model.dto.validation import ProposalUpdateRequest
 
 
@@ -36,11 +40,27 @@ class TestValidateAndAddWorkflow:
         return proposal_repo, radio_source_repo
 
     @pytest.fixture
-    def services(self, repositories):
+    def services(self, repositories, db_session):
         """Create services with repositories."""
         proposal_repo, radio_source_repo = repositories
         validation_service = ProposalValidationService(proposal_repo, radio_source_repo)
-        radio_source_service = RadioSourceService(proposal_repo, radio_source_repo, validation_service)
+        # Create StreamTypeService (needs its repository bound to the test DB session)
+        # and an AuthService backed by the test DB user repository.
+        # This ensures integration tests exercise DB-backed user and stream_type lookups.
+        stream_type_repo = StreamTypeRepository(db_session)
+        stream_type_service = StreamTypeService(stream_type_repo)
+
+        auth = AuthService()
+        # bind auth service user repository to the test DB session
+        auth.user_repo = UserRepository(db_session)
+
+        radio_source_service = RadioSourceService(
+            proposal_repo,
+            radio_source_repo,
+            validation_service,
+            auth,
+            stream_type_service
+        )
         return validation_service, radio_source_service
 
     def test_complete_save_workflow(self, db_session, services):
