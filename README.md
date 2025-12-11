@@ -1,4 +1,4 @@
-![favicon](static/favicon.png)  **RadioChWeb**
+i![favicon](static/favicon.png)  **RadioChWeb**
 
 *RadioChWeb* is a radio stream discovery and management web application built with Flask. It analyzes candidate streams (using ffmpeg and curl), stores analysis results, and provides a simple workflow to propose, review, and approve radio sources.
 
@@ -60,5 +60,3 @@ Resources
 - Architecture notes: `ARCHITECTURE.md`
 - Web UI notes: `web-interface.md`
 - Repo: https://github.com/diamond2016/RadioChWeb
-
-If you need a developer quickstart or CI setup, I can add a `.github/workflows` example next.
