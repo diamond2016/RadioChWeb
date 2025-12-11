@@ -46,9 +46,10 @@
                         </p>
                     </div>
                         <div class="card-footer">
-                    {% if (current_user.is_authenticated and current_user.id == proposal.user_id) or (current_user.is_authenticated and current_user.is_admin) %}
+                    {% if (current_user.is_authenticated and current_user.id == proposal.user.id) or (current_user.is_authenticated and current_user.is_admin) %}
+                    <div class="card-footer">    
                         <a href="{{ url_for('proposal.update_proposal', proposal_id=proposal.id) }}" class="btn btn-secondary btn-sm">Review Proposal</a>
-                        </div>
+                    </div>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.is_admin %}
                         <div class="card-footer">
