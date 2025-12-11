@@ -62,6 +62,9 @@ instance/
 # Cursor
 .cursor/
 
+# Github
+.github/
+
 # JetBrains (PyCharm, etc.)
 .idea/
 
@@ -100,6 +103,7 @@ instance/
 *.swp
 
 # Docs not to be committed
+specs/
 work/
 docs/_build/
 work-in-progress.md
