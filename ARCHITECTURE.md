@@ -137,224 +137,98 @@ CREATE TABLE IF NOT EXISTS "proposals" (
 
 
 
-### 🔧 Technology Stack
+*** Begin Public Architecture Overview ***
 
-#### Core Technologies
-- **Python 3.14+**: Primary programming language
-- **Flask 2.3.2**: Web framework for API endpoints
-- **SQLAlchemy 2.0.43**: ORM and database abstraction
-- **Textual 6.5.0**: Terminal user interface framework
-- **Pydantic 2.12.0**: Data validation and serialization
+# RadioChWeb — Architecture
 
-#### Development Tools
-- **pytest 8.3.4**: Testing framework with asyncio support
-- **pytest-asyncio 1.3.0**: Async testing utilities
-- **pytest-cov 4.0.0**: Code coverage reporting
-- **PyWay 0.3.32**: Database migration tool
+This repository hosts RadioChWeb, a Flask application for discovering, analyzing, validating and managing radio stream sources. This document gives a concise, public-facing overview of the project's structure, main components, and how to run and contribute.
 
-#### External Dependencies
-- **ffmpeg**: Audio stream analysis and metadata extraction
-- **curl**: HTTP header inspection and validation
+## Repository layout (top-level)
 
-## Development State
-
-### ✅ **Completed Features**
-
-#### **Spec 003: Analyze and Classify Stream** 🎯
-- **Status**: ✅ **PRODUCTION READY**
-- **Coverage**: 59% test coverage, 10/10 tests passing
-- **Features**:
-  - Dual validation (curl headers + ffmpeg analysis)
-  - 14 predefined StreamType classifications
-  - Security detection (HTTP/HTTPS)
-  - Timeout handling (30s max, configurable)
-  - Comprehensive error reporting
-  - Textual TUI integration with real-time feedback
-
-#### **Spec 002: Validate and Add Radio Source** ✅
-- **Status**: ✅ **PRODUCTION READY**
-- **Coverage**: 44 tests passing (unit + integration)
-- **Features**:
-  - ProposalValidationService with full validation logic
-  - RadioSourceService for saving/rejecting proposals
-  - Duplicate stream URL detection
-  - Security warnings for HTTP streams
-  - Required field validation (streamUrl, name, websiteUrl)
-  - Full Textual TUI integration with proposal management
-  - DataTable views for proposals, stream types, radio sources
-  - Modal edit screen with save/reject functionality
-  - Database migration integration
-
-#### **Database Layer** 🗄️
-- **Status**: ✅ **FULLY IMPLEMENTED**
-- **Features**:
-  - PyWay migration system (replacing manual scripts)
-  - Complete schema with indexes and foreign keys
-  - Repository pattern implementation
-  - Session management with proper cleanup
-
-#### **Testing Infrastructure** 🧪
-- **Status**: ✅ **ESTABLISHED**
-- **Features**:
-  - pytest with asyncio support
-  - Unit test coverage for core services
-  - Integration tests for end-to-end workflows
-  - Test configuration and fixtures
-  - Code coverage reporting
-
-### 🚧 **In Progress**
-
-#### **Spec 001: Discover Radio Source** 🔍
-- **Status**: 📝 **SPECIFIED** (implementation pending)
-- **Scope**: URL input → scraping → validation → proposal creation
-- **Priority**: P1 (core functionality)
-
-#### **Textual TUI Enhancement** 💻
-- **Status**: ✅ **PRODUCTION READY** (for Spec 002 & 003)
-- **Completed**: 
-  - Stream analysis tab with real functionality
-  - Validate & Add tab with proposal management
-  - Database management tabs with migration support
-- **Pending**: Spec 001 discovery tab
-
-### 📋 **Planned Features**
-
-#### **API Layer** 🌐
-- Flask REST endpoints for all services
-- OpenAPI/Swagger documentation
-- CLI tools for API interaction
-
-#### **Advanced Features** ⚡
-- Concurrent stream analysis
-- Playlist parsing and expansion
-- Batch processing capabilities
-- Export/import functionality
-
-#### **Quality Assurance** 🔍
-- Integration test suite
-- Performance benchmarking
-- Security auditing
-- Documentation completion
-
-## Development Workflow
-
-### 🏃 **Current Workflow**
-1. **Specification**: Create detailed spec.md with user stories
-2. **Planning**: Generate implementation plan.md with tasks
-3. **Implementation**: TDD approach with comprehensive testing
-4. **Integration**: Textual TUI integration and validation
-5. **Migration**: PyWay database schema updates
-
-### 🧪 **Testing Strategy**
-- **Unit Tests**: Service layer business logic
-- **Integration Tests**: End-to-end workflows (planned)
-- **TUI Tests**: Interface validation (planned)
-- **Coverage Target**: >80% overall coverage
-
-### 🚀 **Deployment**
-- **Environment**: Python virtual environment
-- **Database**: SQLite (development), PostgreSQL (production planned)
-- **Dependencies**: requirements.txt with pinned versions
-- **Migration**: Automated PyWay migrations
-
-## Key Design Decisions
-
-### **Architecture Principles**
-- **Backend-First**: Core logic developed before UI
-- **API-First**: All services exposed via REST APIs
-- **Service-Oriented**: Clear separation of concerns
-- **Test-Driven**: Comprehensive test coverage mandatory
-
-### **Technology Choices**
-- **Textual over CLI**: Rich terminal UI for better UX
-- **PyWay over Manual**: Automated migration management
-- **pytest over unittest**: Modern testing framework
-- **Pydantic v2**: Latest data validation standard
-
-### **Data Design**
-- **Normalized Schema**: Proper relational design
-- **Lookup Tables**: Predefined stream types for consistency
-- **Proposal Pattern**: Two-phase validation workflow
-- **Comprehensive Indexing**: Performance optimization
-
-## Getting Started
-
-### **Prerequisites**
-```bash
-# Python 3.14+
-python3 --version
-
-# External tools
-which ffmpeg  # Audio analysis
-which curl    # HTTP validation
+```
+RadioChWeb/
+├── app.py                    # Flask application entry point
+├── database.py               # SQLAlchemy + database helpers
+├── requirements.txt          # Pinned Python dependencies
+├── migrate_db/               # SQL migration scripts and runner (pyway)
+├── model/                    # Domain models, DTOs and repositories
+│   ├── dto/                  # Pydantic DTOs used by services and views
+│   ├── entity/               # SQLAlchemy ORM models
+│   └── repository/           # Repository classes (data access)
+├── route/                    # Flask Blueprints (HTTP routes)
+├── service/                  # Business logic / service layer
+├── templates/                # Jinja2 HTML templates used by the web UI
+├── static/                   # Static assets (css, images, js)
+├── specs/                    # Implementation specs and usage notes
+├── tests/                    # pytest test-suite (unit and integration)
+└── README.md                 # Project readme and basic instructions
 ```
 
-### **Setup**
+## High-level components
+
+- Presentation: Flask + Jinja2 templates provide web routes for listing sources, viewing and managing proposals, and running stream analysis. A minimal Textual-based terminal UI is included for development.
+- Service layer: Business logic is implemented in `service/` modules (e.g. stream analysis, proposals, radio source management). Services operate on DTOs and entities and use repositories for persistence.
+- Model layer: Domain models live in `model/entity` (SQLAlchemy ORM). DTOs (Pydantic v2) live in `model/dto` and are used to validate and serialize data passed between layers.
+- Data access: Repository classes in `model/repository` encapsulate database access and queries.
+- Migrations: `migrate_db/` contains SQL migration files and a small runner that can be used to apply migrations.
+
+## Technology stack
+
+- Python (3.10+ recommended)
+- Flask — web framework
+- SQLAlchemy — ORM and session management
+- Pydantic v2 — DTOs and validation
+- PyWay or SQL migration files in `migrate_db/` — migration runner
+- pytest — unit and integration testing
+- Optional: `ffmpeg` and `curl` are used by stream analysis tools when present on the host
+
+## Database
+
+- Default development database: SQLite (local file). Use migration SQL files under `migrate_db/migrations` to create or update schema.
+
+## Runtime / development
+
+Quick start (development):
+
 ```bash
-# Clone and setup
-cd RadioCh
-python3 -m venv .venv
+git clone <repo_url>
+cd RadioChWeb
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Initialize database
-python migrate.py
+# initialize or migrate the database
+python migrate_db/migrate.py
 
-# Run tests
-pytest -v
+# run tests
+pytest -q
 
-# Launch application
-python radioch_app.py
+# run the web app in development
+python app.py
 ```
 
-### **Development**
-```bash
-# Run specific tests
-pytest tests/unit/test_stream_analysis_service.py -v
+Notes:
+- The development server is not suitable for production. Use a WSGI server (gunicorn, uvicorn) for production deployments.
+- External binaries (ffmpeg, curl) are optional but enable richer stream analysis features.
 
-# Check coverage
-pytest --cov=src --cov-report=html
+## Tests and CI
 
-# Database operations
-python migrate.py status
-python migrate.py migrate
-```
+- Tests are implemented with `pytest`. Fixtures are in `tests/conftest.py`.
+- A typical CI job should install `requirements.txt` and run `pytest -q`.
 
-## Future Roadmap
+## Contributing
 
-### **Phase 1: Complete Core Specs** (Current)
-- Implement Spec 001 (Discovery)
-- Implement Spec 002 (Validation)
-- Enhance TUI with full workflow
-
-### **Phase 2: API & Integration**
-- Complete Flask API layer
-- Add CLI tools
-- Implement batch processing
-
-### **Phase 3: Advanced Features**
-- Web interface (React/Vue)
-- Mobile applications
-- Advanced analytics
-- Multi-format support
-
-### **Phase 4: Production**
-- PostgreSQL migration
-- Docker containerization
-- CI/CD pipeline
-- Performance optimization
+- Follow the specs in `specs/` when adding or changing functionality.
+- Add tests for new service logic and route behavior.
+- For schema changes, add SQL migration files under `migrate_db/migrations`.
 
 ---
 
-**Last Updated**: December 4, 2025
-**Python Version**: 3.14+
-**Test Coverage**: multiple unit & integration tests (see `tests/`) — smoke auth pages test added
-**Status**: Active Development - Auth + Migrations integrated
+**Last updated**: 2025-12-11
 
-### Recent Updates (Dec 4, 2025)
-- Added authentication layer: `User` model, `UserRepository`, `AuthService` (passlib + pbkdf2_sha256 default, bcrypt available), and `auth` blueprint with login/register/change-password/logout flows.
-- Authentication uses **email** as the canonical identity key (username field removed).
-- Templates updated: `index.html` now exposes a `{% block content %}` to allow auth and other pages to render inside the main layout; login/register templates stored under `templates/user/`.
-- Migrations: runner `migrate_db/migrate.py` now prefers the `pyway` CLI (`pyway migrate`) for applying migrations and will fall back to direct SQL application if pyway is unavailable. The project `pyway.yaml` configures the `pyway` metadata table in the SQLite DB.
-- Tests: integration smoke test `tests/integration/test_smoke_auth_pages.py` added to verify auth pages render within site layout.
+If you want an API reference, an entity diagram, or a short HOWTO for deploying to production, I can add those sections.
 
+*** End Public Architecture Overview ***
+
+
+#### **Quality Assurance** 🔍
