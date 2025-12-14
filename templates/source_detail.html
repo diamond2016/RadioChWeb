@@ -19,6 +19,12 @@
             <div class="col-md-8">
                 <h1>{{ source.name }}</h1>
 
+                {% if source.image_url %}
+                <div class="mb-3">
+                    <img src="{{ source.image_url }}" alt="{{ source.name }}" class="img-fluid" style="max-width:240px; border-radius:6px;">
+                </div>
+                {% endif %}
+
                 <div class="card">
                     <div class="card-body">
                         <p><strong>URL:</strong> <a href="{{ source.stream_url }}" target="_blank">{{ source.stream_url }}</a></p>

@@ -27,6 +27,8 @@
 
       /* Card layout: title/desc on top, URL on its own row, buttons below */
       .radio-card .card-body { display: flex; flex-direction: column; gap: .5rem; }
+    .radio-card .card-body .card-header-row { display: flex; gap: .75rem; align-items: center; }
+    .radio-card .radio-thumb { width:64px; height:64px; object-fit:cover; border-radius:6px; flex: 0 0 64px; }
       .radio-card .card-body .url-row { width: 100%; }
       .radio-card .card-body .url-row a,
       .radio-card .card-body .url-row input { display: block; width: 100%; max-width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
@@ -84,8 +86,15 @@
             <div class="col-md-4 mb-4">
                 <div class="card radio-card">
                     <div class="card-body">
-                        <h5 class="card-title">{{ source.name }}</h5>
-                        <p class="card-text">{{ source.description or 'No description available' }}</p>
+                                                <div class="card-header-row">
+                                                    {% if source.image_url %}
+                                                    <img src="{{ source.image_url }}" alt="{{ source.name }}" class="radio-thumb">
+                                                    {% endif %}
+                                                    <div>
+                                                        <h5 class="card-title">{{ source.name }}</h5>
+                                                        <p class="card-text mb-0">{{ source.description or 'No description available' }}</p>
+                                                    </div>
+                                                </div>
 
                         <!-- URL on its own row -->
                         <div class="url-row">
