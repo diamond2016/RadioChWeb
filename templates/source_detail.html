@@ -21,7 +21,8 @@
 
                 {% if source.image_url %}
                 <div class="mb-3">
-                    <img src="{{ source.image_url }}" alt="{{ source.name }}" class="img-fluid" style="max-width:240px; border-radius:6px;">
+                    <!-- reduced ~20% from 240px -->
+                    <img src="{{ source.image_url }}" alt="{{ source.name }}" class="img-fluid" style="max-width:192px; border-radius:6px;">
                 </div>
                 {% endif %}
 
