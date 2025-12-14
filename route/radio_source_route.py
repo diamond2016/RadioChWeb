@@ -79,22 +79,21 @@ def edit_source(source_id: int):
     
     if request.method == 'POST':
         source.name = request.form.get('name')
-        source.stream_url = request.form.get('url')
         source.description = request.form.get('description', '')
-        source.stream_type_id = int(request.form.get('stream_type_id'))
+        source.image_url = request.form.get('image_url', '')
+        source.website_url = request.form.get('website_url', '')
 
         try:
             radio_source_service.update_radio_source(source)
             flash('Radio source updated successfully!', 'success')
-            return redirect(url_for('radio_source.source_detail', source_id=source.id))
+            return redirect(url_for('main.index'))
         
         except Exception as e:
             flash(f'Error updating source: {str(e)}', 'error')
 
     # For GET request, show edit form
-    stream_types: List[StreamType] = stream_type_repo.find_all()
 
-    return render_template('edit_source.html', source=source, stream_types=stream_types)
+    return render_template('edit_source.html', source=source)
 
 
 @radio_source_bp.route('/delete/<int:source_id>', methods=['POST'])

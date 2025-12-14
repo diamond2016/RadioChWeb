@@ -248,7 +248,7 @@ class RadioSourceService:
         radio_source.name = radio_source_dto.name
         radio_source.stream_url = radio_source_dto.stream_url
         radio_source.description = radio_source_dto.description
-        radio_source.stream_type_id = radio_source_dto.stream_type_id
+        radio_source.website_url = radio_source_dto.website_url
         
         # Save updated radio source
         updated_radio_source: RadioSource = self.radio_source_repo.save(radio_source)

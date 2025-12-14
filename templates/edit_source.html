@@ -7,7 +7,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{{ url_for('database.index') }}">RadioChWeb</a>
+                <a class="navbar-brand" href="/">RadioChWeb</a>
                 <div class="navbar-nav">
                     <a class="nav-link" href="{{ url_for('database.list_sources') }}">Browse Sources</a>
                     <a class="nav-link" href="{{ url_for('proposal.propose') }}">Propose Stream</a>
@@ -35,28 +35,22 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="url" class="form-label">Stream URL *</label>
-                                <input type="url" class="form-control" id="url" name="url" value="{{ source.stream_url }}" required>
-                                <div class="form-text">Must be a valid HTTP/HTTPS URL</div>
-                            </div>
-
-                            <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3">{{ source.description or '' }}</textarea>
                             </div>
 
                             <div class="mb-3">
-                                <label for="stream_type_id" class="form-label">Stream Type *</label>
-                                <select class="form-select" id="stream_type_id" name="stream_type_id" required>
-                                    {% for st in stream_types %}
-                                        <option value="{{ st.id }}" {% if source.stream_type_id == st.id %}selected{% endif %}>{{ st.display_name }}</option>
-                                    {% endfor %}
-                                </select>
+                                <label for="image_url" class="form-label">Image URL</label>
+                                <input type="url" class="form-control" id="image_url" name="image_url" value="{{ source.image_url or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="website_url" class="form-label">Website URL</label>
+                                <input type="url" class="form-control" id="website_url" name="website_url" value="{{ source.website_url or '' }}">
                             </div>
 
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <a href="{{ url_for('radio_source.source_detail', source_id=source.id) }}" class="btn btn-secondary">Cancel</a>
+                                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
