@@ -40,7 +40,9 @@
         flex-wrap: wrap; /* allow wrap on very small screens */
         margin-top: .125rem;
       }
-      .radio-card .card-body .action-row .btn { white-space: nowrap; }
+            .radio-card .card-body .action-row .btn { white-space: nowrap; }
+            /* Page date style (smaller, right-aligned) */
+            .page-date { font-size: 0.3em; color: rgba(0,0,0,0.6); }
     </style>
 {% endblock %}
 
@@ -128,11 +130,6 @@
     </main>
 {% endblock %}
 
-{% block styles %}
-        <style>
-            .page-date { font-size: 0.3em; color: rgba(0,0,0,0.6); }
-        </style>
-{% endblock %}
 
 
 {% block scripts %}
