@@ -4,6 +4,7 @@ Provides CRUD operations for radio sources.
 """
 
 from typing import List
+from datetime import datetime
 from flask import Blueprint, request,render_template, redirect, url_for, flash
 
 from model.dto.radio_source import RadioSourceDTO
@@ -18,6 +19,14 @@ from database import db
 from service.stream_type_service import StreamTypeService
 
 radio_source_bp = Blueprint('radio_source', __name__, url_prefix='/source')
+
+
+def get_current_day_str() -> str:
+    """Return the current day as a formatted string for templates.
+
+    Example: 'Tuesday, December 16, 2025'
+    """
+    return datetime.now().strftime('%A, %B %d, %Y')
 
 # Repository and service initialization functions
 def get_radio_source_repo() -> RadioSourceRepository:

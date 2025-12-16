@@ -79,23 +79,32 @@
             {% endif %}
         {% endwith %}
 
-        <h1>Welcome to RadioChWeb</h1>
-        <p>Discover and enjoy radio streams.</p>
+        <div class="row align-items-center mb-2">
+            <div class="col">
+                <h1>Welcome to RadioChWeb</h1>
+                <p class="mb-0">Discover and enjoy radio streams.</p>
+            </div>
+            <div class="col text-end">
+                {% if current_day %}
+                <div class="page-date">{{ current_day }}</div>
+                {% endif %}
+            </div>
+        </div>
         <div class="row">
             <!-- Radio source cards -->
             {% for source in sources %}
             <div class="col-md-4 mb-4">
                 <div class="card radio-card">
                     <div class="card-body">
-                                                <div class="card-header-row">
-                                                    {% if source.image_url %}
-                                                    <img src="{{ source.image_url }}" alt="{{ source.name }}" class="radio-thumb">
-                                                    {% endif %}
-                                                    <div>
-                                                        <h5 class="card-title">{{ source.name }}</h5>
-                                                        <p class="card-text mb-0">{{ source.description or 'No description available' }}</p>
-                                                    </div>
-                                                </div>
+                        <div class="card-header-row">
+                            {% if source.image_url %}
+                            <img src="{{ source.image_url }}" alt="{{ source.name }}" class="radio-thumb">
+                            {% endif %}
+                            <div>
+                                <h5 class="card-title">{{ source.name }}</h5>
+                                <p class="card-text mb-0">{{ source.description or 'No description available' }}</p>
+                            </div>
+                        </div>
 
                         <!-- URL on its own row -->
                         <div class="url-row">
@@ -117,6 +126,12 @@
             {% endfor %}
         </div>
     </main>
+{% endblock %}
+
+{% block styles %}
+        <style>
+            .page-date { font-size: 0.3em; color: rgba(0,0,0,0.6); }
+        </style>
 {% endblock %}
 
 

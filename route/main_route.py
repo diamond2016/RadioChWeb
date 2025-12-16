@@ -16,4 +16,11 @@ def index():
     """Main index page - list all radio sources."""
     radio_source_repo: RadioSourceRepository = get_radio_source_repo()
     sources = radio_source_repo.find_all()
-    return render_template('index.html', sources=sources)
+    # Get a server-side formatted current day string from radio_source helper
+    try:
+        from route.radio_source_route import get_current_day_str
+        current_day = get_current_day_str()
+    except Exception:
+        current_day = None
+
+    return render_template('index.html', sources=sources, current_day=current_day)
