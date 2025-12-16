@@ -40,9 +40,18 @@
         flex-wrap: wrap; /* allow wrap on very small screens */
         margin-top: .125rem;
       }
-            .radio-card .card-body .action-row .btn { white-space: nowrap; }
-            /* Page date style (smaller, right-aligned) */
-            .page-date { font-size: 0.8em; color: rgba(0,0,0,0.6); }
+                        .radio-card .card-body .action-row .btn { white-space: nowrap; }
+                        /* Page date style (smaller, right-aligned) */
+                        .page-date { font-size: 0.5em; color: rgba(0,0,0,0.6); font-family: Georgia, 'Times New Roman', serif; }
+                        /* Card title: use the same professional serif, more visible and tasteful */
+                        .radio-card .card-title {
+                            font-family: Georgia, 'Times New Roman', serif;
+                            color: #0b5ed7;
+                            font-weight: 600;
+                            margin: 0 0 .25rem 0;
+                            text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+                            letter-spacing: 0.2px;
+                        }
     </style>
 {% endblock %}
 
@@ -104,7 +113,9 @@
                             {% endif %}
                             <div>
                                 <h5 class="card-title">{{ source.name }}</h5>
-                                <p class="card-text mb-0">{{ source.description or 'No description available' }}</p>
+                                {% if source.description %}
+                                <p class="card-text mb-0">{{ source.description }}</p>
+                                {% endif %}
                             </div>
                         </div>
 
