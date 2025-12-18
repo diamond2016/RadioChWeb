@@ -1,18 +1,14 @@
 from flask import Flask
-import os
+# Import db from separate module
+from database import DATABASE_URL, db
 
 app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = 'your-secret-key'  # Change in production
-basedir = os.path.abspath(os.path.dirname(__file__))
-instance_dir = os.path.join(basedir, 'instance')
-os.makedirs(instance_dir, exist_ok=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(instance_dir, "radio_sources.db")}'
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Import db from separate module
-from database import db
 db.init_app(app)
 
 # Enable CSRF protection for forms
