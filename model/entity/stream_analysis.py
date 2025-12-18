@@ -1,38 +1,39 @@
-from typing import TYPE_CHECKING, Type
-from database import db
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Integer, String, Boolean, Text, DateTime, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
+from model.entity.base import Base
+
 if TYPE_CHECKING:
-    from flask_sqlalchemy.model import Model as _Model
-    BaseModel: Type[_Model] = _Model
-else:
-    BaseModel = db.Model  # type: ignore[assignment]
+    from model.entity.stream_type import StreamType  # pragma: no cover
+    from model.entity.user import User  # pragma: no cover
 
 
-class StreamAnalysis(db.Model):  # type: ignore[name-defined]
+class StreamAnalysis(Base):  # type: ignore[name-defined]
     __tablename__ = 'stream_analyses'
 
-    id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    stream_url = db.Column(db.String(200), nullable=False)  
-    stream_type_id = db.Column(db.Integer, db.ForeignKey('stream_types.id'), nullable=True)  # Foreign key to StreamType, null if invalid
-    is_valid = db.Column(db.Boolean, nullable=False, default=False)
-    is_secure = db.Column(db.Boolean, nullable=False, default=False)  # False for HTTP, true for HTTPS
-    error_code = db.Column(db.String(50), nullable=True)  # Null if valid
-    detection_method = db.Column(db.String(50), nullable=True)  # How the stream was detected
-    raw_content_type = db.Column(db.Text, nullable=True)  # String from curl headers
-    raw_ffmpeg_output = db.Column(db.Text, nullable=True)  # String from ffmpeg detection   
-    extracted_metadata = db.Column(db.Text, nullable=True)
-
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    stream_url: Mapped[str] = mapped_column(String(200), nullable=False)
+    stream_type_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('stream_types.id'), nullable=True)
+    is_valid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_secure: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    error_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    detection_method: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    raw_content_type: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_ffmpeg_output: Mapped[str | None] = mapped_column(Text, nullable=True)
+    extracted_metadata: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationship with StreamTypes
-    stream_type = db.relationship("StreamType", back_populates="stream_analyses")
-    created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    user = db.relationship("User", back_populates="stream_analyses")
+    stream_type: Mapped[Optional["StreamType"]] = relationship("StreamType", back_populates="stream_analyses")
+    created_by: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="stream_analyses")
 
     # Timestamps
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<StreamAnalysis(id={self.id}, url='{self.stream_url}', type='{self.stream_type_id}', valid={self.is_valid})>"
 

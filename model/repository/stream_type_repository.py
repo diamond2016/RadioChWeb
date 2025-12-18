@@ -11,7 +11,7 @@ class StreamTypeRepository:
     """Repository for StreamType data access operations."""
     
     def __init__(self, db_session: Session):
-        self.db = db_session
+        self.db: Session = db_session
     
     def find_by_id(self, stream_type_id: int) -> Optional[StreamType]:
         """Get StreamType by ID."""
