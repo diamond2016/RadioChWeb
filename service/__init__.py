@@ -1,3 +1,6 @@
+"""Package marker for `service` package."""
+
+__all__ = []
 """
 Services package - Business logic layer for RadioCh application.
 """
