@@ -7,19 +7,19 @@ from flask import Blueprint, request, jsonify, render_template
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.repository.stream_type_repository import StreamTypeRepository
 from model.repository.proposal_repository import ProposalRepository
-from database import db
+from database import db, get_db_session
 
 database_bp = Blueprint('database', __name__, url_prefix='/database')
 
 # Repository initialization functions
 def get_radio_source_repo():
-    return RadioSourceRepository(db.session)
+    return RadioSourceRepository(get_db_session())
 
 def get_stream_type_repo():
-    return StreamTypeRepository(db.session)
+    return StreamTypeRepository(get_db_session())
 
 def get_proposal_repo():
-    return ProposalRepository(db.session)
+    return ProposalRepository(get_db_session())
 
 
 

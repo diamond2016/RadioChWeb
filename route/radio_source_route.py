@@ -15,7 +15,7 @@ from service.auth_service import AuthService
 from service.proposal_service import ProposalService
 from service.radio_source_service import RadioSourceService
 from model.repository.radio_source_repository import RadioSourceRepository
-from database import db
+from database import db, get_db_session
 from service.stream_type_service import StreamTypeService
 
 radio_source_bp = Blueprint('radio_source', __name__, url_prefix='/source')
@@ -30,14 +30,14 @@ def get_current_day_str() -> str:
 
 # Repository and service initialization functions
 def get_radio_source_repo() -> RadioSourceRepository:
-    return RadioSourceRepository(db.session)
+    return RadioSourceRepository(get_db_session())
 
 # Repository and service initialization functions
 def get_proposal_repo() -> ProposalRepository:
-    return ProposalRepository(db.session)
+    return ProposalRepository(get_db_session())
 
 def get_stream_type_repo() -> StreamTypeRepository:
-    return StreamTypeRepository(db.session)
+    return StreamTypeRepository(get_db_session())
 
 def get_auth_service():
     from service.auth_service import AuthService

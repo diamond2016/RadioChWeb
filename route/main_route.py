@@ -2,13 +2,13 @@
 from flask import Blueprint, render_template
 
 from model.repository.radio_source_repository import RadioSourceRepository
-from database import db
+from database import db, get_db_session
 
 main_bp = Blueprint('main', __name__, url_prefix='/')
 
 # Repository initialization functions
 def get_radio_source_repo() -> RadioSourceRepository:
-    return RadioSourceRepository(db.session)
+    return RadioSourceRepository(get_db_session())
 
 
 @main_bp.route('/')

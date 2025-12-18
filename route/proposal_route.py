@@ -5,7 +5,7 @@ Implements spec 003: propose-new-radio-source and spec 004: admin-approve-propos
 from typing import List
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 
-from database import db
+from database import db, get_db_session
 from model.dto.radio_source import RadioSourceDTO
 from model.dto.validation import ValidationResult
 from model.dto.proposal import ProposalDTO
@@ -29,10 +29,10 @@ proposal_bp = Blueprint('proposal', __name__, url_prefix='/proposal')
 
 
 def get_proposal_repo() -> ProposalRepository:
-    return ProposalRepository(db.session)
+    return ProposalRepository(get_db_session())
 
 def get_radio_source_repo() -> RadioSourceRepository:
-    return RadioSourceRepository(db.session)
+    return RadioSourceRepository(get_db_session())
 
 def get_proposal_service() -> ProposalService:
     proposal_repo: ProposalRepository = get_proposal_repo()

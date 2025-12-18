@@ -15,20 +15,20 @@ from model.repository.stream_type_repository import StreamTypeRepository
 from service.proposal_validation_service import ProposalValidationService
 from service.radio_source_service import RadioSourceService
 from service.stream_analysis_service import StreamAnalysisService
-from database import db
+from database import db, get_db_session
 from service.stream_type_service import StreamTypeService
 
 analysis_bp = Blueprint('analysis', __name__, url_prefix='/analysis')
 
 # Repository and service initialization functions
 def get_analysis_repo() -> StreamAnalysisRepository:
-    return StreamAnalysisRepository(db_session=db.session)
+    return StreamAnalysisRepository(db_session=get_db_session())
 
 def get_proposal_repo() -> ProposalRepository:
-    return ProposalRepository(db.session)
+    return ProposalRepository(get_db_session())
 
 def get_radio_source_repo() -> RadioSourceRepository:
-    return RadioSourceRepository(db.session)
+    return RadioSourceRepository(get_db_session())
 
 def get_validation_service() -> ProposalValidationService:
     proposal_repo: ProposalRepository = get_proposal_repo()
@@ -42,7 +42,7 @@ def get_radio_source_service() -> RadioSourceService:
     return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
 
 def get_stream_type_repo() -> StreamTypeRepository:
-    return StreamTypeRepository(db.session)
+    return StreamTypeRepository(get_db_session())
 
 def get_stream_type_service() -> StreamTypeService:
     stream_type_repo: StreamTypeRepository = get_stream_type_repo()
