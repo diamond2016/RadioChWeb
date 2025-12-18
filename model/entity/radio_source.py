@@ -1,7 +1,15 @@
+from typing import TYPE_CHECKING, Type
 from database import db
 from sqlalchemy.sql import func
 
-class RadioSource(db.Model):
+if TYPE_CHECKING:
+    from flask_sqlalchemy.model import Model as _Model
+    BaseModel: Type[_Model] = _Model
+else:
+    BaseModel = db.Model  # type: ignore[assignment]
+
+
+class RadioSource(db.Model):  # type: ignore[name-defined]
     __tablename__ = 'radio_sources'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

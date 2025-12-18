@@ -56,10 +56,6 @@ def get_stream_type_service() -> StreamTypeService:
     from service.stream_type_service import StreamTypeService
     return StreamTypeService(stream_type_repo)
 
-def get_proposal_service() -> ProposalService:
-    proposal_repo: ProposalRepository = get_proposal_repo()
-    from service.proposal_service import ProposalService
-    return ProposalService(proposal_repo)
 
 
 @proposal_bp.route('/', methods=['GET'])

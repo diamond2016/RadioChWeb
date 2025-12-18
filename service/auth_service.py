@@ -34,7 +34,7 @@ class AuthService:
     def hash_password(self, password: str) -> str:
         return pwd_context.hash(password)
 
-    def verify_password(self, plain: str, hashed: str) -> (bool, str | None):
+    def verify_password(self, plain: str, hashed: str) -> tuple[bool, str | None]:
         """
         Verify password; return (verified, new_hash_or_none)
         new_hash_or_none is non-None when the hash should be updated (lazy upgrade)
@@ -81,11 +81,11 @@ class AuthService:
             return None
         return UserDTO.model_validate(user)
     
-    def register_user_dto(self, user_dto: UserDTO, password: str) -> UserDTO:
+    def register_user_dto(self, user_dto: UserDTO, password: str) -> UserDTO | None:
         user = self.register_user(user_dto, password)
         return self.get_user_by_id(user.id)
 
-    def change_password_dto(self, user_dto: UserDTO, new_password: str) -> UserDTO:
+    def change_password_dto(self, user_dto: UserDTO, new_password: str) -> UserDTO | None:
         user = self.change_password(user_dto, new_password)
         return self.get_user_by_id(user.id)
 

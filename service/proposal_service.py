@@ -18,7 +18,7 @@ class ProposalService:
         self.proposal_repo: ProposalRepository = proposal_repo
 
     # a user can propose from analyze stream an can update proposals if is their own
-    def update_proposal(self, proposal_id: int, updates: ProposalDTO) -> ProposalDTO:
+    def update_proposal(self, proposal_id: int, updates: ProposalDTO) -> ProposalDTO | None:
         """Update editable fields of a proposal and persist changes.
 
         Non Editable fields: id, stream_url, stream_type_id, is_secure 
@@ -45,10 +45,10 @@ class ProposalService:
         if updates.image_url is not None:
             proposal.image_url = updates.image_url
 
-        result: proposal = self.proposal_repo.update(proposal)
+        result: Proposal | None = self.proposal_repo.update(proposal)
         if result is None:
             return None
-        return ProposalDTO.model_validate(proposal)
+        return ProposalDTO.model_validate(result)
     
 
     def get_proposal(self, proposal_id: int) -> Optional[ProposalDTO]:
@@ -61,7 +61,7 @@ class ProposalService:
         Returns:
             Proposal if found, None otherwise
         """
-        result: Proposal = self.proposal_repo.find_by_id(proposal_id)
+        result: Proposal | None = self.proposal_repo.find_by_id(proposal_id)
         if result is None:
             return None
         

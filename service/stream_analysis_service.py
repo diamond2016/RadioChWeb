@@ -127,10 +127,6 @@ class StreamAnalysisService:
             )
             return self._persist_analysis_and_return_dto(result)
             
-            # FR-003: Compare results, ffmpeg is authoritative
-            final_result: StreamAnalysisDTO = self._resolve_analysis_results(curl_result, ffmpeg_result, is_secure)
-            # print("Analysis result for URL {}: {}".format(url, final_result))
-            return final_result
         except Exception:
             result = StreamAnalysisDTO(
                 stream_url=url,
@@ -351,7 +347,6 @@ class StreamAnalysisService:
         
         # FFmpeg succeeded - use it as authoritative source
         format_name = ffmpeg_result["format"]
-        user: UserDTO | None = self._safe_current_user_dto()
 
         if not format_name:
             return StreamAnalysisDTO(
@@ -463,13 +458,13 @@ class StreamAnalysisService:
 
         # Map enums to plain values when persisting
         detection = None
-        if getattr(analysis_dto, 'detection_method', None) is not None:
-            dm = analysis_dto.detection_method
+        dm = getattr(analysis_dto, 'detection_method', None)
+        if dm is not None:
             detection = dm.value if hasattr(dm, 'value') else str(dm)
 
         error_code_val = None
-        if getattr(analysis_dto, 'error_code', None) is not None:
-            ec = analysis_dto.error_code
+        ec = getattr(analysis_dto, 'error_code', None)
+        if ec is not None:
             error_code_val = ec.value if hasattr(ec, 'value') else str(ec)
 
         # Determine creator id: prefer DTO user.id, else current user id
@@ -533,7 +528,6 @@ class StreamAnalysisService:
         Returns True on successful creation, False otherwise.
         """
         # Resolve input to an analysis entity/object
-        stream_entity = None
         stream_entity: StreamAnalysis | None = self.analysis_repository.find_by_id(stream_id)
 
         if not stream_entity:

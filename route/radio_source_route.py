@@ -87,7 +87,7 @@ def edit_source(source_id: int):
         return redirect(url_for('main.index'))
     
     if request.method == 'POST':
-        source.name = request.form.get('name')
+        source.name = request.form.get('name', source.name)
         source.description = request.form.get('description', '')
         source.image_url = request.form.get('image_url', '')
         source.website_url = request.form.get('website_url', '')

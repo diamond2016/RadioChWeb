@@ -39,7 +39,11 @@ def get_radio_source_service() -> RadioSourceService:
     proposal_repo: ProposalRepository = get_proposal_repo()
     radio_source_repo: RadioSourceRepository = get_radio_source_repo()
     validation_service: ProposalValidationService = get_validation_service()
-    return RadioSourceService(proposal_repo, radio_source_repo, validation_service)
+    # Provide auth and stream_type services required by RadioSourceService
+    from service.auth_service import AuthService
+    auth_service: AuthService = AuthService(None)
+    stream_type_service: StreamTypeService = get_stream_type_service()
+    return RadioSourceService(proposal_repo, radio_source_repo, validation_service, auth_service, stream_type_service)
 
 def get_stream_type_repo() -> StreamTypeRepository:
     return StreamTypeRepository(get_db_session())

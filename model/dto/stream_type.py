@@ -16,6 +16,6 @@ class StreamTypeDTO(BaseModel):
     @property
     def type_key(self) -> str:
         """Returns the type key in format: PROTOCOL-FORMAT-METADATA"""
-        return f"{self.protocol}-{self.format}-{self.metadata}"
+        return f"{self.protocol}-{self.format}-{self.metadata_type}"
     
     model_config = ConfigDict(from_attributes=True)

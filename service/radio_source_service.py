@@ -7,7 +7,7 @@ transaction handling.
 """
 
 from datetime import datetime
-from typing import List
+from typing import List, Any
 from model.dto.radio_source import RadioSourceDTO
 from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
@@ -34,14 +34,14 @@ class RadioSourceService:
         self,
         proposal_repo: ProposalRepository,
         radio_source_repo: RadioSourceRepository,
-        proposal_service: ProposalService,
+        proposal_service: Any,
         auth_service: AuthService,
         stream_type_service: StreamTypeService
     ):
         
         self.proposal_repo: ProposalRepository = proposal_repo
         self.radio_source_repo: RadioSourceRepository = radio_source_repo
-        self.proposal_service: ProposalService = proposal_service
+        self.proposal_service: Any = proposal_service
         self.auth_service: AuthService = auth_service
         self.stream_type_service: StreamTypeService = stream_type_service
     
@@ -149,7 +149,7 @@ class RadioSourceService:
             raise RuntimeError(f"Failed to save radio source: {str(e)}")
 
 
-    def get_all_radio_sources(self) -> list[RadioSourceDTO]:
+    def get_all_radio_sources(self) -> list[RadioSourceDTO] | list[RadioSource]:
         """
         Get all radio sources.
         Returns:
@@ -273,7 +273,7 @@ class RadioSourceService:
         This method is defensive about repository method names to preserve backward compatibility.
         """
         try:
-            proposal: Proposal = self.proposal_repo.find_by_id(proposal_id)
+            proposal: Proposal | None = self.proposal_repo.find_by_id(proposal_id)
             if proposal is None:
                 return False
             # Return repository deletion result when available

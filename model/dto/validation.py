@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ConfigDict
 try:
     from model.dto.proposal import ProposalUpdateRequest  # type: ignore
 except Exception:
-    ProposalUpdateRequest = None
+    ProposalUpdateRequest = None  # type: ignore
 
 
 class SecurityStatusDTO(BaseModel):

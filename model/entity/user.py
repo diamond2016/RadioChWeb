@@ -1,10 +1,16 @@
-from typing import Literal
+from typing import Literal, TYPE_CHECKING, Type
 from flask_login import UserMixin
 from sqlalchemy.sql import func
 from database import db
 
+if TYPE_CHECKING:
+    from flask_sqlalchemy.model import Model as _Model
+    BaseModel: Type[_Model] = _Model
+else:
+    BaseModel = db.Model  # type: ignore[assignment]
 
-class User(UserMixin, db.Model):
+
+class User(UserMixin, db.Model):  # type: ignore[name-defined]
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

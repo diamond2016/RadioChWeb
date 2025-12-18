@@ -32,7 +32,7 @@ class StreamTypeService:
 
     def get_stream_type(self, stream_type_id: int) -> Optional[StreamTypeDTO]:
         """Get StreamType by ID."""
-        stream_type: StreamType = self.repository.find_by_id(stream_type_id)
+        stream_type: StreamType | None = self.repository.find_by_id(stream_type_id)
 
         if stream_type:
             stream_type_dto: StreamTypeDTO = StreamTypeDTO.model_validate({
