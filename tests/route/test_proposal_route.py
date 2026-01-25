@@ -1,7 +1,8 @@
 from model.entity.proposal import Proposal
+from flask import session
 
 
-def test_update_proposal_post(test_app, test_db):
+def test_update_proposal_post(test_app, test_db, test_user):
     # Create a proposal in the test DB
     proposal = Proposal(
         stream_url='https://stream.example.com/test',
@@ -13,6 +14,8 @@ def test_update_proposal_post(test_app, test_db):
         description='Old description',
         image_url='https://old.example.com/img.png'
     )
+    # set the owner to the test user so the edit is allowed
+    proposal.created_by = test_user.id
     test_db.add(proposal)
     test_db.commit()
     test_db.refresh(proposal)
@@ -36,6 +39,9 @@ def test_update_proposal_post(test_app, test_db):
 
     # Call the view function within a request context
     with test_app.test_request_context(f'/proposal/{proposal.id}', method='POST', data=data):
+        # Simulate logged-in user session
+        session['_user_id'] = str(test_user.id)
+        session['_fresh'] = True
         from route.proposal_route import update_proposal
         resp = update_proposal(proposal.id)
 

@@ -45,7 +45,7 @@ def test_delete_analysis_route_removes_row(test_app, test_db, test_user):
     assert found is None
 
 
-def test_approve_analysis_route_creates_proposal(test_app, test_db, test_user):
+def test_approve_analysis_route_creates_proposal(test_app, test_db, test_admin):
     # Ensure session works for flashing
     test_app.secret_key = 'test-secret'
 
@@ -58,11 +58,11 @@ def test_approve_analysis_route_creates_proposal(test_app, test_db, test_user):
     with patch('service.stream_analysis_service.shutil.which', return_value='/usr/bin/ffmpeg'):
         with patch('route.analysis_route.url_for', return_value='/'):
             with test_app.test_request_context(f'/analysis/approve/{sa.id}', method='POST'):
-                # Log in the created test user by setting session keys so login_manager recognizes the user
-                session['_user_id'] = str(test_user.id)
+                # Log in as an admin so approval is permitted
+                session['_user_id'] = str(test_admin.id)
                 session['_fresh'] = True
-                # Ensure ownership of the analysis points to the logged-in user
-                sa.created_by = test_user.id
+                # Associate analysis with an owner (not required for admin approval)
+                sa.created_by = test_admin.id
                 test_db.add(sa)
                 test_db.flush()
                 resp = approve_analysis(sa.id)

@@ -4,7 +4,9 @@ Implements spec 002: validate-and-add-radio-source (to be modified spec).
 """
 
 from typing import List
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
+from flask_login import login_required, current_user
+from service.auth_service import admin_required
 
 from model.entity.stream_analysis import StreamAnalysis
 from model.dto.stream_analysis import StreamAnalysisDTO, StreamAnalysisResult
@@ -68,6 +70,7 @@ def index():
 
 
 @analysis_bp.route('/analyze', methods=['POST'])
+@login_required
 def analyze_url():
     """Analyze a stream URL and show results."""
     url = request.form.get('url')
@@ -110,25 +113,45 @@ def analyze_url():
 
 
 @analysis_bp.route('/approve/<int:id>', methods=['POST'])
+@login_required
 def approve_analysis(id: int):
-    """Approve an analysis and creates a proposal."""
-    
+    """Create a proposal from analysis. Allowed for the analysis owner or admin."""
+    analysis_repo = get_analysis_repo()
+    analysis = analysis_repo.find_by_id(id)
+    if not analysis:
+        flash('Analysis not found', 'error')
+        return redirect(url_for('analysis.index'))
+
+    # Only owner or admin may turn an analysis into a proposal
+    if not (getattr(current_user, 'is_admin', False) or getattr(current_user, 'id', None) == getattr(analysis, 'created_by', None)):
+        abort(403)
+
     try:
         analysis_service: StreamAnalysisService = get_stream_analysis_service()
         success: bool = analysis_service.save_analysis_as_proposal(id)
         if success:
-            flash('ProposalAnalysis approved and added as proposal for radio source!', 'success')
+            flash('Proposal created from analysis successfully!', 'success')
         else:
-            flash('Failed to approve stream analysis', 'error')
+            flash('Failed to create proposal from analysis', 'error')
     except Exception as e:
-        flash(f'Error approving stream analysis: {str(e)}', 'error')
+        flash(f'Error creating proposal from analysis: {str(e)}', 'error')
 
     return redirect(url_for('proposal.index'))
 
 
 @analysis_bp.route('/delete/<int:id>', methods=['POST'])
+@login_required
 def delete_analysis(id: int):
     """Delete an analysis."""
+    analysis_repo = get_analysis_repo()
+    analysis = analysis_repo.find_by_id(id)
+    if not analysis:
+        flash('Analysis not found', 'error')
+        return redirect(url_for('analysis.index'))
+
+    if not (getattr(current_user, 'is_admin', False) or getattr(current_user, 'id', None) == getattr(analysis, 'created_by', None)):
+        abort(403)
+
     analysis_service: StreamAnalysisService = get_stream_analysis_service()
     
     try:

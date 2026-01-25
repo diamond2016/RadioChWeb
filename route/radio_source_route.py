@@ -11,7 +11,8 @@ from model.dto.radio_source import RadioSourceDTO
 from model.entity.stream_type import StreamType
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.stream_type_repository import StreamTypeRepository
-from service.auth_service import AuthService
+from service.auth_service import AuthService, admin_required
+from flask_login import login_required, current_user
 from service.proposal_service import ProposalService
 from service.radio_source_service import RadioSourceService
 from model.repository.radio_source_repository import RadioSourceRepository
@@ -76,6 +77,7 @@ def source_detail(source_id: int):
 
 
 @radio_source_bp.route('/edit/<int:source_id>', methods=['GET', 'POST'])
+@admin_required
 def edit_source(source_id: int):
     """Edit radio source."""
     radio_source_service: RadioSourceService = get_radio_source_service()
@@ -106,6 +108,7 @@ def edit_source(source_id: int):
 
 
 @radio_source_bp.route('/delete/<int:source_id>', methods=['POST'])
+@admin_required
 def delete_source(source_id: int):
     """Delete radio source."""
     radio_source_service: RadioSourceService = get_radio_source_service()

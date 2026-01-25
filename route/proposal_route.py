@@ -3,7 +3,8 @@ Proposal routes - Flask blueprint for handling proposal submissions and validati
 Implements spec 003: propose-new-radio-source and spec 004: admin-approve-proposal."""
 
 from typing import List
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
+from flask_login import login_required, current_user
 
 from database import db, get_db_session
 from model.dto.radio_source import RadioSourceDTO
@@ -18,7 +19,7 @@ from model.repository.stream_type_repository import StreamTypeRepository
 
 from route.analysis_route import get_stream_type_repo
 
-from service.auth_service import AuthService
+from service.auth_service import AuthService, admin_required
 from service.proposal_service import ProposalService
 from service.proposal_validation_service import ProposalValidationService
 from service.proposal_service import ProposalService
@@ -59,16 +60,28 @@ def get_stream_type_service() -> StreamTypeService:
 
 
 @proposal_bp.route('/', methods=['GET'])
+@login_required
 def index():
-    """Display the proposals page with all proposals"""
+    """Display the proposals page.
 
-    # Get all proposals for display (pass entity objects so templates can access id)
-    proposal_service: ProposalService = get_proposal_service()   
-    proposals: List[ProposalDTO] = proposal_service.get_all_proposals()
+    Admins see all proposals; regular authenticated users see only their own proposals.
+    """
+
+    proposal_service: ProposalService = get_proposal_service()
+    all_proposals: List[ProposalDTO] = proposal_service.get_all_proposals()
+
+    if getattr(current_user, 'is_admin', False):
+        proposals = all_proposals
+    else:
+        # Filter proposals to those created by the current user
+        user_id = getattr(current_user, 'id', None)
+        proposals = [p for p in all_proposals if (p.user and getattr(p.user, 'id', None) == user_id)]
+
     return render_template('proposals.html', proposals=proposals)
 
 
 @proposal_bp.route('/propose', methods=['GET', 'POST'])
+@login_required
 def propose():
     """Handle proposal submission form."""
     proposal_repo: ProposalRepository = get_proposal_repo()
@@ -108,9 +121,16 @@ def propose():
 
 
 @proposal_bp.route('/update/<int:proposal_id>', methods=['GET', 'POST'])
+@login_required
 def update_proposal(proposal_id):
     proposal_service = get_proposal_service()
     proposal: ProposalDTO = proposal_service.get_proposal(proposal_id)
+    # Only the proposal owner or an admin may edit
+    if not current_user.is_authenticated:
+        abort(403)
+    owner_id = getattr(getattr(proposal, 'user', None), 'id', None)
+    if not (getattr(current_user, 'is_admin', False) or (owner_id is not None and owner_id == getattr(current_user, 'id', None))):
+        abort(403)
     
     if request.method == 'POST':
         # Read form values and delegate update to ProposalService
@@ -147,6 +167,7 @@ def update_proposal(proposal_id):
 
 
 @proposal_bp.route('/approve/<int:proposal_id>', methods=['POST'])
+@admin_required
 def approve_proposal(proposal_id):
     """Approve and convert proposal to radio source."""
     radio_source_service = get_radio_source_service()
@@ -164,6 +185,7 @@ def approve_proposal(proposal_id):
 
 
 @proposal_bp.route('/reject/<int:proposal_id>', methods=['POST'])
+@admin_required
 def reject_proposal(proposal_id):
     """Deletes(rejects) a proposal to radio source."""
     proposal_service: ProposalService = get_proposal_service()
