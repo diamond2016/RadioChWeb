@@ -91,3 +91,22 @@ If you want an API reference, an entity diagram, or a short HOWTO for deploying 
 
 
 #### **Quality Assurance** 🔍
+
+## RadioChWeb - API Architecture
+This section outlines the architecture of the RadioChWeb API, detailing its structure and components. It is basesd on FastAPI framework principles.
+
+api/
+   main.py
+   deps.py
+   routers/
+       sources.py
+       search.py
+       stream_types.py   (opzionale)
+   services/
+       radio_source_service.py
+       stream_type_service.py (opzionale)
+schemas/
+models/
+db.py
+
+
