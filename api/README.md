@@ -21,7 +21,8 @@ pip install -r api/requirements.txt
 3. Run the app (development):
 
 ```bash
-uvicorn api.main:app --reload --port 5001
+cd api
+uvicorn main:app --reload --port 5001
 ```
 
 4. Smoke-check the health endpoint:
