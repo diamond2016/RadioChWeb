@@ -17,7 +17,7 @@ def get_source(source_id: int):
     # Placeholder: not found
     raise HTTPException(status_code=404, detail="Source not found")
 from fastapi import APIRouter, HTTPException, Query
-from typing import List, Optional
+from typing import Optional
 
 from schemas.radio_source import RadioSourceOut, RadioSourceList
 
