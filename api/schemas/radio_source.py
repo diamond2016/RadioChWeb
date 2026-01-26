@@ -1,3 +1,4 @@
+import string
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -27,4 +28,12 @@ class RadioSourceList(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class RadioSourceListenMetadata(BaseModel):
+    """Schema for Radiosource listen metadata entity."""
+    source_id: int
+    stream_url: str
+    stream_type: StreamTypeOut
+    name: str
 

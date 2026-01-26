@@ -34,14 +34,14 @@ class RadioSourceService:
         self,
         proposal_repo: ProposalRepository,
         radio_source_repo: RadioSourceRepository,
-        proposal_service: Any,
+        proposal_service: ProposalService,
         auth_service: AuthService,
         stream_type_service: StreamTypeService
     ):
         
         self.proposal_repo: ProposalRepository = proposal_repo
         self.radio_source_repo: RadioSourceRepository = radio_source_repo
-        self.proposal_service: Any = proposal_service
+        self.proposal_service: ProposalService = proposal_service
         self.auth_service: AuthService = auth_service
         self.stream_type_service: StreamTypeService = stream_type_service
     

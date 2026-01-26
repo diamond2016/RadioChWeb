@@ -7,7 +7,6 @@ separate from the RadioSource service.
 """
 
 from typing import List, Optional
-from model.entity import proposal
 from model.entity.proposal import Proposal
 from model.repository.proposal_repository import ProposalRepository
 from model.dto.proposal import ProposalDTO
