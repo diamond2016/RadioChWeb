@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional, Any
-from api.deps import get_db
+from typing import Dict, List, Optional
+from deps import get_db
 
-from api.schemas.stream_type import StreamTypeList, StreamTypeOut
+from schemas.stream_type import StreamTypeList, StreamTypeOut
+from model.repository.stream_type_repository import StreamTypeRepository
+from service.stream_type_service import StreamTypeService
 
 
 class StreamTypeAPIService:
@@ -11,25 +13,25 @@ class StreamTypeAPIService:
     application internals at module import time.
     """
 
-    def __init__(self, stream_type_service: Optional[Any] = None):
+    def __init__(self, stream_type_service: Optional[StreamTypeService] = None):
         self._stream_type_service = stream_type_service
         self._stream_type_repo = None
         self._predefined_types: Optional[Dict[str, int]] = None
 
-    def get_stream_type_repo(self):
+    def get_stream_type_repo(self) -> StreamTypeRepository:
         from model.repository.stream_type_repository import StreamTypeRepository
 
         if self._stream_type_repo is None:
             self._stream_type_repo = StreamTypeRepository(get_db())
         return self._stream_type_repo
 
-    def get_stream_type_service(self):
+    def get_stream_type_service(self) -> StreamTypeService:
         if self._stream_type_service is not None:
             return self._stream_type_service
         from service.stream_type_service import StreamTypeService
 
         svc = StreamTypeService(stream_type_repo=self.get_stream_type_repo())
-        self._stream_type_service = svc
+        self._stream_type_service: StreamTypeService = svc
         return svc
 
     def _get_predefined_types_map(self) -> Dict[str, int]:
@@ -44,7 +46,7 @@ class StreamTypeAPIService:
         return None
 
     def get_all_stream_types(self) -> StreamTypeList:
-        items = [
+        items: List[StreamTypeOut] = [
             StreamTypeOut(id=dto.id, display_name=dto.display_name)
             for dto in self.get_stream_type_service().get_all_stream_types()
         ]
