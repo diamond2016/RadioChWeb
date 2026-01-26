@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import sources, health
+from routes import radio_sources, health
 
 # create FastAPI app
 app = FastAPI(title="RadioChWeb API", version="0.1.0", 
@@ -21,6 +21,6 @@ app.add_middleware(
 )
 
 # register router
-app.include_router(sources.router, prefix="/api/v1/sources") 
+app.include_router(radio_sources.router, prefix="/api/v1/sources") 
 app.include_router(health.router, prefix="/api/v1")
 
