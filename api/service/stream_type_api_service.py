@@ -14,30 +14,21 @@ class StreamTypeAPIService:
     """
 
     def __init__(self):
-        self._stream_type_service = None
-        self._stream_type_repo = None
-        self._predefined_types: Optional[Dict[str, int]] = None
+        self._stream_type_service: StreamTypeService = self.get_stream_type_service()
+        self._stream_type_repo : StreamTypeRepository = self.get_stream_type_repo()
+        self._predefined_types: Dict[str, int] = self._get_predefined_types_map()
 
     def get_stream_type_repo(self) -> StreamTypeRepository:
-        from model.repository.stream_type_repository import StreamTypeRepository
-
-        if self._stream_type_repo is None:
-            self._stream_type_repo = StreamTypeRepository(get_db_session())
-        return self._stream_type_repo
+        return StreamTypeRepository(get_db_session())
 
     def get_stream_type_service(self) -> StreamTypeService:
-        from service.stream_type_service import StreamTypeService
-        if self._stream_type_service is None:
-            self._stream_type_service: StreamTypeService = StreamTypeService(stream_type_repository=self.get_stream_type_repo())
-        return self._stream_type_service
+        return StreamTypeService(stream_type_repository=self.get_stream_type_repo())
 
     def _get_predefined_types_map(self) -> Dict[str, int]:
-        if self._predefined_types is None:
-            self._predefined_types = self.get_stream_type_service().get_predefined_types_map()
-        return self._predefined_types
+        return self._stream_type_service.get_predefined_types_map()
 
     def get_stream_type(self, id: int) -> Optional[StreamTypeOut]:
-        stream_type_dto: StreamTypeDTO | None = self.get_stream_type_service().get_stream_type(id)
+        stream_type_dto: StreamTypeDTO = self._stream_type_service.get_stream_type(id)
         if stream_type_dto:
             # Accept DTOs that may be simple namespaces or objects by
             # converting to a mapping first (tests provide SimpleNamespace).
@@ -46,7 +37,7 @@ class StreamTypeAPIService:
         return None
 
     def get_all_stream_types(self) -> StreamTypeList:
-        raw_items = self.get_stream_type_service().get_all_stream_types()
+        raw_items = self._stream_type_service.get_all_stream_types()
         items: list[StreamTypeOut] = []
         for item in raw_items:
             data = vars(item) if hasattr(item, "__dict__") else item
