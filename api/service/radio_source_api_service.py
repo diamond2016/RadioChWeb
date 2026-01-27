@@ -1,5 +1,5 @@
 from typing import List, Optional, Any
-from database import get_db_session
+from deps import get_db_session
 
 # Avoid importing heavy application modules at import time. Import them lazily
 # inside methods to keep this module safe to import from the main venv.

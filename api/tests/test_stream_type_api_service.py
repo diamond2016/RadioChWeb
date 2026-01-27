@@ -1,8 +1,6 @@
 # python
 from types import SimpleNamespace
 
-import pytest
-
 from api.service.stream_type_api_service import StreamTypeAPIService
 
 

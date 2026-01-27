@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 from schemas.stream_type import StreamTypeList, StreamTypeOut
-from database import get_db_session
+from deps import get_db_session
 
 
 class StreamTypeAPIService:

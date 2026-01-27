@@ -1,8 +1,5 @@
 # python
 import importlib
-from types import SimpleNamespace
-
-import pytest
 
 from api.service.radio_source_api_service import RadioSourceAPIService
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 
-from schemas.radio_source import RadioSourceOut, RadioSourceList
+from api.schemas.radio_source import RadioSourceOut, RadioSourceList
 
 router = APIRouter(prefix="/api/v1/sources", tags=["sources"])
 
