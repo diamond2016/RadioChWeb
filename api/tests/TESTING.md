@@ -1,4 +1,4 @@
-Quick smoke tests
+PYTHONPATH=.. uvicorn main:app --reload --port 5001
 # health
 curl http://127.0.0.1:5001/api/v1/health
 

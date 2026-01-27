@@ -1,4 +1,7 @@
 from typing import Dict, Optional
+from model.dto.stream_type import StreamTypeDTO
+from service.stream_type_service import StreamTypeService
+from model.repository.stream_type_repository import StreamTypeRepository
 from schemas.stream_type import StreamTypeList, StreamTypeOut
 from deps import get_db_session
 
@@ -15,21 +18,18 @@ class StreamTypeAPIService:
         self._stream_type_repo = None
         self._predefined_types: Optional[Dict[str, int]] = None
 
-    def get_stream_type_repo(self) -> "StreamTypeRepository":
+    def get_stream_type_repo(self) -> StreamTypeRepository:
         from model.repository.stream_type_repository import StreamTypeRepository
 
         if self._stream_type_repo is None:
             self._stream_type_repo = StreamTypeRepository(get_db_session())
         return self._stream_type_repo
 
-    def get_stream_type_service(self) -> "StreamTypeService":
+    def get_stream_type_service(self) -> StreamTypeService:
         from service.stream_type_service import StreamTypeService
-        if self._stream_type_service is not None:
-            return self._stream_type_service
-
-        svc = StreamTypeService(stream_type_repo=self.get_stream_type_repo())
-        self._stream_type_service: "StreamTypeService" = svc
-        return svc
+        if self._stream_type_service is None:
+            self._stream_type_service: StreamTypeService = StreamTypeService(stream_type_repository=self.get_stream_type_repo())
+        return self._stream_type_service
 
     def _get_predefined_types_map(self) -> Dict[str, int]:
         if self._predefined_types is None:
@@ -37,14 +37,18 @@ class StreamTypeAPIService:
         return self._predefined_types
 
     def get_stream_type(self, id: int) -> Optional[StreamTypeOut]:
-        stream_type_dto = self.get_stream_type_service().get_stream_type(id)
+        stream_type_dto: StreamTypeDTO | None = self.get_stream_type_service().get_stream_type(id)
         if stream_type_dto:
-            return StreamTypeOut(id=stream_type_dto.id, display_name=stream_type_dto.display_name)
+            # Accept DTOs that may be simple namespaces or objects by
+            # converting to a mapping first (tests provide SimpleNamespace).
+            data = vars(stream_type_dto) if hasattr(stream_type_dto, "__dict__") else stream_type_dto
+            return StreamTypeOut.model_validate(data)
         return None
 
-    def get_all_stream_types(self) -> "StreamTypeList":
-        items: list["StreamTypeOut"] = [
-            StreamTypeOut(id=dto.id, display_name=dto.display_name)
-            for dto in self.get_stream_type_service().get_all_stream_types()
-        ]
+    def get_all_stream_types(self) -> StreamTypeList:
+        raw_items = self.get_stream_type_service().get_all_stream_types()
+        items: list[StreamTypeOut] = []
+        for item in raw_items:
+            data = vars(item) if hasattr(item, "__dict__") else item
+            items.append(StreamTypeOut.model_validate(data))
         return StreamTypeList(items=items, total=len(items), page=1, page_size=len(items))

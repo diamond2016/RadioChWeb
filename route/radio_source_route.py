@@ -3,12 +3,10 @@ Radio source routes - Flask blueprint for managing radio sources.
 Provides CRUD operations for radio sources.
 """
 
-from typing import List
 from datetime import datetime
 from flask import Blueprint, request,render_template, redirect, url_for, flash
 
 from model.dto.radio_source import RadioSourceDTO
-from model.entity.stream_type import StreamType
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.auth_service import AuthService, admin_required
@@ -48,14 +46,14 @@ def get_stream_type_service() -> StreamTypeService:
     stream_type_repo: StreamTypeRepository = get_stream_type_repo()
     return StreamTypeService(stream_type_repo)  # Pass necessary dependencies if any
 
-def gest_proposal_service() -> ProposalService:
+def get_proposal_service() -> ProposalService:
     proposal_repo: ProposalRepository = get_proposal_repo()
     return ProposalService(proposal_repo)  # Pass necessary dependencies if any
 
 def get_radio_source_service() -> RadioSourceService:
     proposal_repo: ProposalRepository = get_proposal_repo()
     radio_source_repo: RadioSourceRepository = get_radio_source_repo()
-    proposal_service: ProposalService = gest_proposal_service()
+    proposal_service: ProposalService = get_proposal_service()
     auth_service: AuthService = get_auth_service()
     stream_type_service: StreamTypeService = get_stream_type_service()
     
@@ -81,7 +79,6 @@ def source_detail(source_id: int):
 def edit_source(source_id: int):
     """Edit radio source."""
     radio_source_service: RadioSourceService = get_radio_source_service()
-    stream_type_repo: StreamTypeRepository = get_stream_type_repo()
     source: RadioSourceDTO | None = radio_source_service.get_radio_source_by_id(source_id)
     
     if not source:
