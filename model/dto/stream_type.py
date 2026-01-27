@@ -12,10 +12,10 @@ class StreamTypeDTO(BaseModel):
     format: str    # MP3, AAC, OGG
     metadata_type: str  # Icecast, Shoutcast, None (mapped from metadata_type)
     display_name: str
-    
+    model_config = ConfigDict(from_attributes=True)
+
     @property
     def type_key(self) -> str:
         """Returns the type key in format: PROTOCOL-FORMAT-METADATA"""
         return f"{self.protocol}-{self.format}-{self.metadata_type}"
     
-    model_config = ConfigDict(from_attributes=True)
