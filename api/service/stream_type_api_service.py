@@ -1,7 +1,6 @@
-from typing import Dict, List, Optional
-from deps import get_db
+from typing import Dict, Optional
+from database import get_db_session
 
-from schemas.stream_type import StreamTypeList, StreamTypeOut
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.stream_type_service import StreamTypeService
 
@@ -22,7 +21,7 @@ class StreamTypeAPIService:
         from model.repository.stream_type_repository import StreamTypeRepository
 
         if self._stream_type_repo is None:
-            self._stream_type_repo = StreamTypeRepository(get_db())
+            self._stream_type_repo = StreamTypeRepository(get_db_session())
         return self._stream_type_repo
 
     def get_stream_type_service(self) -> StreamTypeService:

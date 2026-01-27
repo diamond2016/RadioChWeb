@@ -1,5 +1,5 @@
-from typing import Dict, List, Optional, Any
-from api.deps import get_db
+from typing import List, Optional, Any
+from database import get_db_session
 
 # Avoid importing heavy application modules at import time. Import them lazily
 # inside methods to keep this module safe to import from the main venv.
@@ -26,17 +26,17 @@ class RadioSourceAPIService:
     def get_stream_type_repo(self):
         from model.repository.stream_type_repository import StreamTypeRepository
 
-        return StreamTypeRepository(get_db())
+        return StreamTypeRepository(get_db_session())
 
     def get_proposal_repo(self):
         from model.repository.proposal_repository import ProposalRepository
 
-        return ProposalRepository(get_db())
+        return ProposalRepository(get_db_session())
 
     def get_radio_source_repo(self):
         from model.repository.radio_source_repository import RadioSourceRepository
 
-        return RadioSourceRepository(get_db())
+        return RadioSourceRepository(get_db_session())
 
     def get_auth_service(self):
         from service.auth_service import AuthService

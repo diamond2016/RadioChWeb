@@ -9,7 +9,7 @@ from model.entity.user import User
 from model.repository.user_repository import UserRepository
 from service.auth_service import AuthService
 from tests.conftest import test_app
-from tests.service.test_proposal_service import mock_auth_service
+from tests.tests_service.test_proposal_service import mock_auth_service
 
 @fixture
 def mock_user_repo() -> UserRepository:

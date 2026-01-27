@@ -8,13 +8,11 @@ from unittest.mock import Mock, patch
 from typing import cast
 import sys
 from pathlib import Path
-
-from model.repository.proposal_repository import ProposalRepository
-from model.repository.stream_analysis_repository import StreamAnalysisRepository
-
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
+print(sys.path)
+from model.repository.proposal_repository import ProposalRepository
+from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from service.stream_analysis_service import StreamAnalysisService
 from service.stream_type_service import StreamTypeService
 from model.dto.stream_analysis import ErrorCode, DetectionMethod, StreamAnalysisDTO

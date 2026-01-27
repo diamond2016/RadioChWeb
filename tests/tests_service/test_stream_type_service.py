@@ -4,11 +4,17 @@ Unit tests for StreamTypeService.
 Moved from `tests/unit` into `tests/service` during test reorganization.
 """
 
-from typing import List
 import pytest
 from unittest.mock import Mock
+import sys
+from pathlib import Path
+from typing import List
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+print(sys.path)
 from model.entity.stream_type import StreamType
 from model.repository.stream_type_repository import StreamTypeRepository
+from model.entity.stream_analysis import StreamAnalysis
 from service.stream_type_service import StreamTypeService
 from model.dto.stream_type import StreamTypeDTO
 

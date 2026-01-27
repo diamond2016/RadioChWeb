@@ -2,8 +2,6 @@
 Test configuration and fixtures for RadioChWeb tests.
 """
 
-from flask_login import login_user
-from flask_sqlalchemy.session import Session
 import pytest
 import sys
 from pathlib import Path
@@ -11,15 +9,13 @@ from flask import Flask, app
 from unittest.mock import Mock
 import uuid
 
-from sqlalchemy.orm.scoping import scoped_session
-
 # Add current directory to Python path for tests
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from database import db
 from model.entity.stream_type import StreamType
 from model.entity.user import User
-
+from database import db
+from sqlalchemy.orm import scoped_session, Session
 
 @pytest.fixture(scope="session")
 def test_app():

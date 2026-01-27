@@ -21,7 +21,6 @@ pytest==9.0.2
 pytest-cov==7.0.0
 python-dotenv==1.0.0
 PyYAML==6.0.3
-SQLAlchemy==1.4.48
 starlette==0.50.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
@@ -29,3 +28,5 @@ uvicorn==0.22.0
 uvloop==0.22.1
 watchfiles==1.1.1
 websockets==16.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
