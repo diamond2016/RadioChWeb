@@ -5,8 +5,14 @@ curl http://127.0.0.1:5001/api/v1/health
 # list stream types (adjust path if needed)
 curl http://127.0.0.1:5001/api/v1/stream_types
 
+# listen single stream_type
+curl http://127.0.0.1:5001/api/v1/stream_types/1
+
 # list sources (adjust path if needed)
 curl http://127.0.0.1:5001/api/v1/sources
+
+# list single radio source (adjust path if needed)
+curl http://127.0.0.1:5001/api/v1/sources/2
 
 # run tests
 cd ..

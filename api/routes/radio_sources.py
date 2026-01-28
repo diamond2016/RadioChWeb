@@ -4,43 +4,34 @@ from typing import Optional
 from api.schemas.radio_source import RadioSourceOut, RadioSourceList
 from api.services.radio_source_api_service import RadioSourceAPIService
 
-router = APIRouter(prefix="/api/v1/sources", tags=["sources"])
 service = RadioSourceAPIService()
-
+# Router has no prefix here; `main.py` includes this router with prefix (`/api/v1/sources`).
+router = APIRouter(tags=["sources"])
 
 @router.get("/", response_model=RadioSourceList)
-def list_all_radio_sources(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
-    items = get_all_radio_sources(page=page, page_size=page_size)
-    total = len(items)  
-    return {"items": [], "total": 0, "page": page, "page_size": page_size}
+def list_sources(q: Optional[str] = Query(None), stream_type: Optional[int] = Query(None), 
+                 country: Optional[str] = Query(None), page: int = 1, page_size: int = 20) -> RadioSourceList:
+    """List radio sources with optional filters"""
 
+    # Phase 1: read all sources wihothout filtering/pagination
+    all_sources: RadioSourceList = service.get_all_radio_sources()
+    print(f"Total sources before filtering: {len(all_sources.sources)}")
+    return all_sources
 
 @router.get("/{source_id}", response_model=RadioSourceOut)
 def get_source(source_id: int):
-    # Placeholder: not found
-    raise HTTPException(status_code=404, detail="Source not found")
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
-
-from schemas.radio_source import RadioSourceOut, RadioSourceList
-
-router = APIRouter()
-
-
-@router.get("/", response_model=RadioSourceList)
-def list_sources(q: Optional[str] = Query(None), stream_type: Optional[int] = Query(None), country: Optional[str] = Query(None), page: int = 1, page_size: int = 20):
-    """List radio sources (placeholder implementation)."""
-    # Phase 1: implement service layer to read from DB
-    return {"items": [], "total": 0, "page": page, "page_size": page_size}
-
-
-@router.get("/{source_id}", response_model=RadioSourceOut)
-def get_source(source_id: int):
-    # Placeholder: raise 404 if not found
-    raise HTTPException(status_code=404, detail="Not implemented")
+    """List single radio source"""
+    # raise 404 if not found
+    radio_source: RadioSourceOut = service.get_source(source_id)
+    if not radio_source:
+        raise HTTPException(status_code=404, detail="radio source not found")
+    return radio_source
 
 
 @router.get("/{source_id}/listen")
 def listen_source(source_id: int):
-    # Return minimal metadata for the client to open stream
-    return {"stream_url": "", "stream_type": None, "name": None}
+    """Return minimal metadata for the client to open stream"""
+    listen_metadata = service.get_listen_metadata(source_id)
+    if not listen_metadata:
+        raise HTTPException(status_code=404, detail="radio source not found")
+    return listen_metadata  
