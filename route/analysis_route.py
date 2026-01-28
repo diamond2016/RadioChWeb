@@ -9,7 +9,7 @@ from flask_login import login_required, current_user
 from service.auth_service import admin_required
 
 from model.entity.stream_analysis import StreamAnalysis
-from model.dto.stream_analysis import StreamAnalysisDTO, StreamAnalysisResult
+from model.dto.stream_analysis import StreamAnalysisDTO
 from model.repository.stream_analysis_repository import StreamAnalysisRepository
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository

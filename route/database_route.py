@@ -3,7 +3,7 @@ Database routes - Flask blueprint for database operations and main listings.
 Provides the main index and source listings.
 """
 
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, render_template
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.repository.stream_type_repository import StreamTypeRepository
 from model.repository.proposal_repository import ProposalRepository

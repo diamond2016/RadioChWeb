@@ -1,42 +1,24 @@
 """
-Database configuration and SQLAlchemy instance.
+Database configuration and session dependencies for API.
+Proxies to the unified database configuration in the project root.
 """
-from typing import cast
-import os
+import sys
+from pathlib import Path
 
-# IMPORT THE SQALCHEMY LIBRARY's CREATE_ENGINE METHOD
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine
+# Ensure project root is in sys.path so we can import from root
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
 
-# Import Flask-SQLAlchemy's SQLAlchemy for the app-level `db` instance
-from flask_sqlalchemy import SQLAlchemy
+# Import the unified database configuration and type
+from database import get_db_session, db, StandaloneSession
+from sqlalchemy.orm import Session as SessionType
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-instance_dir = os.path.join(basedir, 'instance')
-os.makedirs(instance_dir, exist_ok=True)
-DATABASE_URL = f'sqlite:///{os.path.join(instance_dir, "radio_sources.db")}'
+# Ensure all models are registered in the SQLAlchemy metadata for relationships
+import model.entity
 
-# Provide an explicit type annotation so mypy and type checkers
-# understand that `db` is a Flask-SQLAlchemy `SQLAlchemy` instance.
-# This makes `db.Model`, `db.session` and related attributes resolvable
-# by static type checkers (with appropriate stubs/plugins installed).
-db: SQLAlchemy = SQLAlchemy()
-    
-# SQLAlchemy 2.0 style engine and sessionmaker for direct usage
-engine = create_engine(DATABASE_URL, future=True)
-# Create a session factory
-session_factory = sessionmaker(bind=engine) 
-# Create a scoped session
-Session: scoped_session[Session] = scoped_session(session_factory)
-
-def get_db_session() -> Session:
-    """Return the active SQLAlchemy session typed as `Session`.
-
-    This uses a simple `cast` because `flask_sqlalchemy` exposes a
-    `scoped_session` at runtime. Call sites should prefer this helper
-    so repository constructors receive the canonical `Session` type.
-    """
-    return cast(Session, db.session)
+# Export get_db_session for use in API services
+# It will now correctly fall back to StandaloneSession when outside Flask context
 
 
 
