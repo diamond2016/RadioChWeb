@@ -1,6 +1,7 @@
 # python
 from types import SimpleNamespace
 
+from api.schemas.stream_type import StreamTypeList
 from api.service.stream_type_api_service import StreamTypeAPIService
 
 
@@ -11,7 +12,7 @@ def test_get_all_stream_types_returns_items_and_counts():
     fake_service = SimpleNamespace(get_all_stream_types=lambda: [dto1, dto2])
     svc._stream_type_service = fake_service
 
-    result = svc.get_all_stream_types()
+    result: StreamTypeList = svc.get_all_stream_types()
 
     assert result is not None
     assert hasattr(result, "items")

@@ -1,9 +1,11 @@
 from typing import Dict, Optional
+
+from deps import get_db_session
 from model.dto.stream_type import StreamTypeDTO
 from service.stream_type_service import StreamTypeService
 from model.repository.stream_type_repository import StreamTypeRepository
 from schemas.stream_type import StreamTypeList, StreamTypeOut
-from deps import get_db_session
+
 
 
 class StreamTypeAPIService:
@@ -14,8 +16,8 @@ class StreamTypeAPIService:
     """
 
     def __init__(self):
-        self._stream_type_service: StreamTypeService = self.get_stream_type_service()
         self._stream_type_repo : StreamTypeRepository = self.get_stream_type_repo()
+        self._stream_type_service: StreamTypeService = self.get_stream_type_service()
         self._predefined_types: Dict[str, int] = self._get_predefined_types_map()
 
     def get_stream_type_repo(self) -> StreamTypeRepository:
