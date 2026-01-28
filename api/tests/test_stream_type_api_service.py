@@ -1,7 +1,7 @@
 # python
 from types import SimpleNamespace
 
-from api.schemas.stream_type import StreamTypeList
+from api.schemas.stream_type import StreamTypeList, StreamTypeOut
 from api.service.stream_type_api_service import StreamTypeAPIService
 
 
@@ -42,3 +42,18 @@ def test_get_all_stream_types_empty_list():
     assert result.page == 1
     assert result.page_size == 0
     assert result.items == []
+
+def test_get_stream_type():
+    svc = StreamTypeAPIService()
+    dto = SimpleNamespace(id=1, display_name="Music")
+    fake_service = SimpleNamespace(get_stream_type=lambda id: dto if id == 1 else None)
+    svc._stream_type_service = fake_service
+
+    result: StreamTypeOut | None = svc.get_stream_type(1)
+
+    assert result is not None
+    assert result.id == 1
+    assert result.display_name == "Music"
+
+    result_none: StreamTypeOut | None = svc.get_stream_type(999)
+    assert result_none is None
