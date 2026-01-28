@@ -1,5 +1,6 @@
 import datetime
 from unittest.mock import Mock
+import uuid
 
 from flask_login import login_user
 import pytest
@@ -40,9 +41,10 @@ def test_register_user_dto_success(test_app):
     plain = "Secur3P@ss!"
     mock_user_repo.find_by_email = Mock(return_value=None)
     mock_user_repo.find_by_id = Mock(return_value=None)
+    unique_email = f"test_user_{uuid.uuid4().hex}@example.com"
     user = User(
         id=0,
-        email="test@example.com",
+        email=unique_email,
         hash_password="hashed",
         role="user"
     )   
@@ -66,7 +68,8 @@ def test_change_password_dto_success(test_app):
 
     # Create and register a real user inside app context so repository
     # operations work against the test DB.
-    user = User(id=0, email="change_password@example.com", hash_password="", role="user")
+    unique_email = f"test_user_{uuid.uuid4().hex}@example.com"
+    user = User(id=1, email=unique_email, hash_password="", role="user")
     user_dto: UserDTO = UserDTO.model_validate(user)
 
     with test_app.app_context():
