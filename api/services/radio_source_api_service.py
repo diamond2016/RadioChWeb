@@ -4,6 +4,7 @@ from deps import get_db_session
 # Avoid importing heavy application modules at import time. Import them lazily
 # inside methods to keep this module safe to import from the main venv.
 from api.schemas.radio_source import RadioSourceList, RadioSourceListenMetadata, RadioSourceOut
+from model.dto.radio_source import RadioSourceDTO
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
@@ -95,18 +96,25 @@ class RadioSourceAPIService:
         # prepare out for API (RadioSourceOut)
         all_items_out: List[RadioSourceOut] = [RadioSourceOut.model_validate(item) for item in all_items]
         paged_items: List[RadioSourceOut] = all_items_out[start:end]  
-        return paged_items, total
+        return RadioSourceList(items=paged_items, total=total, page=page, page_size=page_size)
 
 
-    def get_source(self, source_id: int) -> Optional[RadioSourceOut]:
+    def get_radio_source(self, source_id: int) -> Optional[RadioSourceOut]:
         """GET /api/v1/sources/{id}"""
-        source: Any = self._radio_source_service.get_radio_source_by_id(source_id)
+        source: RadioSourceDTO = self._radio_source_service.get_radio_source_by_id(source_id)
         if not source:
             return None
-        return RadioSourceOut.model_validate(source)
+        print(type(source))
+        try:
+            target = RadioSourceOut.model_validate(source)
+        except Exception as e:
+            print(f"Error validating RadioSourceOut: {e}")
+            return None
+        return target
+
 
     def get_listen_metadata(self, source_id: int) -> Optional[RadioSourceListenMetadata]:
-        source: Any = self._radio_source_service.get_radio_source_by_id(source_id)
+        source: RadioSourceDTO = self._radio_source_service.get_radio_source_by_id(source_id)
         if not source:
             return None
         return RadioSourceListenMetadata.model_validate({

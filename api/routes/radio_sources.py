@@ -19,10 +19,10 @@ def list_sources(q: Optional[str] = Query(None), stream_type: Optional[int] = Qu
     return all_sources
 
 @router.get("/{source_id}", response_model=RadioSourceOut)
-def get_source(source_id: int):
+def get_radio_source(source_id: int):
     """List single radio source"""
     # raise 404 if not found
-    radio_source: RadioSourceOut = service.get_source(source_id)
+    radio_source: RadioSourceOut = service.get_radio_source(source_id)
     if not radio_source:
         raise HTTPException(status_code=404, detail="radio source not found")
     return radio_source

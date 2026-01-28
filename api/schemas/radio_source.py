@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -19,7 +19,7 @@ class RadioSourceOut(BaseModel):
     
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
+    model_config = ConfigDict(from_attributes=True) 
 
 class RadioSourceList(BaseModel):
     """Schema for Radiosource list entity."""
@@ -27,7 +27,7 @@ class RadioSourceList(BaseModel):
     total: int
     page: int
     page_size: int
-
+    model_config = ConfigDict(from_attributes=True) 
 
 class RadioSourceListenMetadata(BaseModel):
     """Schema for Radiosource listen metadata entity."""
@@ -35,4 +35,4 @@ class RadioSourceListenMetadata(BaseModel):
     stream_url: str
     stream_type: StreamTypeOut
     name: str
-
+    model_config = ConfigDict(from_attributes=True)
