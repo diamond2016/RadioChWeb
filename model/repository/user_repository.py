@@ -1,12 +1,11 @@
 from typing import Optional
-from database import db
-from model.dto.user import UserDTO
+from database import db, get_db_session
 from model.entity.user import User
 
 
 class UserRepository:
     def __init__(self, session=None):
-        self.session = session or db.session
+        self.session = session or get_db_session()
 
     def find_by_id(self, user_id: int) -> Optional[User]:
         return self.session.query(User).filter(User.id == user_id).first()

@@ -62,11 +62,11 @@ class RadioSourceAPIService:
         """GET /api/v1/sources/all"""
         all_items: List[RadioSource] = self._radio_source_service.get_all_radio_sources()
         if not all_items:
-            return RadioSourceList(sources=[], total=0, page=1, page_size=0)
+            return RadioSourceList(items=[], total=0, page=1, page_size=0)
         
         # prepare out for API (RadioSourceOut)
         all_items_out: List[RadioSourceOut] = [RadioSourceOut.model_validate(item) for item in all_items]
-        return RadioSourceList(sources=all_items_out, total=len(all_items_out), page=1, page_size=len(all_items_out))
+        return RadioSourceList(items=all_items_out, total=len(all_items_out), page=1, page_size=len(all_items_out))
 
 
     def list_sources(self,

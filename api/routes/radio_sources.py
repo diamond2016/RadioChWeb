@@ -15,7 +15,7 @@ def list_sources(q: Optional[str] = Query(None), stream_type: Optional[int] = Qu
 
     # Phase 1: read all sources wihothout filtering/pagination
     all_sources: RadioSourceList = service.get_all_radio_sources()
-    print(f"Total sources before filtering: {len(all_sources.sources)}")
+    print(f"Total sources before filtering: {len(all_sources.items)}")
     return all_sources
 
 @router.get("/{source_id}", response_model=RadioSourceOut)
