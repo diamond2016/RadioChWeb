@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 
 from api.schemas.stream_type import StreamTypeList, StreamTypeOut
-from api.service.stream_type_api_service import StreamTypeAPIService
+from api.services.stream_type_api_service import StreamTypeAPIService
 
 
 def test_get_all_stream_types_returns_items_and_counts():

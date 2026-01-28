@@ -1,7 +1,7 @@
 # python
 import importlib
 
-from api.service.radio_source_api_service import RadioSourceAPIService
+from api.services.radio_source_api_service import RadioSourceAPIService
 
 
 def test_get_stream_type_repo_returns_repository_with_db_session(monkeypatch):
@@ -10,7 +10,7 @@ def test_get_stream_type_repo_returns_repository_with_db_session(monkeypatch):
 
     # Patch the get_db_session used in the radio_source_api_service module
     monkeypatch.setattr(
-        "api.service.radio_source_api_service.get_db_session",
+        "api.services.radio_source_api_service.get_db_session",
         lambda: sentinel_session,
     )
 
@@ -35,7 +35,7 @@ def test_get_stream_type_repo_returns_repository_with_db_session(monkeypatch):
 def test_get_stream_type_repo_returns_new_instance_each_call(monkeypatch):
     sentinel_session = object()
     monkeypatch.setattr(
-        "api.service.radio_source_api_service.get_db_session",
+        "api.services.radio_source_api_service.get_db_session",
         lambda: sentinel_session,
     )
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from api.service.stream_type_api_service import StreamTypeAPIService
+from api.services.stream_type_api_service import StreamTypeAPIService
 from api.schemas.stream_type import StreamTypeList, StreamTypeOut
 
 
@@ -16,7 +16,7 @@ def get_stream_types() -> StreamTypeList:
 
 @router.get("/{stream_type_id}", response_model=StreamTypeOut)
 def get_stream_type(stream_type_id: int) -> StreamTypeOut:
-    stream_type = service.get_stream_type(stream_type_id)
+    stream_type: StreamTypeOut | None = service.get_stream_type(stream_type_id)
     if not stream_type:
         raise HTTPException(status_code=404, detail="Stream type not found")
     return stream_type

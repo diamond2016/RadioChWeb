@@ -3,7 +3,8 @@ from deps import get_db_session
 
 # Avoid importing heavy application modules at import time. Import them lazily
 # inside methods to keep this module safe to import from the main venv.
-from api.schemas.radio_source import RadioSourceListenMetadata, RadioSourceOut
+from api.schemas.radio_source import RadioSourceList, RadioSourceListenMetadata, RadioSourceOut
+from service.radio_source_service import RadioSourceService
 
 class RadioSourceAPIService:
     """API-facing service for radio sources.
@@ -59,7 +60,7 @@ class RadioSourceAPIService:
             stream_type_service=self.get_stream_type_service(),
         )
 
-    def get_radio_source_service(self):
+    def get_radio_source_service(self) -> Any | RadioSourceService:
         # If injected, return it
         if self._radio_source_service is not None:
             return self._radio_source_service
@@ -76,14 +77,16 @@ class RadioSourceAPIService:
         self._radio_source_service = svc
         return svc
 
-    def get_stream_type_api_service(self):
-        if self._stream_type_api_service is not None:
-            return self._stream_type_api_service
-        from api.service.stream_type_api_service import StreamTypeAPIService
 
-        svc = StreamTypeAPIService()
-        self._stream_type_api_service = svc
-        return svc
+    def get_all_radio_sources(self) -> RadioSourceList:
+        """GET /api/v1/sources/all"""
+        all_items: list = self.get_radio_source_service().get_all_radio_sources()
+        if not all_items:
+            return RadioSourceList(sources=[])
+        
+        # prepare out for API (RadioSourceOut)
+        all_items_out: List[RadioSourceOut] = [RadioSourceOut.model_validate(item) for item in all_items]
+        return RadioSourceList(sources=all_items_out)
 
 
     def list_sources(self,

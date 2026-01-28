@@ -2,13 +2,16 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 
 from api.schemas.radio_source import RadioSourceOut, RadioSourceList
+from api.services.radio_source_api_service import RadioSourceAPIService
 
 router = APIRouter(prefix="/api/v1/sources", tags=["sources"])
+service = RadioSourceAPIService()
 
 
 @router.get("/", response_model=RadioSourceList)
-def list_sources(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
-    # Placeholder: return empty page
+def list_all_radio_sources(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)):
+    items = get_all_radio_sources(page=page, page_size=page_size)
+    total = len(items)  
     return {"items": [], "total": 0, "page": page, "page_size": page_size}
 
 
