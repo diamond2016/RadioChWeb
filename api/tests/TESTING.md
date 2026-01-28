@@ -18,6 +18,10 @@ curl http://127.0.0.1:5001/api/v1/sources/2
 cd ..
 pytest -q
 
+# API DOCS
+http://localhost:5001/docs
+
+
 NOTE ON TESTS
 Added test: test_stream_type_api_service.py — 3 pytest cases.
 Updated: conftest.py — add repo root to sys.path.
