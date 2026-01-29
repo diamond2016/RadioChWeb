@@ -12,6 +12,9 @@ Key endpoints
 - GET `/api/v1/sources/{id}` — get details for a single radio source.
 - GET `/api/v1/sources/{id}/listen` — minimal metadata for opening the stream.
 - GET `/api/v1/stream_types/` — list available stream types.
+- GET `/api/v1/stream_types/{id}` — get details for a single stream type.
+
+
 
 Run locally
 -----------
