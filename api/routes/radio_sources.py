@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 
-from api.schemas.radio_source import RadioSourceOut, RadioSourceList
+from api.schemas.radio_source import RadioSourceListenMetadata, RadioSourceOut, RadioSourceList
 from api.services.radio_source_api_service import RadioSourceAPIService
 
 service = RadioSourceAPIService()
@@ -31,7 +31,7 @@ def get_radio_source(source_id: int):
 @router.get("/{source_id}/listen")
 def listen_source(source_id: int):
     """Return minimal metadata for the client to open stream"""
-    listen_metadata = service.get_listen_metadata(source_id)
+    listen_metadata: RadioSourceListenMetadata | None = service.get_listen_metadata(source_id)
     if not listen_metadata:
         raise HTTPException(status_code=404, detail="radio source not found")
     return listen_metadata  

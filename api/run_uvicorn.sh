@@ -7,5 +7,6 @@ set -euo pipefail
 export PYTHONPATH="$(pwd)/.."
 echo "PYTHONPATH=$PYTHONPATH"
 
+source .venv/bin/activate
 # Run uvicorn with the app defined in main.py
 exec uvicorn main:app --reload --port 5001

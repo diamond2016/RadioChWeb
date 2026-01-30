@@ -31,7 +31,7 @@ class RadioSourceList(BaseModel):
 
 class RadioSourceListenMetadata(BaseModel):
     """Schema for Radiosource listen metadata entity."""
-    source_id: int
+    id: int
     stream_url: str
     stream_type: StreamTypeOut
     name: str

@@ -104,9 +104,8 @@ class RadioSourceAPIService:
         source: RadioSourceDTO = self._radio_source_service.get_radio_source_by_id(source_id)
         if not source:
             return None
-        print(type(source))
         try:
-            target = RadioSourceOut.model_validate(source)
+            target: RadioSourceOut = RadioSourceOut.model_validate(source)
         except Exception as e:
             print(f"Error validating RadioSourceOut: {e}")
             return None
@@ -117,10 +116,11 @@ class RadioSourceAPIService:
         source: RadioSourceDTO = self._radio_source_service.get_radio_source_by_id(source_id)
         if not source:
             return None
-        return RadioSourceListenMetadata.model_validate({
-            "source_id": source.id,
-            "stream_url": source.stream_url,
-            "stream_type": self.get_stream_type_service().get_stream_type(source.stream_type),
-            "name": source.name
-        })
+        try:
+            target: RadioSourceOut = RadioSourceOut.model_validate(source)
+        except Exception as e:
+            print(f"Error validating RadioSourceOut: {e}")
+            return None
+        return RadioSourceListenMetadata.model_validate(target)
+        
 

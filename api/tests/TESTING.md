@@ -14,6 +14,9 @@ curl http://127.0.0.1:5001/api/v1/sources
 # list single radio source (adjust path if needed)
 curl http://127.0.0.1:5001/api/v1/sources/2
 
+# listen a radio source (adjust path if needed)
+curl http://127.0.0.1:5001/api/v1/sources/2/listen
+
 # run tests
 cd ..
 pytest -q
