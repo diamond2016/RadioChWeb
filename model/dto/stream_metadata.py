@@ -3,7 +3,7 @@ Stream metadata DTO for on-the-fly listening information.
 """
 
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class StreamMetadataDTO(BaseModel):
@@ -12,7 +12,4 @@ class StreamMetadataDTO(BaseModel):
     genre: Optional[str] = None
     current_track: Optional[str] = None
     error_message: Optional[str] = None
-
-    class Config:
-        validate_assignment = True
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
