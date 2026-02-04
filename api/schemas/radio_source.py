@@ -1,3 +1,4 @@
+import webbrowser
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
@@ -34,5 +35,6 @@ class RadioSourceListenMetadata(BaseModel):
     id: int
     stream_url: str
     stream_type: StreamTypeOut
+    website_url: Optional[str] = None
     name: str
     model_config = ConfigDict(from_attributes=True)

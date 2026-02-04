@@ -27,6 +27,25 @@
     <div class="stream-type mt-2">
       <small>Type: {{ source.stream_type.display_name if source.stream_type else 'Unknown' }}</small>
     </div>
+    {% if metadata %}
+      {% if metadata.available %}
+        <div class="stream-metadata mt-2" style="font-size:.85rem; text-align:left;">
+          {% if metadata.current_track %}
+            <div><strong>Now playing:</strong> {{ metadata.current_track }}</div>
+          {% endif %}
+          {% if metadata.genre %}
+            <div><strong>Genre:</strong> {{ metadata.genre }}</div>
+          {% endif %}
+          {% if metadata.bitrate %}
+            <div><strong>Bitrate:</strong> {{ metadata.bitrate }} kb/s</div>
+          {% endif %}
+        </div>
+      {% elif metadata.error_message %}
+        <div class="stream-metadata mt-2" style="font-size:.85rem; color:#a00;">
+          <small>{{ metadata.error_message }}</small>
+        </div>
+      {% endif %}
+    {% endif %}
     <div class="mt-3">
       <button class="btn btn-sm btn-outline-secondary" onclick="window.close()">Close</button>
     </div>

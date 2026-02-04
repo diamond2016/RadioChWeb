@@ -3,6 +3,7 @@ from typing import Optional
 
 from api.schemas.radio_source import RadioSourceListenMetadata, RadioSourceOut, RadioSourceList
 from api.services.radio_source_api_service import RadioSourceAPIService
+from api.schemas.stream_metadata import StreamMetadataOut
 
 service = RadioSourceAPIService()
 # Router has no prefix here; `main.py` includes this router with prefix (`/api/v1/sources`).
@@ -35,3 +36,9 @@ def listen_source(source_id: int):
     if not listen_metadata:
         raise HTTPException(status_code=404, detail="radio source not found")
     return listen_metadata  
+
+
+@router.get("/{source_id}/metadata", response_model=StreamMetadataOut)
+def get_stream_metadata_from_source(source_id: int, timeout: int = Query(10, ge=5, le=30)) -> StreamMetadataOut:
+    metadata = service.get_stream_metadata(source_id, timeout)
+    return StreamMetadataOut.model_validate(metadata.model_dump())

@@ -5,12 +5,14 @@ from deps import get_db_session
 # inside methods to keep this module safe to import from the main venv.
 from api.schemas.radio_source import RadioSourceList, RadioSourceListenMetadata, RadioSourceOut
 from model.dto.radio_source import RadioSourceDTO
+from model.dto.stream_metadata import StreamMetadataDTO
 from model.entity.radio_source import RadioSource
 from model.repository.proposal_repository import ProposalRepository
 from model.repository.radio_source_repository import RadioSourceRepository
 from model.repository.stream_type_repository import StreamTypeRepository
 from service.auth_service import AuthService
 from service.radio_source_service import RadioSourceService
+from service.stream_metadata_service import StreamMetadataService
 from service.stream_type_service import StreamTypeService
 from service.proposal_service import ProposalService
 
@@ -25,6 +27,7 @@ class RadioSourceAPIService:
 
     def __init__(self): 
         self._radio_source_service: RadioSourceService = self.get_radio_source_service()
+        self._metadata_service: Optional[StreamMetadataService] = None
 
     # Repository and service initialization functions (lazily imported)
     def get_stream_type_repo(self) -> StreamTypeRepository:
@@ -58,6 +61,11 @@ class RadioSourceAPIService:
             auth_service=self.get_auth_service(),
             stream_type_service=self.get_stream_type_service()
         )
+
+    def get_stream_metadata_service(self) -> StreamMetadataService:
+        if self._metadata_service is None:
+            self._metadata_service = StreamMetadataService()
+        return self._metadata_service
             
     def get_all_radio_sources(self) -> RadioSourceList:
         """GET /api/v1/sources/all"""
@@ -122,5 +130,14 @@ class RadioSourceAPIService:
             print(f"Error validating RadioSourceOut: {e}")
             return None
         return RadioSourceListenMetadata.model_validate(target)
+
+    def get_stream_metadata(self, source_id: int, timeout_seconds: int = 10) -> StreamMetadataDTO:
+        source: RadioSourceDTO | None = self._radio_source_service.get_radio_source_by_id(source_id)
+        if not source or not source.stream_url:
+            return StreamMetadataDTO(available=False, error_message="radio source not found or missing stream URL")
+        metadata_service = self.get_stream_metadata_service()
+        if not metadata_service.is_available:
+            return StreamMetadataDTO(available=False, error_message="ffprobe is not installed")
+        return metadata_service.get_metadata(source.stream_url, timeout_seconds)
         
 
